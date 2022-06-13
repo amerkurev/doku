@@ -25,13 +25,13 @@ FROM ghcr.io/umputun/baseimage/app:v1.9.1 as base
 
 FROM scratch
 
+ENV DOKU_IN_DOCKER=1
+
 COPY --from=backend /build/doku /srv/doku
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=base /etc/passwd /etc/passwd
 COPY --from=base /etc/group /etc/group
-
-EXPOSE 9090
 
 WORKDIR /srv
 ENTRYPOINT ["/srv/doku"]
