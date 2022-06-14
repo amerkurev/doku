@@ -6,6 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/amerkurev/doku/app/http"
+	"github.com/amerkurev/doku/app/poller"
 	"github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 )
@@ -32,38 +34,53 @@ var revision = "unknown"
 func main() {
 	fmt.Printf("doku %s\n", revision)
 
-	p := flags.NewParser(&opts, flags.Default)
-	p.SubcommandsOptional = true
+	parser := flags.NewParser(&opts, flags.Default)
+	parser.SubcommandsOptional = true
 
-	if _, err := p.Parse(); err != nil {
+	if _, err := parser.Parse(); err != nil {
 		os.Exit(2)
 	}
 
 	configureLogging()
+
 	addr := listenAddress(opts.Listen)
-	log.Info(fmt.Sprintf("Starting Doku server at http://%s/", addr))
-	start()
+	s, err := http.NewServer(addr)
+	if err != nil {
+		log.WithField("err", err).Fatal("error when the HTTP server starts")
+	}
+	log.Info(fmt.Sprintf("starting HTTP server at %s", addr))
+
+	p, err := poller.New(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
+	if err != nil {
+		log.WithField("err", err).Fatal("error when docker daemon polling starts")
+	}
+	log.Info("starting docker poller")
+
+	services := struct {
+		poller.Poller
+		http.Server
+	}{
+		Poller: p,
+		Server: s,
+	}
 
 	// Wait for termination signal
 	done := make(chan struct{}, 1)
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
-	log.Info("Quit the server with CONTROL-C.")
+	log.Info("quit the server with CONTROL-C.")
 
 	go func() {
 		<-signalChannel
-		log.Info("Received termination signal, attempting to gracefully shut down")
-		stop()
+		log.Info("received termination signal, attempting to gracefully shut down")
+		services.Poller.Stop()
+		if err := services.Server.Stop(); err != nil {
+			log.WithField("err", err).Error("error when the HTTP server shuts down")
+		}
 		done <- struct{}{}
 	}()
 	<-done
-	log.Info("Shutting down")
-}
-
-func start() {
-}
-
-func stop() {
+	log.Info("shutting down")
 }
 
 func configureLogging() {
