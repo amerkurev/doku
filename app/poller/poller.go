@@ -43,7 +43,7 @@ func New(host, certPath, version string, verify bool) (Poller, error) {
 			select {
 			case m := <-messages:
 				if docker.IsSignificantEvent(m.Type) {
-					numMessages += 1
+					numMessages++
 				}
 			case err = <-errs:
 				if err != nil {

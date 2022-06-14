@@ -117,6 +117,7 @@ func setOpts(c *docker.Client, host, certPath, version string, verify bool) erro
 	return nil
 }
 
+// IsSignificantEvent says that event is relative to disk usage.
 func IsSignificantEvent(e string) bool {
 	for _, event := range significantDockerEvents {
 		if e == event {

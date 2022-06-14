@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	ReadTimeout     = 15 * time.Second
-	WriteTimeout    = 15 * time.Second
-	IdleTimeout     = 15 * time.Second
-	ShutdownTimeout = 15 * time.Second
+	readTimeout     = 15 * time.Second
+	writeTimeout    = 15 * time.Second
+	idleTimeout     = 15 * time.Second
+	shutdownTimeout = 15 * time.Second
 )
 
 // Server represents an interface of control over the HTTP server.
@@ -35,9 +35,9 @@ func NewServer(addr string) (Server, error) {
 	s := &server{
 		Server: &http.Server{
 			Addr:         addr,
-			ReadTimeout:  ReadTimeout,
-			WriteTimeout: WriteTimeout,
-			IdleTimeout:  IdleTimeout,
+			ReadTimeout:  readTimeout,
+			WriteTimeout: writeTimeout,
+			IdleTimeout:  idleTimeout,
 		},
 	}
 
@@ -55,7 +55,7 @@ func (s *server) Serve(ln net.Listener) error {
 
 // Stop stops HTTP server.
 func (s *server) Stop() error {
-	ctx, cancel := context.WithTimeout(context.Background(), ShutdownTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 	err := s.Server.Shutdown(ctx)
 	return err
