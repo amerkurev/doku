@@ -6,14 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/amerkurev/doku/app/store"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	readTimeout     = 15 * time.Second
-	writeTimeout    = 15 * time.Second
-	idleTimeout     = 15 * time.Second
-	shutdownTimeout = 15 * time.Second
+	longPollingTimeout = 30 * time.Second // must be less than writeTimeout!
+	shutdownTimeout    = 5 * time.Second
+	readTimeout        = 5 * time.Second
+	writeTimeout       = 2 * longPollingTimeout
 )
 
 // Server represents an interface of control over the HTTP server.
@@ -25,6 +26,10 @@ type server struct {
 	*http.Server
 }
 
+func longPolling(w http.ResponseWriter, req *http.Request) {
+	<-store.Get().Wait(context.Background(), longPollingTimeout)
+}
+
 // NewServer creates an HTTP server.
 func NewServer(addr string) (Server, error) {
 	ln, err := net.Listen("tcp", addr)
@@ -32,12 +37,15 @@ func NewServer(addr string) (Server, error) {
 		return nil, err
 	}
 
+	handler := http.NewServeMux()
+	handler.HandleFunc("/poll", longPolling)
+
 	s := &server{
 		Server: &http.Server{
 			Addr:         addr,
+			Handler:      handler,
 			ReadTimeout:  readTimeout,
 			WriteTimeout: writeTimeout,
-			IdleTimeout:  idleTimeout,
 		},
 	}
 

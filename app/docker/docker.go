@@ -30,8 +30,8 @@ type Info struct {
 
 // Client defines Docker client.
 type Client interface {
-	Events(context.Context) (<-chan events.Message, <-chan error)
-	Info(context.Context) *Info
+	DockerEvents(context.Context) (<-chan events.Message, <-chan error)
+	DockerInfo(context.Context) *Info
 }
 
 type client struct {
@@ -55,22 +55,25 @@ func NewClient(host, certPath, version string, verify bool) (Client, error) {
 	return c, nil
 }
 
-// Events returns a stream of events in the Docker daemon.
-func (c *client) Events(ctx context.Context) (<-chan events.Message, <-chan error) {
+// DockerEvents returns a stream of events in the Docker daemon.
+func (c *client) DockerEvents(ctx context.Context) (<-chan events.Message, <-chan error) {
 	return c.Client.Events(ctx, types.EventsOptions{})
 }
 
-func (c *client) Info(ctx context.Context) *Info {
+// DockerInfo returns a piece of information about disk usage and others.
+func (c *client) DockerInfo(ctx context.Context) *Info {
 	defer elapsed("yet another poll execution is done")()
 
 	info, err := c.Client.Info(ctx)
 	if err != nil {
 		log.WithField("err", err).Error("docker info request error")
+		return nil
 	}
 
 	diskUsage, err := c.Client.DiskUsage(ctx)
 	if err != nil {
 		log.WithField("err", err).Error("docker disk usage request error")
+		return nil
 	}
 
 	return &Info{

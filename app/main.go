@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/amerkurev/doku/app/store"
 	"os"
 	"os/signal"
 	"syscall"
@@ -43,6 +44,13 @@ func main() {
 
 	configureLogging()
 
+	// configure store
+	err := store.Initialize()
+	if err != nil {
+		log.WithField("err", err).Fatal("error when the store initialized")
+	}
+
+	// configure HTTP server
 	addr := listenAddress(opts.Listen)
 	s, err := http.NewServer(addr)
 	if err != nil {
@@ -50,6 +58,7 @@ func main() {
 	}
 	log.Info(fmt.Sprintf("starting HTTP server at %s", addr))
 
+	// configure poller
 	p, err := poller.New(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
 	if err != nil {
 		log.WithField("err", err).Fatal("error when docker daemon polling starts")
@@ -64,7 +73,7 @@ func main() {
 		Server: s,
 	}
 
-	// Wait for termination signal
+	// wait for termination signal
 	done := make(chan struct{}, 1)
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)

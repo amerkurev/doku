@@ -2,6 +2,8 @@ package poller
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/amerkurev/doku/app/store"
 	"time"
 
 	"github.com/amerkurev/doku/app/docker"
@@ -31,12 +33,12 @@ func New(host, certPath, version string, verify bool) (Poller, error) {
 	}
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
-	messages, errs := d.Events(ctx)
+	messages, errs := d.DockerEvents(ctx)
 	numMessages := 0 // count Docker daemon events.
 
 	go func() {
 		// Run it immediately on start
-		_ = d.Info(ctx)
+		save(d.DockerInfo(ctx))
 
 		// Run poll with interval while context is not cancel
 		for {
@@ -52,7 +54,7 @@ func New(host, certPath, version string, verify bool) (Poller, error) {
 					// Reconnect to Docker daemon
 					select {
 					case <-time.After(pollingLongInterval):
-						messages, errs = d.Events(ctx)
+						messages, errs = d.DockerEvents(ctx)
 					case <-ctx.Done():
 						return
 					}
@@ -63,10 +65,10 @@ func New(host, certPath, version string, verify bool) (Poller, error) {
 				// Execute poll only if received Docker daemon events.
 				if numMessages > 0 {
 					numMessages = 0
-					_ = d.Info(ctx)
+					save(d.DockerInfo(ctx))
 				}
 			case <-time.After(pollingLongInterval):
-				_ = d.Info(ctx)
+				save(d.DockerInfo(ctx))
 			}
 		}
 	}()
@@ -81,4 +83,26 @@ func New(host, certPath, version string, verify bool) (Poller, error) {
 // Stop stops Docker daemon polling.
 func (p *poller) Stop() {
 	p.cancelFunc()
+}
+
+func save(d *docker.Info) {
+	if d != nil {
+		s := store.Get()
+		s.Set("latestPolling", d)
+
+		b, err := json.Marshal(d.Info)
+		if err != nil {
+			log.WithField("err", err).Error("docker info serialization error")
+		}
+		s.Set("json.dockerInfo", b)
+
+		b, err = json.Marshal(d.DiskUsage)
+		if err != nil {
+			log.WithField("err", err).Error("docker disk usage serialization error")
+		}
+		s.Set("json.dockerDiskUsage", b)
+
+		// wake up those who are waiting
+		s.Notify()
+	}
 }
