@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -68,9 +69,9 @@ func (l *structuredLoggerEntry) Write(status, bytes int, header http.Header, ela
 
 func (l *structuredLoggerEntry) Panic(v interface{}, stack []byte) {
 	l.Logger = l.Logger.WithFields(logrus.Fields{
-		"stack": string(stack),
 		"panic": fmt.Sprintf("%+v", v),
 	})
 
 	l.Logger.Errorln("request panic")
+	os.Stderr.Write(stack) // nolint gosec
 }

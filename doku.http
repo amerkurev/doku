@@ -1,0 +1,11 @@
+### GET version
+GET http://127.0.0.1:9090/version
+Accept: application/json
+
+### GET docker info
+GET http://127.0.0.1:9090/docker/info
+Accept: application/json
+
+### GET docker disk usage
+GET http://127.0.0.1:9090/docker/disk-usage
+Accept: application/json
