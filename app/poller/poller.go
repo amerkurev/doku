@@ -3,6 +3,7 @@ package poller
 import (
 	"context"
 	"encoding/json"
+	"github.com/amerkurev/doku/app/util"
 	"time"
 
 	"github.com/amerkurev/doku/app/docker"
@@ -62,7 +63,7 @@ func Run(ctx context.Context, d *docker.Client) {
 }
 
 func poll(ctx context.Context, d *docker.Client) {
-	defer elapsed("yet another poll execution is done")()
+	defer util.Elapsed("yet another poll execution is done")()
 
 	r, err := d.DockerInfo(ctx)
 	if err != nil {
@@ -89,11 +90,4 @@ func poll(ctx context.Context, d *docker.Client) {
 
 	// wake up those who are waiting.
 	s.NotifyAll()
-}
-
-func elapsed(what string) func() {
-	start := time.Now()
-	return func() {
-		log.WithField("took", time.Since(start)).Debug(what)
-	}
 }

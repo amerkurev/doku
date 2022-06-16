@@ -23,7 +23,7 @@ func CreateRouter(longPollingTimeout time.Duration) *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	// long polling routes
-	r.Route("/long-polling", func(r chi.Router) {
+	r.Route("/_", func(r chi.Router) {
 		r.Use(LongPolling(longPollingTimeout))
 		r.Get("/echo", echo)
 	})
