@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	log "github.com/sirupsen/logrus"
 )
 
 func echo(w http.ResponseWriter, req *http.Request) {
@@ -16,6 +17,9 @@ func CreateRouter(longPollingTimeout time.Duration) *chi.Mux {
 	r := chi.NewRouter()
 
 	// a good base middleware stack
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(NewStructuredLogger(log.StandardLogger()))
 	r.Use(middleware.Recoverer)
 
 	// long polling routes
