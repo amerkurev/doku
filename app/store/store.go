@@ -34,7 +34,7 @@ func Initialize() error {
 // Get returns current initialized store.
 func Get() Store {
 	if store == nil {
-		// This only happens in tests
+		// this only happens in tests
 		log.Warning("store requested before it was initialized, automatically initializing")
 		err := Initialize()
 		if err != nil {

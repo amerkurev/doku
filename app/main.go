@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/amerkurev/doku/app/docker"
-	"github.com/amerkurev/doku/app/store"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/http"
 	"github.com/amerkurev/doku/app/poller"
+	"github.com/amerkurev/doku/app/store"
 	"github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 )
@@ -79,7 +79,7 @@ func run() error {
 
 	addr := listenAddress(opts.Listen)
 	log.Info(fmt.Sprintf("starting http server at %s", addr))
-	return http.RunServer(ctx, addr)
+	return http.Run(ctx, addr)
 }
 
 func configureLogging() {

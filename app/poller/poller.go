@@ -3,10 +3,10 @@ package poller
 import (
 	"context"
 	"encoding/json"
-	"github.com/amerkurev/doku/app/store"
 	"time"
 
 	"github.com/amerkurev/doku/app/docker"
+	"github.com/amerkurev/doku/app/store"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,13 +18,13 @@ const (
 // Run starts a goroutine to poll the Docker daemon.
 func Run(ctx context.Context, d *docker.Client) {
 	messages, errs := d.DockerEvents(ctx)
-	numMessages := 0 // count Docker daemon events.
+	numMessages := 0 // count of Docker daemon events.
 
 	go func() {
-		// Run it immediately on start
+		// run it immediately on start
 		poll(ctx, d)
 
-		// Run poll with interval while context is not cancel
+		// run poll with interval while context is not cancel
 		for {
 			select {
 			case m := <-messages:
@@ -35,7 +35,7 @@ func Run(ctx context.Context, d *docker.Client) {
 				if err != nil {
 					log.WithField("err", err).Error("failed to listen to docker events")
 
-					// Reconnect to Docker daemon
+					// reconnect to the Docker daemon
 					select {
 					case <-time.After(pollingLongInterval):
 						messages, errs = d.DockerEvents(ctx)
@@ -48,12 +48,13 @@ func Run(ctx context.Context, d *docker.Client) {
 				log.Info("gracefully poller shutdown")
 				return
 			case <-time.After(pollingShortInterval):
-				// Execute poll only if received Docker daemon events.
+				// execute poll only if was happened Docker daemon events
 				if numMessages > 0 {
 					numMessages = 0
 					poll(ctx, d)
 				}
 			case <-time.After(pollingLongInterval):
+				// forced poll every minute
 				poll(ctx, d)
 			}
 		}
@@ -86,7 +87,7 @@ func poll(ctx context.Context, d *docker.Client) {
 	}
 	s.Set("json.dockerDiskUsage", b)
 
-	// wake up those who are waiting
+	// wake up those who are waiting.
 	s.NotifyAll()
 }
 

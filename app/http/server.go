@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	longPollingTimeout = 30 * time.Second // must be less than writeTimeout!
+	longPollingTimeout = 30 * time.Second // it must be less than writeTimeout!
 	readTimeout        = 5 * time.Second
 	writeTimeout       = 2 * longPollingTimeout
 )
@@ -20,8 +20,8 @@ func longPolling(w http.ResponseWriter, req *http.Request) {
 	<-store.Get().Wait(context.TODO(), longPollingTimeout)
 }
 
-// RunServer creates and starts an HTTP server.
-func RunServer(ctx context.Context, addr string) error {
+// Run creates and starts an HTTP server.
+func Run(ctx context.Context, addr string) error {
 	handler := http.NewServeMux()
 	handler.HandleFunc("/poll", longPolling)
 
