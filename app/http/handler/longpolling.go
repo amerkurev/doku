@@ -13,7 +13,7 @@ import (
 func LongPolling(longPollingTimeout time.Duration) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			<-store.Get().Wait(context.Background(), longPollingTimeout)
+			<-store.Wait(context.Background(), longPollingTimeout)
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)

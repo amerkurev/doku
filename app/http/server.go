@@ -3,11 +3,11 @@ package http
 import (
 	"context"
 	"fmt"
+	"github.com/amerkurev/doku/app/store"
 	"net/http"
 	"time"
 
 	"github.com/amerkurev/doku/app/http/handler"
-	"github.com/amerkurev/doku/app/store"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,15 +34,15 @@ func Run(ctx context.Context, addr string) error {
 	go func() {
 		<-ctx.Done()
 
-		go func() {
-			store.Get().NotifyAll() // unlock all long-polling requests
-		}()
-
 		// shutdown signal with grace period of `shutdownTimeout` seconds
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer func() {
 			cancel()
 			done <- true
+		}()
+
+		go func() {
+			store.NotifyAll() // unlock all long-polling requests before shut down
 		}()
 
 		err := httpServer.Shutdown(ctx)

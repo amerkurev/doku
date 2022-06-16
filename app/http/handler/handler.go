@@ -14,7 +14,7 @@ func echo(w http.ResponseWriter, req *http.Request) {
 }
 
 func version(w http.ResponseWriter, req *http.Request) {
-	revision, _ := store.Get().Get("revision")
+	revision, _ := store.Get("revision")
 	_, _ = w.Write([]byte(revision.(string)))
 }
 

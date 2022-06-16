@@ -22,6 +22,8 @@ var (
 	once  sync.Once
 )
 
+const errStoreUninitialized = "store requested before it was initialized"
+
 // Initialize instantiates the store.
 func Initialize() error {
 	var err error
@@ -31,15 +33,35 @@ func Initialize() error {
 	return err
 }
 
-// Get returns current initialized store.
-func Get() Store {
+// Set sets the value for a key.
+func Set(key string, value any) {
 	if store == nil {
-		// this only happens in tests
-		log.Warning("store requested before it was initialized, automatically initializing")
-		err := Initialize()
-		if err != nil {
-			log.WithField("err", err).Fatal("failed to initialize the store")
-		}
+		log.Fatal(errStoreUninitialized)
 	}
-	return store
+	store.Set(key, value)
+}
+
+// Get returns the value stored in the store for a key, or nil if no value is present.
+// The ok result indicates whether value was found in the store.
+func Get(key string) (value any, ok bool) {
+	if store == nil {
+		log.Fatal(errStoreUninitialized)
+	}
+	return store.Get(key)
+}
+
+// Wait returns a closed channel only after notification or when the timeout elapses.
+func Wait(ctx context.Context, d time.Duration) <-chan struct{} {
+	if store == nil {
+		log.Fatal(errStoreUninitialized)
+	}
+	return store.Wait(ctx, d)
+}
+
+// NotifyAll wakes up those who are waiting.
+func NotifyAll() {
+	if store == nil {
+		log.Fatal(errStoreUninitialized)
+	}
+	store.NotifyAll()
 }

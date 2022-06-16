@@ -68,7 +68,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize the store: %w", err)
 	}
-	store.Get().Set("revision", revision)
+	store.Set("revision", revision)
 
 	d, err := docker.NewClient(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
 	if err != nil {

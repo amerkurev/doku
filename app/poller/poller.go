@@ -70,24 +70,22 @@ func poll(ctx context.Context, d *docker.Client) {
 		log.WithField("err", err).Error("failed to docker request")
 		return
 	}
-
-	s := store.Get()
-	s.Set("latestPolling", r)
+	store.Set("latestPolling", r)
 
 	b, err := json.Marshal(r.Info)
 	if err != nil {
 		log.WithField("err", err).Error("failed to serialize docker info")
 		return
 	}
-	s.Set("json.dockerInfo", b)
+	store.Set("json.dockerInfo", b)
 
 	b, err = json.Marshal(r.DiskUsage)
 	if err != nil {
 		log.WithField("err", err).Error("failed to serialize docker disk usage")
 		return
 	}
-	s.Set("json.dockerDiskUsage", b)
+	store.Set("json.dockerDiskUsage", b)
 
 	// wake up those who are waiting.
-	s.NotifyAll()
+	store.NotifyAll()
 }
