@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/amerkurev/doku/app/http/handler"
 	"github.com/amerkurev/doku/app/store"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,18 +17,13 @@ const (
 	writeTimeout       = 2 * longPollingTimeout
 )
 
-func longPolling(w http.ResponseWriter, req *http.Request) {
-	<-store.Get().Wait(context.TODO(), longPollingTimeout)
-}
-
 // Run creates and starts an HTTP server.
 func Run(ctx context.Context, addr string) error {
-	handler := http.NewServeMux()
-	handler.HandleFunc("/poll", longPolling)
+	router := handler.CreateRouter(longPollingTimeout)
 
 	httpServer := &http.Server{
 		Addr:         addr,
-		Handler:      handler,
+		Handler:      router,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 	}

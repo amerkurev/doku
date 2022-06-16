@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/docker/docker v20.10.17+incompatible
 	github.com/docker/go-connections v0.4.0
+	github.com/go-chi/chi/v5 v5.0.7
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.2
