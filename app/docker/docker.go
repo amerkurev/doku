@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/docker/docker/api/types/events"
 	docker "github.com/docker/docker/client"
 	"github.com/docker/go-connections/tlsconfig"
-	log "github.com/sirupsen/logrus"
 )
 
 var significantDockerEvents = [...]string{
@@ -29,17 +29,12 @@ type Info struct {
 }
 
 // Client defines Docker client.
-type Client interface {
-	DockerEvents(context.Context) (<-chan events.Message, <-chan error)
-	DockerInfo(context.Context) *Info
-}
-
-type client struct {
+type Client struct {
 	*docker.Client
 }
 
 // NewClient creates a new Docker client.
-func NewClient(host, certPath, version string, verify bool) (Client, error) {
+func NewClient(host, certPath, version string, verify bool) (*Client, error) {
 
 	cli, err := docker.NewClientWithOpts(func(c *docker.Client) error {
 		return setOpts(c, host, certPath, version, verify)
@@ -49,38 +44,32 @@ func NewClient(host, certPath, version string, verify bool) (Client, error) {
 		return nil, err
 	}
 
-	c := &client{
-		Client: cli,
-	}
-	return c, nil
+	return &Client{cli}, nil
 }
 
 // DockerEvents returns a stream of events in the Docker daemon.
-func (c *client) DockerEvents(ctx context.Context) (<-chan events.Message, <-chan error) {
+func (c *Client) DockerEvents(ctx context.Context) (<-chan events.Message, <-chan error) {
 	return c.Client.Events(ctx, types.EventsOptions{})
 }
 
 // DockerInfo returns a piece of information about disk usage and others.
-func (c *client) DockerInfo(ctx context.Context) *Info {
-	defer elapsed("yet another poll execution is done")()
-
+func (c *Client) DockerInfo(ctx context.Context) (*Info, error) {
 	info, err := c.Client.Info(ctx)
 	if err != nil {
-		log.WithField("err", err).Error("docker info request error")
-		return nil
+		return nil, fmt.Errorf("info request: %w", err)
 	}
 
 	diskUsage, err := c.Client.DiskUsage(ctx)
 	if err != nil {
-		log.WithField("err", err).Error("docker disk usage request error")
-		return nil
+		return nil, fmt.Errorf("disk usage request: %w", err)
 	}
 
-	return &Info{
+	r := &Info{
 		Info:      info,
 		DiskUsage: diskUsage,
 		Timestamp: time.Now().UnixMicro(),
 	}
+	return r, nil
 }
 
 func setOpts(c *docker.Client, host, certPath, version string, verify bool) error {
@@ -128,11 +117,4 @@ func IsSignificantEvent(e string) bool {
 		}
 	}
 	return false
-}
-
-func elapsed(what string) func() {
-	start := time.Now()
-	return func() {
-		log.WithField("took", time.Since(start)).Debug(what)
-	}
 }

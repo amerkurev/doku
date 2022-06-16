@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/store"
 	"os"
 	"os/signal"
@@ -44,52 +46,40 @@ func main() {
 
 	configureLogging()
 
-	// configure store
-	err := store.Initialize()
-	if err != nil {
-		log.WithField("err", err).Fatal("error when the store initialized")
+	if err := run(); err != nil {
+		log.WithField("err", err).Fatal("doku failed")
 	}
+	log.Info("goodbye")
+}
 
-	// configure HTTP server
-	addr := listenAddress(opts.Listen)
-	s, err := http.NewServer(addr)
-	if err != nil {
-		log.WithField("err", err).Fatal("error when the HTTP server starts")
-	}
-	log.Info(fmt.Sprintf("starting HTTP server at %s", addr))
-
-	// configure poller
-	p, err := poller.New(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
-	if err != nil {
-		log.WithField("err", err).Fatal("error when docker daemon polling starts")
-	}
-	log.Info("starting docker poller")
-
-	services := struct {
-		poller.Poller
-		http.Server
-	}{
-		Poller: p,
-		Server: s,
-	}
-
-	// wait for termination signal
-	done := make(chan struct{}, 1)
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
-	log.Info("quit the server with CONTROL-C.")
+func run() error {
+	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
+		// catch signal and invoke graceful termination
+		signalChannel := make(chan os.Signal, 1)
+		signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
 		<-signalChannel
-		log.Info("received termination signal, attempting to gracefully shut down")
-		services.Poller.Stop()
-		if err := services.Server.Stop(); err != nil {
-			log.WithField("err", err).Error("error when the HTTP server shuts down")
-		}
-		done <- struct{}{}
+		log.Debug("interrupt signal")
+		cancel()
 	}()
-	<-done
-	log.Info("shutting down")
+
+	err := store.Initialize()
+	if err != nil {
+		return fmt.Errorf("failed to initialize the store: %w", err)
+	}
+
+	d, err := docker.NewClient(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
+	if err != nil {
+		return fmt.Errorf("failed to initialize docker client: %w", err)
+	}
+
+	log.Info("starting docker poller")
+	poller.Run(ctx, d)
+
+	addr := listenAddress(opts.Listen)
+	log.Info(fmt.Sprintf("starting http server at %s", addr))
+	return http.RunServer(ctx, addr)
 }
 
 func configureLogging() {

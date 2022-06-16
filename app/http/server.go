@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"net"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -12,59 +12,46 @@ import (
 
 const (
 	longPollingTimeout = 30 * time.Second // must be less than writeTimeout!
-	shutdownTimeout    = 5 * time.Second
 	readTimeout        = 5 * time.Second
 	writeTimeout       = 2 * longPollingTimeout
 )
 
-// Server represents an interface of control over the HTTP server.
-type Server interface {
-	Stop() error
-}
-
-type server struct {
-	*http.Server
-}
-
 func longPolling(w http.ResponseWriter, req *http.Request) {
-	<-store.Get().Wait(context.Background(), longPollingTimeout)
+	<-store.Get().Wait(context.TODO(), longPollingTimeout)
 }
 
-// NewServer creates an HTTP server.
-func NewServer(addr string) (Server, error) {
-	ln, err := net.Listen("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-
+// RunServer creates and starts an HTTP server.
+func RunServer(ctx context.Context, addr string) error {
 	handler := http.NewServeMux()
 	handler.HandleFunc("/poll", longPolling)
 
-	s := &server{
-		Server: &http.Server{
-			Addr:         addr,
-			Handler:      handler,
-			ReadTimeout:  readTimeout,
-			WriteTimeout: writeTimeout,
-		},
+	httpServer := &http.Server{
+		Addr:         addr,
+		Handler:      handler,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
 	}
 
+	done := make(chan bool)
+
 	go func() {
-		if err := s.Serve(ln); err != http.ErrServerClosed {
-			log.WithField("err", err).Error("error when the HTTP request handling")
+		<-ctx.Done()
+		go func() {
+			store.Get().NotifyAll() // unlock all long-polling requests
+		}()
+		err := httpServer.Shutdown(context.Background())
+		if err != nil {
+			log.WithField("err", err).Error("failed to shut down the http server")
 		}
+		done <- true
 	}()
-	return s, nil
-}
 
-func (s *server) Serve(ln net.Listener) error {
-	return s.Server.Serve(ln)
-}
+	err := httpServer.ListenAndServe()
+	if err != nil && err == http.ErrServerClosed {
+		<-done
+		log.Info("gracefully http server shutdown")
+		return nil
+	}
 
-// Stop stops HTTP server.
-func (s *server) Stop() error {
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer cancel()
-	err := s.Server.Shutdown(ctx)
-	return err
+	return fmt.Errorf("http server failed: %w", err)
 }

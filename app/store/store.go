@@ -14,7 +14,7 @@ type Store interface {
 	Get(key string) (value any, ok bool)
 
 	Wait(ctx context.Context, d time.Duration) <-chan struct{}
-	Notify()
+	NotifyAll()
 }
 
 var (
@@ -38,7 +38,7 @@ func Get() Store {
 		log.Warning("store requested before it was initialized, automatically initializing")
 		err := Initialize()
 		if err != nil {
-			log.WithField("err", err).Fatal("failed to automatically initialize store")
+			log.WithField("err", err).Fatal("failed to initialize the store")
 		}
 	}
 	return store

@@ -30,7 +30,7 @@ func (s *memoryStore) Wait(ctx context.Context, d time.Duration) <-chan struct{}
 	return ctx.Done()
 }
 
-func (s *memoryStore) Notify() {
+func (s *memoryStore) NotifyAll() {
 	for _, cancelFunc := range s.loadAndDeleteCancelers() {
 		cancelFunc()
 	}
