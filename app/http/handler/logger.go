@@ -48,7 +48,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 
 	entry.Logger = entry.Logger.WithFields(logFields)
 
-	entry.Logger.Infoln("request started")
+	entry.Logger.Debugln("request started")
 
 	return entry
 }
@@ -63,7 +63,7 @@ func (l *structuredLoggerEntry) Write(status, bytes int, header http.Header, ela
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0,
 	})
 
-	l.Logger.Infoln("request complete")
+	l.Logger.Debugln("request complete")
 }
 
 func (l *structuredLoggerEntry) Panic(v interface{}, stack []byte) {
@@ -71,4 +71,6 @@ func (l *structuredLoggerEntry) Panic(v interface{}, stack []byte) {
 		"stack": string(stack),
 		"panic": fmt.Sprintf("%+v", v),
 	})
+
+	l.Logger.Errorln("request panic")
 }

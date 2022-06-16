@@ -4,12 +4,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/amerkurev/doku/app/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 )
 
 func echo(w http.ResponseWriter, req *http.Request) {
+}
+
+func version(w http.ResponseWriter, req *http.Request) {
+	revision, _ := store.Get().Get("revision")
+	_, _ = w.Write([]byte(revision.(string)))
 }
 
 // CreateRouter creates an HTTP route multiplexer.
@@ -23,11 +29,11 @@ func CreateRouter(longPollingTimeout time.Duration) *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	// long polling routes
-	r.Route("/_", func(r chi.Router) {
+	r.Group(func(r chi.Router) {
 		r.Use(LongPolling(longPollingTimeout))
-		r.Get("/echo", echo)
+		r.Get("/_/echo", echo)
 	})
 
-	r.Get("/echo", echo)
+	r.Get("/version", version)
 	return r
 }
