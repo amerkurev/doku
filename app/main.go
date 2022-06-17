@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/http"
@@ -78,9 +80,28 @@ func run() error {
 	log.Info("starting docker poller")
 	poller.Run(ctx, d)
 
+	basicAuthAllowed, baErr := makeBasicAuth(opts.AuthBasicHtpasswd)
+	if baErr != nil {
+		return fmt.Errorf("failed to load basic auth: %w", baErr)
+	}
+
 	addr := listenAddress(opts.Listen)
+	httpServer := &http.Server{
+		Version: revision,
+		Address: addr,
+		Timeouts: http.Timeouts{
+			Read:        5 * time.Second,
+			Write:       60 * time.Second,
+			Idle:        60 * time.Second,
+			Shutdown:    5 * time.Second,
+			LongPolling: 30 * time.Second, // it must be less than writeTimeout!
+		},
+		BasicAuthEnabled: len(basicAuthAllowed) > 0,
+		BasicAuthAllowed: basicAuthAllowed,
+	}
+
 	log.Info(fmt.Sprintf("starting http server at %s", addr))
-	return http.Run(ctx, addr)
+	return httpServer.Run(ctx)
 }
 
 func configureLogging() {
@@ -117,4 +138,22 @@ func listenAddress(addr string) string {
 		return "0.0.0.0:9090"
 	}
 	return "127.0.0.1:80"
+}
+
+// makeBasicAuth returns a list of allowed basic auth users and password hashes.
+// if no htpasswd file is specified, an empty list is returned.
+func makeBasicAuth(htpasswdFile string) ([]string, error) {
+	var basicAuthAllowed []string
+	if htpasswdFile != "" {
+		data, err := os.ReadFile(htpasswdFile) //nolint:gosec //read file with opts passed path
+		if err != nil {
+			return nil, fmt.Errorf("failed to read htpasswd file %s: %w", htpasswdFile, err)
+		}
+		basicAuthAllowed = strings.Split(string(data), "\n")
+		for i, v := range basicAuthAllowed {
+			basicAuthAllowed[i] = strings.TrimSpace(v)
+			basicAuthAllowed[i] = strings.Replace(basicAuthAllowed[i], "\t", "", -1)
+		}
+	}
+	return basicAuthAllowed, nil
 }

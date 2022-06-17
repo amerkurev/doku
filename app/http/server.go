@@ -7,26 +7,36 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/amerkurev/doku/app/http/handler"
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	longPollingTimeout = 30 * time.Second // it must be less than writeTimeout!
-	shutdownTimeout    = 5 * time.Second
-	readTimeout        = 5 * time.Second
-	writeTimeout       = 2 * longPollingTimeout
-)
+type Server struct {
+	Version          string
+	Address          string
+	Timeouts         Timeouts
+	BasicAuthEnabled bool
+	BasicAuthAllowed []string
+}
+
+// Timeouts consolidate timeouts for both server and transport
+type Timeouts struct {
+	Write       time.Duration
+	Read        time.Duration
+	Idle        time.Duration
+	Shutdown    time.Duration
+	LongPolling time.Duration
+}
 
 // Run creates and starts an HTTP server.
-func Run(ctx context.Context, addr string) error {
-	router := handler.CreateRouter(longPollingTimeout)
+func (s *Server) Run(ctx context.Context) error {
+	router := CreateRouter(s)
 
 	httpServer := &http.Server{
-		Addr:         addr,
+		Addr:         s.Address,
 		Handler:      router,
-		ReadTimeout:  readTimeout,
-		WriteTimeout: writeTimeout,
+		ReadTimeout:  s.Timeouts.Read,
+		WriteTimeout: s.Timeouts.Write,
+		IdleTimeout:  s.Timeouts.Idle,
 	}
 
 	done := make(chan bool, 1)
@@ -35,7 +45,7 @@ func Run(ctx context.Context, addr string) error {
 		<-ctx.Done()
 
 		// shutdown signal with grace period of `shutdownTimeout` seconds
-		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), s.Timeouts.Shutdown)
 		defer func() {
 			cancel()
 			done <- true

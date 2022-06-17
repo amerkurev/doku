@@ -73,5 +73,5 @@ func (l *structuredLoggerEntry) Panic(v interface{}, stack []byte) {
 	})
 
 	l.Logger.Errorln("request panic")
-	os.Stderr.Write(stack) // nolint gosec
+	os.Stderr.Write(stack) // nolint:gosec
 }
