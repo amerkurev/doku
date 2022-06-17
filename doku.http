@@ -11,5 +11,5 @@ GET http://127.0.0.1:9090/api/docker/disk-usage
 Accept: application/json
 
 ### GET host volume usage
-GET http://127.0.0.1:9090/api/host/volume-usage
+GET http://127.0.0.1:9090/api/host/disk-usage
 Accept: application/json

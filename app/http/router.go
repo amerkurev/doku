@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"github.com/amerkurev/doku/app/http/handler"
 	"github.com/amerkurev/doku/app/store"
 	"github.com/go-chi/chi/v5"
@@ -13,11 +14,12 @@ var emptyObject = []byte("{}")
 
 func version(w http.ResponseWriter, _ *http.Request) {
 	v, _ := store.Get("revision")
-	w.Write([]byte(v.(string))) // nolint:gosec
+	b := []byte(fmt.Sprintf(`{"version": "%s"}`, v.(string)))
+	w.Write(b) // nolint:gosec
 }
 
 func dockerInfo(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("json.dockerInfo")
+	v, ok := store.Get("dockerInfo")
 	if !ok {
 		v = emptyObject
 	}
@@ -25,15 +27,15 @@ func dockerInfo(w http.ResponseWriter, _ *http.Request) {
 }
 
 func dockerDiskUsage(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("json.dockerDiskUsage")
+	v, ok := store.Get("dockerDiskUsage")
 	if !ok {
 		v = emptyObject
 	}
 	w.Write(v.([]byte)) // nolint:gosec
 }
 
-func volumeUsage(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("json.volumeUsage")
+func hostDiskUsage(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("hostDiskUsage")
 	if !ok {
 		v = emptyObject
 	}
@@ -56,23 +58,22 @@ func CreateRouter(s *Server) *chi.Mux {
 	}
 
 	r.Route("/api", func(r chi.Router) {
+		r.Use(handler.ContentTypeJSON)
+		r.Get("/version", version)
+
 		// long polling routes
 		r.Group(func(r chi.Router) {
-			r.Use(handler.ContentTypeJSON)
 			r.Use(handler.LongPolling(s.Timeouts.LongPolling))
 			r.Get("/_/docker/disk-usage", dockerDiskUsage)
 		})
 
-		r.Get("/version", version)
 		r.Route("/docker", func(r chi.Router) {
-			r.Use(handler.ContentTypeJSON)
 			r.Get("/info", dockerInfo)
 			r.Get("/disk-usage", dockerDiskUsage)
 		})
 
 		r.Route("/host", func(r chi.Router) {
-			r.Use(handler.ContentTypeJSON)
-			r.Get("/volume-usage", volumeUsage)
+			r.Get("/disk-usage", hostDiskUsage)
 		})
 	})
 	return r

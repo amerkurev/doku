@@ -2,11 +2,9 @@ package docker
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/events"
@@ -22,16 +20,24 @@ var significantDockerEvents = [...]string{
 	events.ServiceEventType,
 }
 
-// Info contains all information that retrieves from the Docker daemon.
-type Info struct {
-	types.Info
-	types.DiskUsage
-	Timestamp int64
-}
-
 // Client defines Docker client.
 type Client struct {
 	*docker.Client
+}
+
+// Events returns a stream of events in the Docker daemon.
+func (c *Client) Events(ctx context.Context) (<-chan events.Message, <-chan error) {
+	return c.Client.Events(ctx, types.EventsOptions{})
+}
+
+// Info returns information about the Docker server.
+func (c *Client) Info(ctx context.Context) (types.Info, error) {
+	return c.Client.Info(ctx)
+}
+
+// DiskUsage requests the current data usage from the Docker daemon.
+func (c *Client) DiskUsage(ctx context.Context) (types.DiskUsage, error) {
+	return c.Client.DiskUsage(ctx)
 }
 
 // NewClient creates a new Docker client.
@@ -46,31 +52,6 @@ func NewClient(host, certPath, version string, verify bool) (*Client, error) {
 	}
 
 	return &Client{cli}, nil
-}
-
-// DockerEvents returns a stream of events in the Docker daemon.
-func (c *Client) DockerEvents(ctx context.Context) (<-chan events.Message, <-chan error) {
-	return c.Client.Events(ctx, types.EventsOptions{})
-}
-
-// DockerInfo returns a piece of information about disk usage and others.
-func (c *Client) DockerInfo(ctx context.Context) (*Info, error) {
-	info, err := c.Client.Info(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("info request: %w", err)
-	}
-
-	diskUsage, err := c.Client.DiskUsage(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("disk usage request: %w", err)
-	}
-
-	r := &Info{
-		Info:      info,
-		DiskUsage: diskUsage,
-		Timestamp: time.Now().UnixMicro(),
-	}
-	return r, nil
 }
 
 func setOpts(c *docker.Client, host, certPath, version string, verify bool) error {
@@ -120,6 +101,7 @@ func IsSignificantEvent(e string) bool {
 	return false
 }
 
+// BindMounts returns all files or directories on the host machine that mounted into containers.
 func BindMounts(containers []*types.Container) []string {
 	res := make([]string, 0, len(containers))
 	for _, c := range containers {

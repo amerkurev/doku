@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/amerkurev/doku/app/util"
 	"os"
 	"os/signal"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/amerkurev/doku/app/http"
 	"github.com/amerkurev/doku/app/poller"
 	"github.com/amerkurev/doku/app/store"
+	"github.com/amerkurev/doku/app/types"
 	"github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 )
@@ -62,7 +62,7 @@ func main() {
 	log.Info("goodbye")
 }
 
-func run(vols []util.Volume) error {
+func run(vols []types.HostVolume) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
@@ -170,14 +170,14 @@ func makeBasicAuth(htpasswdFile string) ([]string, error) {
 }
 
 // parseVolumes parses volumes from string list, each element in format "name:path"
-func parseVolumes(volumes []string) ([]util.Volume, error) {
-	res := make([]util.Volume, len(volumes))
+func parseVolumes(volumes []string) ([]types.HostVolume, error) {
+	res := make([]types.HostVolume, len(volumes))
 	for i, v := range volumes {
 		parts := strings.SplitN(v, ":", 2)
 		if len(parts) != 2 {
 			return nil, errors.New("invalid volume format, should be <name>:<path>")
 		}
-		res[i] = util.Volume{Name: parts[0], Path: parts[1]}
+		res[i] = types.HostVolume{Name: parts[0], Path: parts[1]}
 		log.WithField("path", parts[1]).Debug("volume to report")
 	}
 	return res, nil
