@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Server is a server for http.
 type Server struct {
 	Version          string
 	Address          string
