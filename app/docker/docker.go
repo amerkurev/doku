@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -117,4 +118,16 @@ func IsSignificantEvent(e string) bool {
 		}
 	}
 	return false
+}
+
+func BindMounts(containers []*types.Container) []string {
+	res := make([]string, 0, len(containers))
+	for _, c := range containers {
+		for _, m := range c.Mounts {
+			if m.Type == "bind" {
+				res = append(res, strings.TrimPrefix(m.Source, "/host_mnt"))
+			}
+		}
+	}
+	return res
 }

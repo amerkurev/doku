@@ -8,6 +8,7 @@ import (
 
 	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/store"
+	"github.com/shirou/gopsutil/v3/disk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -63,8 +64,10 @@ func Run(ctx context.Context, d *docker.Client) {
 }
 
 func poll(ctx context.Context, d *docker.Client) {
-	defer util.Elapsed("yet another poll execution is done")()
+	defer util.PrintExecTime("yet another poll execution is done")()
+	defer store.NotifyAll() // wake up those who are waiting.
 
+	// docker info (docker system df)
 	r, err := d.DockerInfo(ctx)
 	if err != nil {
 		log.WithField("err", err).Error("failed to docker request")
@@ -86,6 +89,48 @@ func poll(ctx context.Context, d *docker.Client) {
 	}
 	store.Set("json.dockerDiskUsage", b)
 
-	// wake up those who are waiting.
-	store.NotifyAll()
+	// disk info (host)
+	v, ok := store.Get("volumes")
+	if !ok {
+		log.Error("volumes missing")
+		return
+	}
+
+	vols := v.([]util.Volume)
+
+	for i, vol := range vols {
+		du, err := disk.UsageWithContext(ctx, vol.Path)
+		if err != nil {
+			log.WithField("err", err).Error("failed to get disk usage")
+			continue
+		}
+
+		vols[i].Path = du.Path
+		vols[i].Fstype = du.Fstype
+		vols[i].Total = du.Total
+		vols[i].Free = du.Free
+		vols[i].Used = du.Used
+		vols[i].UsedPercent = du.UsedPercent
+		vols[i].InodesTotal = du.InodesTotal
+		vols[i].InodesUsed = du.InodesUsed
+		vols[i].InodesFree = du.InodesFree
+		vols[i].InodesUsedPercent = du.InodesUsedPercent
+	}
+
+	b, err = json.Marshal(vols)
+	if err != nil {
+		log.WithField("err", err).Error("failed to serialize disk usage")
+		return
+	}
+	store.Set("json.volumeUsage", b)
+
+	// docker bind mounts info
+	//for _, path := range docker.BindMounts(r.DiskUsage.Containers) {
+	//	size, files, err := util.DirSize(path)
+	//	if err != nil {
+	//		fmt.Printf("err: %+v", err)
+	//		continue
+	//	}
+	//	fmt.Printf("%s, %d bytes, %d files\n", path, size, files)
+	//}
 }

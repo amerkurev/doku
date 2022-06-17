@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/amerkurev/doku/app/util"
 	"os"
 	"os/signal"
 	"strings"
@@ -18,8 +20,9 @@ import (
 )
 
 var opts struct {
-	Listen            string `short:"l" long:"listen" env:"LISTEN" description:"listen on host:port (default: 0.0.0.0:9090 under docker, 127.0.0.1:80 without)"`
-	AuthBasicHtpasswd string `long:"basic-htpasswd" env:"BASIC_HTPASSWD" description:"htpasswd file for basic auth"`
+	Listen            string   `short:"l" long:"listen" env:"LISTEN" description:"listen on host:port (default: 0.0.0.0:9090 under docker, 127.0.0.1:9090 without)"`
+	AuthBasicHtpasswd string   `long:"basic-htpasswd" env:"BASIC_HTPASSWD" description:"htpasswd file for basic auth"`
+	Volumes           []string `short:"v" long:"volume" env:"VOLUMES" default:"root:/" env-delim:"," description:"volumes to report"`
 
 	Docker struct {
 		Host     string `long:"host" env:"HOST" default:"unix:///var/run/docker.sock" description:"url to the docker server"`
@@ -48,13 +51,18 @@ func main() {
 
 	configureLogging()
 
-	if err := run(); err != nil {
+	vols, err := parseVolumes(opts.Volumes)
+	if err != nil {
+		log.WithField("err", err).Fatal("parse volume failed")
+	}
+
+	if err := run(vols); err != nil {
 		log.WithField("err", err).Fatal("doku failed")
 	}
 	log.Info("goodbye")
 }
 
-func run() error {
+func run(vols []util.Volume) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
@@ -70,7 +78,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize the store: %w", err)
 	}
+
+	// save some data in the store for access from other packages
 	store.Set("revision", revision)
+	store.Set("volumes", vols)
 
 	d, err := docker.NewClient(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
 	if err != nil {
@@ -125,7 +136,7 @@ func configureLogging() {
 	}
 }
 
-// listenAddress sets default to 127.0.0.1:80 and, if detected DOKU_IN_DOCKER env, to 0.0.0.0:9090
+// listenAddress sets default to 127.0.0.1:9090 and, if detected DOKU_IN_DOCKER env, to 0.0.0.0:9090
 func listenAddress(addr string) string {
 
 	// don't set default if any opts.Listen address defined by user
@@ -137,7 +148,7 @@ func listenAddress(addr string) string {
 	if v, ok := os.LookupEnv("DOKU_IN_DOCKER"); ok && (v == "1" || v == "true") {
 		return "0.0.0.0:9090"
 	}
-	return "127.0.0.1:80"
+	return "127.0.0.1:9090"
 }
 
 // makeBasicAuth returns a list of allowed basic auth users and password hashes.
@@ -156,4 +167,18 @@ func makeBasicAuth(htpasswdFile string) ([]string, error) {
 		}
 	}
 	return basicAuthAllowed, nil
+}
+
+// parseVolumes parses volumes from string list, each element in format "name:path"
+func parseVolumes(volumes []string) ([]util.Volume, error) {
+	res := make([]util.Volume, len(volumes))
+	for i, v := range volumes {
+		parts := strings.SplitN(v, ":", 2)
+		if len(parts) != 2 {
+			return nil, errors.New("invalid volume format, should be <name>:<path>")
+		}
+		res[i] = util.Volume{Name: parts[0], Path: parts[1]}
+		log.WithField("path", parts[1]).Debug("volume to report")
+	}
+	return res, nil
 }
