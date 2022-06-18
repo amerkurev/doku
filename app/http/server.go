@@ -3,10 +3,10 @@ package http
 import (
 	"context"
 	"fmt"
-	"github.com/amerkurev/doku/app/store"
 	"net/http"
 	"time"
 
+	"github.com/amerkurev/doku/app/store"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+
 	"github.com/amerkurev/doku/app/http/handler"
 	"github.com/amerkurev/doku/app/store"
 	"github.com/go-chi/chi/v5"

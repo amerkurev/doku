@@ -23,7 +23,7 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	messages, errs := d.Events(ctx)
 	numMessages := 0 // count of Docker daemon events.
 
-	// calculate the size of directories that mounted into the containers on the host machine
+	// calculate the size of directories that mounted (bind type) into containers
 	dirSizeCalculator(ctx, d, volumes)
 
 	go func() {

@@ -2,73 +2,136 @@ package poller
 
 import (
 	"context"
-	"github.com/amerkurev/doku/app/docker"
-	"github.com/amerkurev/doku/app/store"
 	"os"
 	"path"
+	"strings"
 	"time"
 
+	"github.com/amerkurev/doku/app/docker"
+	"github.com/amerkurev/doku/app/store"
 	"github.com/amerkurev/doku/app/types"
+	"github.com/amerkurev/doku/app/util"
 	dockerTypes "github.com/docker/docker/api/types"
 	log "github.com/sirupsen/logrus"
 )
 
+func containerLogFile(ci *dockerTypes.ContainerJSON, volumes []types.HostVolume) {
+	for _, vol := range volumes {
+		p := path.Join(vol.Path, ci.LogPath)
+		if fi, err := os.Stat(p); err == nil {
+			store.Set(ci.LogPath, &types.HostPathInfo{
+				Path:      ci.LogPath,
+				Size:      fi.Size(),
+				LastCheck: time.Now().UnixMilli(),
+			})
+			log.WithFields(log.Fields{"path": ci.LogPath, "size": fi.Size()}).Debug("container log file")
+			return
+		}
+	}
+}
+
+func bindMountedDirectory(m *dockerTypes.MountPoint, volumes []types.HostVolume) {
+	for _, vol := range volumes {
+		var p string
+		if vol.Path == "/" {
+			p = strings.TrimPrefix(m.Source, "/host_mnt")
+		} else {
+			p = strings.Replace(m.Source, "/host_mnt", vol.Path, 1)
+		}
+		if fi, err := os.Stat(p); err == nil {
+			if fi.IsDir() {
+				size, files, err := util.DirSize(p)
+				if err == nil {
+					store.Set(m.Source, &types.HostPathInfo{
+						Path:      m.Source,
+						Size:      size,
+						IsDir:     true,
+						Files:     files,
+						OnlyRead:  m.RW == false,
+						LastCheck: time.Now().UnixMilli(),
+					})
+					f := log.Fields{"path": m.Source, "size": size, "rw": m.RW}
+					log.WithFields(f).Debug("(bind) mounted dir")
+					return
+				}
+			} else {
+				store.Set(m.Source, &types.HostPathInfo{
+					Path:      m.Source,
+					Size:      fi.Size(),
+					OnlyRead:  m.RW == false,
+					LastCheck: time.Now().UnixMilli(),
+				})
+				f := log.Fields{"path": m.Source, "size": fi.Size(), "rw": m.RW}
+				log.WithFields(f).Debug("(bind) mounted file")
+				return
+			}
+		}
+	}
+}
+
 func dirSizeCalculator(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	go func() {
 		for {
-			// return from function or pause the current goroutine for at least 1 ms
-			if interruptionPoint(ctx) {
-				return
-			}
+			if containers, err := d.ContainerList(ctx, dockerTypes.ContainerListOptions{All: true}); err != nil {
+				log.WithField("err", err).Error("failed to get the list of containers")
+			} else {
+				var seen []string
 
-			containers, err := d.ContainerList(ctx, dockerTypes.ContainerListOptions{All: true})
-			if err != nil {
-				log.WithField("err", err).Error("failed to get the list of containers in the docker host")
-				continue
-			}
-
-			for _, c := range containers {
-				ci, err := d.ContainerInspect(ctx, c.ID)
-				if err != nil {
-					break
-				}
-
-				for _, vol := range volumes {
-					p := path.Join(vol.Path, ci.LogPath)
-					if fi, err := os.Stat(p); err == nil {
-						r := &types.HostPathInfo{
-							Path:      ci.LogPath,
-							Size:      fi.Size(),
-							LastCheck: time.Now().UnixMilli(),
-						}
-						store.Set(ci.LogPath, r)
+				for _, c := range containers {
+					ci, err := d.ContainerInspect(ctx, c.ID)
+					if err != nil {
+						log.WithField("err", err).Error("failed to inspect the container")
 						break
 					}
-				}
 
-				if interruptionPoint(ctx) {
-					return
+					if contains("DOKU_IN_DOCKER=1", ci.Config.Env) {
+						continue // skip myself
+					}
+
+					// get size of container log file
+					containerLogFile(&ci, volumes)
+					// let the processor cool down
+					if interruptionPoint(ctx, time.Second) {
+						return
+					}
+
+					for _, m := range c.Mounts {
+						if m.Type == "bind" && !contains(m.Source, seen) {
+							// prevent repeated getting a size
+							seen = append(seen, m.Source)
+							// get size of (bind) mounted directory
+							bindMountedDirectory(&m, volumes)
+							// let the processor cool down
+							if interruptionPoint(ctx, time.Second) {
+								return
+							}
+						}
+					}
 				}
 			}
 
-			// docker bind mounts info
-			// for _, path := range docker.BindMounts(r.DiskUsage.Containers) {
-			//	size, files, err := util.DirSize(path)
-			//	if err != nil {
-			//		fmt.Printf("err: %+v", err)
-			//		continue
-			//	}
-			//	fmt.Printf("%s, %d bytes, %d files\n", path, size, files)
-			// }
+			// return from function or pause the current goroutine for at least 5 minutes
+			if interruptionPoint(ctx, 5*time.Minute) {
+				return
+			}
 		}
 	}()
 }
 
-func interruptionPoint(ctx context.Context) bool {
+func interruptionPoint(ctx context.Context, d time.Duration) bool {
 	select {
 	case <-ctx.Done():
 		return true
-	case <-time.After(time.Second):
+	case <-time.After(d):
 		return false
 	}
+}
+
+func contains[T comparable](val T, list []T) bool {
+	for _, v := range list {
+		if val == v {
+			return true
+		}
+	}
+	return false
 }

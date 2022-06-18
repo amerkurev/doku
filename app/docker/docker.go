@@ -101,7 +101,7 @@ func IsSignificantEvent(e string) bool {
 	return false
 }
 
-// BindMounts returns all files or directories on the host machine that mounted into containers.
+// BindMounts returns all files or directories that mounted (bind type) into containers.
 func BindMounts(containers []*types.Container) []string {
 	res := make([]string, 0, len(containers))
 	for _, c := range containers {

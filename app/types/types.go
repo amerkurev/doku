@@ -12,5 +12,6 @@ type HostPathInfo struct {
 	Size      int64  `json:"size"`
 	IsDir     bool   `json:"isDir"`
 	Files     int64  `json:"files"`
+	OnlyRead  bool   `json:"onlyRead"`
 	LastCheck int64  `json:"lastCheck"`
 }
