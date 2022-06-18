@@ -54,5 +54,4 @@ func BasicAuthHandler(allowed []string) func(next http.Handler) http.Handler {
 		}
 		return http.HandlerFunc(fn)
 	}
-
 }

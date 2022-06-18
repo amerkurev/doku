@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/amerkurev/doku/app/types"
 	"time"
 
 	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/store"
+	"github.com/amerkurev/doku/app/types"
 	"github.com/amerkurev/doku/app/util"
-	"github.com/shirou/gopsutil/v3/disk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,9 +19,12 @@ const (
 )
 
 // Run starts a goroutine to poll the Docker daemon.
-func Run(ctx context.Context, d *docker.Client) {
+func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	messages, errs := d.Events(ctx)
 	numMessages := 0 // count of Docker daemon events.
+
+	// calculate the size of directories that mounted into the containers on the host machine
+	dirSizeCalculator(ctx, d, volumes)
 
 	go func() {
 		// run it immediately on start
@@ -76,20 +78,6 @@ func poll(ctx context.Context, d *docker.Client) {
 	if err := dockerDiskUsage(ctx, d); err != nil {
 		log.WithField("err", err).Error("failed to request the current data usage from the docker daemon")
 	}
-
-	if err := hostDiskUsage(ctx); err != nil {
-		log.WithField("err", err).Error("failed to get disk usage on the host machine")
-	}
-
-	// docker bind mounts info
-	// for _, path := range docker.BindMounts(r.DiskUsage.Containers) {
-	//	size, files, err := util.DirSize(path)
-	//	if err != nil {
-	//		fmt.Printf("err: %+v", err)
-	//		continue
-	//	}
-	//	fmt.Printf("%s, %d bytes, %d files\n", path, size, files)
-	// }
 }
 
 func dockerInfo(ctx context.Context, d *docker.Client) error {
@@ -119,31 +107,5 @@ func dockerDiskUsage(ctx context.Context, d *docker.Client) error {
 	}
 
 	store.Set("dockerDiskUsage", b)
-	return nil
-}
-
-func hostDiskUsage(ctx context.Context) error {
-	v, ok := store.Get("volumes")
-	if !ok {
-		return fmt.Errorf("volumes not found")
-	}
-
-	vols := v.([]types.HostVolume)
-
-	for i, vol := range vols {
-		du, err := disk.UsageWithContext(ctx, vol.Path)
-		if err != nil {
-			log.WithField("err", err).Error("failed to get host disk usage")
-			continue
-		}
-		vols[i].CopyFrom(du)
-	}
-
-	b, err := json.Marshal(vols)
-	if err != nil {
-		return fmt.Errorf("failed to encode as JSON")
-	}
-
-	store.Set("hostDiskUsage", b)
 	return nil
 }

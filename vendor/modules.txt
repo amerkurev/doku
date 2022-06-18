@@ -41,13 +41,11 @@ github.com/docker/go-units
 ## explicit; go 1.14
 github.com/go-chi/chi/v5
 github.com/go-chi/chi/v5/middleware
-# github.com/go-ole/go-ole v1.2.6
-## explicit; go 1.12
-github.com/go-ole/go-ole
-github.com/go-ole/go-ole/oleutil
 # github.com/gogo/protobuf v1.3.2
 ## explicit; go 1.15
 github.com/gogo/protobuf/proto
+# github.com/google/go-cmp v0.5.8
+## explicit; go 1.13
 # github.com/jessevdk/go-flags v1.5.0
 ## explicit; go 1.15
 github.com/jessevdk/go-flags
@@ -68,22 +66,12 @@ github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c
-## explicit; go 1.14
-github.com/power-devops/perfstat
-# github.com/shirou/gopsutil/v3 v3.22.5
-## explicit; go 1.15
-github.com/shirou/gopsutil/v3/disk
-github.com/shirou/gopsutil/v3/internal/common
 # github.com/sirupsen/logrus v1.8.1
 ## explicit; go 1.13
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.7.2
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
-# github.com/yusufpapurcu/wmi v1.2.2
-## explicit; go 1.16
-github.com/yusufpapurcu/wmi
 # golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 ## explicit; go 1.11
 golang.org/x/crypto/bcrypt
@@ -97,7 +85,6 @@ golang.org/x/net/proxy
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-golang.org/x/sys/windows/registry
 # golang.org/x/time v0.0.0-20220609170525-579cf78fd858
 ## explicit
 # gopkg.in/yaml.v3 v3.0.1

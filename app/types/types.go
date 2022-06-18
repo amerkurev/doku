@@ -1,26 +1,16 @@
 package types
 
-import (
-	"github.com/shirou/gopsutil/v3/disk"
-)
-
 // HostVolume contains input information for a volume and the result for utilization percentage.
 type HostVolume struct {
-	Name           string `json:"name"`
-	Path           string `json:"path"`
-	disk.UsageStat `json:"usageStat"`
+	Name string `json:"name"`
+	Path string `json:"path"`
 }
 
-// CopyFrom fill HostVolume struct from gopsutil.disk.UsageStat.
-func (v *HostVolume) CopyFrom(du *disk.UsageStat) {
-	v.UsageStat.Path = du.Path
-	v.Fstype = du.Fstype
-	v.Total = du.Total
-	v.Free = du.Free
-	v.Used = du.Used
-	v.UsedPercent = du.UsedPercent
-	v.InodesTotal = du.InodesTotal
-	v.InodesUsed = du.InodesUsed
-	v.InodesFree = du.InodesFree
-	v.InodesUsedPercent = du.InodesUsedPercent
+// HostPathInfo contains information about a filesystem path (file or directory).
+type HostPathInfo struct {
+	Path      string `json:"path"`
+	Size      int64  `json:"size"`
+	IsDir     bool   `json:"isDir"`
+	Files     int64  `json:"files"`
+	LastCheck int64  `json:"lastCheck"`
 }

@@ -51,18 +51,18 @@ func main() {
 
 	configureLogging()
 
-	vols, err := parseVolumes(opts.Volumes)
+	volumes, err := parseVolumes(opts.Volumes)
 	if err != nil {
 		log.WithField("err", err).Fatal("parse volume failed")
 	}
 
-	if err := run(vols); err != nil {
+	if err := run(volumes); err != nil {
 		log.WithField("err", err).Fatal("doku failed")
 	}
 	log.Info("goodbye")
 }
 
-func run(vols []types.HostVolume) error {
+func run(volumes []types.HostVolume) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
@@ -78,10 +78,7 @@ func run(vols []types.HostVolume) error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize the store: %w", err)
 	}
-
-	// save some data in the store for access from other packages
 	store.Set("revision", revision)
-	store.Set("volumes", vols)
 
 	d, err := docker.NewClient(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
 	if err != nil {
@@ -89,7 +86,7 @@ func run(vols []types.HostVolume) error {
 	}
 
 	log.Info("starting docker poller")
-	poller.Run(ctx, d)
+	poller.Run(ctx, d, volumes)
 
 	basicAuthAllowed, baErr := makeBasicAuth(opts.AuthBasicHtpasswd)
 	if baErr != nil {
