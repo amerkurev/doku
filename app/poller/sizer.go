@@ -30,7 +30,7 @@ func containerLogFile(ci *dockerTypes.ContainerJSON, volumes []types.HostVolume)
 	}
 }
 
-func bindMountedDirectory(m *dockerTypes.MountPoint, volumes []types.HostVolume) {
+func bindMountedDirectory(m dockerTypes.MountPoint, volumes []types.HostVolume) {
 	for _, vol := range volumes {
 		var p string
 		if vol.Path == "/" {
@@ -47,7 +47,7 @@ func bindMountedDirectory(m *dockerTypes.MountPoint, volumes []types.HostVolume)
 						Size:      size,
 						IsDir:     true,
 						Files:     files,
-						OnlyRead:  m.RW == false,
+						OnlyRead:  !m.RW,
 						LastCheck: time.Now().UnixMilli(),
 					})
 					f := log.Fields{"path": m.Source, "size": size, "rw": m.RW}
@@ -58,7 +58,7 @@ func bindMountedDirectory(m *dockerTypes.MountPoint, volumes []types.HostVolume)
 				store.Set(m.Source, &types.HostPathInfo{
 					Path:      m.Source,
 					Size:      fi.Size(),
-					OnlyRead:  m.RW == false,
+					OnlyRead:  !m.RW,
 					LastCheck: time.Now().UnixMilli(),
 				})
 				f := log.Fields{"path": m.Source, "size": fi.Size(), "rw": m.RW}
@@ -100,7 +100,7 @@ func dirSizeCalculator(ctx context.Context, d *docker.Client, volumes []types.Ho
 							// prevent repeated getting a size
 							seen = append(seen, m.Source)
 							// get size of (bind) mounted directory
-							bindMountedDirectory(&m, volumes)
+							bindMountedDirectory(m, volumes)
 							// let the processor cool down
 							if interruptionPoint(ctx, time.Second) {
 								return
