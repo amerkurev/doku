@@ -50,7 +50,7 @@ func CreateRouter(s *Server) *chi.Mux {
 		r.Use(handler.BasicAuthHandler(s.BasicAuthAllowed))
 	}
 
-	r.Route("/api", func(r chi.Router) {
+	r.Group(func(r chi.Router) {
 		r.Use(handler.ContentTypeJSON)
 		r.Get("/version", version)
 
