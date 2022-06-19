@@ -39,9 +39,9 @@ func (s *memoryStore) NotifyAll() {
 func (s *memoryStore) loadAndDeleteCancelers() []context.CancelFunc {
 	s.mx.Lock()
 	defer s.mx.Unlock()
-	r := s.cancelers
+	res := s.cancelers
 	s.cancelers = nil
-	return r
+	return res
 }
 
 // NewMemStore creates a memory store that implements the Store interface.

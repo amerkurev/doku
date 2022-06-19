@@ -2,55 +2,21 @@ package poller
 
 import (
 	"context"
+	"encoding/json"
 	"os"
+	"path"
 	"strings"
 	"time"
 
 	"github.com/amerkurev/doku/app/docker"
+	"github.com/amerkurev/doku/app/store"
 	"github.com/amerkurev/doku/app/types"
 	"github.com/amerkurev/doku/app/util"
 	dockerTypes "github.com/docker/docker/api/types"
 	log "github.com/sirupsen/logrus"
 )
 
-func pathInfo(m dockerTypes.MountPoint, volumes []types.HostVolume) error {
-	var err error
-	for _, vol := range volumes {
-		var p string
-		if vol.Path == "/" {
-			p = strings.TrimPrefix(m.Source, "/host_mnt")
-		} else {
-			p = strings.Replace(m.Source, "/host_mnt", vol.Path, 1)
-		}
-
-		fi, statErr := os.Stat(p)
-		if statErr != nil {
-			err = statErr
-			continue
-		}
-
-		r := &types.HostPathInfo{
-			Path:      m.Source,
-			Size:      fi.Size(),
-			ReadOnly:  !m.RW,
-			LastCheck: time.Now().UnixMilli(),
-		}
-		if fi.IsDir() {
-			size, files, e := util.DirSize(p)
-			if e != nil {
-				return e
-			}
-			r.Size = size
-			r.IsDir = true
-			r.Files = files
-			r.LastCheck = time.Now().UnixMilli()
-		}
-		f := log.Fields{"path": r.Path, "size": r.Size, "ro": r.ReadOnly}
-		log.WithFields(f).Debug("bind mounts")
-		return nil
-	}
-	return err // return last os.Stat error
-}
+var mounts = make(map[string]*types.HostPathInfo)
 
 func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	go func() {
@@ -62,7 +28,7 @@ func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 
 				for _, cont := range containers {
 					if cont.Config != nil && contains("DOKU_IN_DOCKER=1", cont.Config.Env) {
-						continue // skip myself
+						continue // skip myself (doku)
 					}
 
 					for _, m := range cont.Mounts {
@@ -70,10 +36,18 @@ func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 							// prevent repeated getting a size
 							seen = append(seen, m.Source)
 
-							// get size of (bind) mounted directory
-							if err := pathInfo(m, volumes); err != nil {
-								f := log.Fields{"err": err, "mount": m}
-								log.WithFields(f).Error("failed to get the mounted directory size")
+							// get size of mounted directory (bind type)
+							pi, err := pathInfo(m, volumes)
+							if err != nil {
+								log.WithField("err", err).Error("failed to get the mounted directory size")
+							} else {
+								mounts[m.Source] = pi
+								b, err := json.Marshal(mounts)
+								if err != nil {
+									log.WithField("err", err).Error("failed to encode as JSON")
+								} else {
+									store.Set("dockerMountsBind", b) // for early access by API
+								}
 							}
 
 							// let the processor cool down
@@ -91,6 +65,43 @@ func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 			}
 		}
 	}()
+}
+
+func pathInfo(m dockerTypes.MountPoint, volumes []types.HostVolume) (*types.HostPathInfo, error) {
+	var err error
+	for _, vol := range volumes {
+		p := strings.TrimPrefix(m.Source, "/host_mnt")
+		if !strings.HasPrefix(p, vol.Path) {
+			p = path.Join(vol.Path, p)
+		}
+
+		fi, statErr := os.Stat(p)
+		if statErr != nil {
+			err = statErr
+			continue
+		}
+
+		res := &types.HostPathInfo{
+			Path:      m.Source,
+			Size:      fi.Size(),
+			ReadOnly:  !m.RW,
+			LastCheck: time.Now().UnixMilli(),
+		}
+		if fi.IsDir() {
+			size, files, e := util.DirSize(p)
+			if e != nil {
+				return nil, e
+			}
+			res.Size = size
+			res.IsDir = true
+			res.Files = files
+			res.LastCheck = time.Now().UnixMilli()
+		}
+		f := log.Fields{"path": res.Path, "size": res.Size, "ro": res.ReadOnly}
+		log.WithFields(f).Debug("bind mounts")
+		return res, nil
+	}
+	return nil, err // return last os.Stat error
 }
 
 func interruptionPoint(ctx context.Context, d time.Duration) bool {

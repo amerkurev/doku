@@ -26,7 +26,7 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	messages, errs := d.Events(ctx)
 	numMessages := 0 // count of Docker daemon events.
 
-	// calculate the size of directories that mounted (bind type) into containers
+	// calculate the size of directories that mounted into containers (bind type)
 	mountsBindSize(ctx, d, volumes)
 
 	go func() {
@@ -158,16 +158,16 @@ func logFileSize(ci *dockerTypes.ContainerJSON, volumes []types.HostVolume) (*ty
 			continue
 		}
 
-		r := &types.LogFileInfo{
+		res := &types.LogFileInfo{
 			ContainerID:   ci.ID,
 			ContainerName: ci.Name,
 			Path:          ci.LogPath,
 			Size:          fi.Size(),
 			LastCheck:     time.Now().UnixMilli(),
 		}
-		f := log.Fields{"path": r.Path, "size": r.Size, "id": r.ContainerName}
+		f := log.Fields{"path": res.Path, "size": res.Size, "id": res.ContainerName}
 		log.WithFields(f).Debug("container log file")
-		return r, nil
+		return res, nil
 	}
 	return nil, err // return last os.Stat error
 }

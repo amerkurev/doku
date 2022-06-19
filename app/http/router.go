@@ -2,13 +2,13 @@ package http
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/amerkurev/doku/app/http/handler"
 	"github.com/amerkurev/doku/app/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 var emptyObject = []byte("{}")
@@ -37,6 +37,14 @@ func dockerDiskUsage(w http.ResponseWriter, _ *http.Request) {
 
 func dockerLogInfo(w http.ResponseWriter, _ *http.Request) {
 	v, ok := store.Get("dockerLogInfo")
+	if !ok {
+		v = emptyObject
+	}
+	w.Write(v.([]byte)) // nolint:gosec
+}
+
+func dockerMountsBind(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("dockerMountsBind")
 	if !ok {
 		v = emptyObject
 	}
@@ -72,6 +80,7 @@ func CreateRouter(s *Server) *chi.Mux {
 			r.Get("/info", dockerInfo)
 			r.Get("/disk-usage", dockerDiskUsage)
 			r.Get("/log-info", dockerLogInfo)
+			r.Get("/mounts-bind", dockerMountsBind)
 		})
 	})
 	return r
