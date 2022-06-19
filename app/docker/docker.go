@@ -40,6 +40,25 @@ func (c *Client) DiskUsage(ctx context.Context) (types.DiskUsage, error) {
 	return c.Client.DiskUsage(ctx)
 }
 
+// ContainerJSONList returns the list of the container information.
+func (c *Client) ContainerJSONList(ctx context.Context) ([]*types.ContainerJSON, error) {
+	containers, err := c.Client.ContainerList(ctx, types.ContainerListOptions{All: true})
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*types.ContainerJSON, 0, len(containers))
+
+	for _, cont := range containers {
+		ci, err := c.Client.ContainerInspect(ctx, cont.ID)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, &ci)
+	}
+	return res, nil
+}
+
 // NewClient creates a new Docker client.
 func NewClient(host, certPath, version string, verify bool) (*Client, error) {
 
