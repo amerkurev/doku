@@ -76,7 +76,7 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 }
 
 func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
-	defer util.PrintExecTime("yet another poll execution is done")()
+	defer util.PrintExecTime("poll execution progress")()
 	defer store.NotifyAll() // wake up those who are waiting.
 
 	if err := dockerInfo(ctx, d); err != nil {
@@ -158,16 +158,13 @@ func logFileSize(ci *dockerTypes.ContainerJSON, volumes []types.HostVolume) (*ty
 			continue
 		}
 
-		res := &types.LogFileInfo{
+		return &types.LogFileInfo{
 			ContainerID:   ci.ID,
 			ContainerName: ci.Name,
 			Path:          ci.LogPath,
 			Size:          fi.Size(),
 			LastCheck:     time.Now().UnixMilli(),
-		}
-		f := log.Fields{"path": res.Path, "size": res.Size, "id": res.ContainerName}
-		log.WithFields(f).Debug("container log file")
-		return res, nil
+		}, nil
 	}
 	return nil, err // return last os.Stat error
 }

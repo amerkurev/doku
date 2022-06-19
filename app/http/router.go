@@ -51,6 +51,14 @@ func dockerMountsBind(w http.ResponseWriter, _ *http.Request) {
 	w.Write(v.([]byte)) // nolint:gosec
 }
 
+func sizeCalcProgress(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("sizeCalcProgress")
+	if !ok {
+		v = emptyObject
+	}
+	w.Write(v.([]byte)) // nolint:gosec
+}
+
 // CreateRouter creates an HTTP route multiplexer.
 func CreateRouter(s *Server) *chi.Mux {
 	r := chi.NewRouter()
@@ -69,6 +77,7 @@ func CreateRouter(s *Server) *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(handler.ContentTypeJSON)
 		r.Get("/version", version)
+		r.Get("/size-calc-progress", sizeCalcProgress)
 
 		// long polling routes
 		r.Group(func(r chi.Router) {

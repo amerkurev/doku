@@ -18,9 +18,17 @@ import (
 
 var mounts = make(map[string]*types.HostPathInfo)
 
+type progress struct {
+	Start    time.Time `json:"start"`
+	Duration int64     `json:"duration"`
+	Done     bool      `json:"done"`
+}
+
 func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	go func() {
 		for {
+			op := progress{Start: time.Now()}
+
 			if containers, err := d.ContainerJSONList(ctx); err != nil {
 				log.WithField("err", err).Error("failed to get the list of containers")
 			} else {
@@ -39,7 +47,7 @@ func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 							// get size of mounted directory (bind type)
 							pi, err := pathInfo(m, volumes)
 							if err != nil {
-								log.WithField("err", err).Error("failed to get the mounted directory size")
+								log.WithField("err", err).Error("failed to get mounted file or directory")
 							} else {
 								mounts[m.Source] = pi
 								b, err := json.Marshal(mounts)
@@ -58,6 +66,15 @@ func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 					}
 				}
 			}
+
+			op.Duration = time.Since(op.Start).Milliseconds()
+			op.Done = true
+			b, err := json.Marshal(op)
+			if err != nil {
+				log.WithField("err", err).Error("failed to encode as JSON")
+			}
+			store.Set("sizeCalcProgress", b)
+			log.WithField("took", op.Duration).Debug("size calc progress")
 
 			// return from function or pause the current goroutine for at least 5 minutes
 			if interruptionPoint(ctx, 5*time.Minute) {
@@ -97,8 +114,6 @@ func pathInfo(m dockerTypes.MountPoint, volumes []types.HostVolume) (*types.Host
 			res.Files = files
 			res.LastCheck = time.Now().UnixMilli()
 		}
-		f := log.Fields{"path": res.Path, "size": res.Size, "ro": res.ReadOnly}
-		log.WithFields(f).Debug("bind mounts")
 		return res, nil
 	}
 	return nil, err // return last os.Stat error
