@@ -88,9 +88,9 @@ func run(volumes []types.HostVolume) error {
 	log.Info("starting docker poller")
 	poller.Run(ctx, d, volumes)
 
-	basicAuthAllowed, baErr := makeBasicAuth(opts.AuthBasicHtpasswd)
-	if baErr != nil {
-		return fmt.Errorf("failed to load basic auth: %w", baErr)
+	basicAuthAllowed, err := makeBasicAuth(opts.AuthBasicHtpasswd)
+	if err != nil {
+		return fmt.Errorf("failed to load basic auth: %w", err)
 	}
 
 	addr := listenAddress(opts.Listen)

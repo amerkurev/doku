@@ -83,12 +83,12 @@ func poll(ctx context.Context, d *docker.Client) {
 func dockerInfo(ctx context.Context, d *docker.Client) error {
 	r, err := d.Info(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to execute request")
+		return fmt.Errorf("failed to execute request: %w", err)
 	}
 
 	b, err := json.Marshal(r)
 	if err != nil {
-		return fmt.Errorf("failed to encode as JSON")
+		return fmt.Errorf("failed to encode as JSON: %w", err)
 	}
 
 	store.Set("dockerInfo", b)
@@ -98,12 +98,12 @@ func dockerInfo(ctx context.Context, d *docker.Client) error {
 func dockerDiskUsage(ctx context.Context, d *docker.Client) error {
 	r, err := d.DiskUsage(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to execute request")
+		return fmt.Errorf("failed to execute request: %w", err)
 	}
 
 	b, err := json.Marshal(r)
 	if err != nil {
-		return fmt.Errorf("failed to encode as JSON")
+		return fmt.Errorf("failed to encode as JSON: %w", err)
 	}
 
 	store.Set("dockerDiskUsage", b)
