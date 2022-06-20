@@ -36,7 +36,7 @@ func Initialize() error {
 // Set sets the value for a key.
 func Set(key string, value any) {
 	if store == nil {
-		log.Fatal(errStoreUninitialized)
+		log.Panic(errStoreUninitialized)
 	}
 	store.Set(key, value)
 }
@@ -45,7 +45,7 @@ func Set(key string, value any) {
 // The ok result indicates whether value was found in the store.
 func Get(key string) (value any, ok bool) {
 	if store == nil {
-		log.Fatal(errStoreUninitialized)
+		log.Panic(errStoreUninitialized)
 	}
 	return store.Get(key)
 }
@@ -53,7 +53,7 @@ func Get(key string) (value any, ok bool) {
 // Wait returns a closed channel only after notification or when the timeout elapses.
 func Wait(ctx context.Context, d time.Duration) <-chan struct{} {
 	if store == nil {
-		log.Fatal(errStoreUninitialized)
+		log.Panic(errStoreUninitialized)
 	}
 	return store.Wait(ctx, d)
 }
@@ -61,7 +61,7 @@ func Wait(ctx context.Context, d time.Duration) <-chan struct{} {
 // NotifyAll wakes up those who are waiting.
 func NotifyAll() {
 	if store == nil {
-		log.Fatal(errStoreUninitialized)
+		log.Panic(errStoreUninitialized)
 	}
 	store.NotifyAll()
 }
