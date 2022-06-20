@@ -10,13 +10,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jessevdk/go-flags"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/http"
 	"github.com/amerkurev/doku/app/poller"
 	"github.com/amerkurev/doku/app/store"
 	"github.com/amerkurev/doku/app/types"
-	"github.com/jessevdk/go-flags"
-	log "github.com/sirupsen/logrus"
 )
 
 var opts struct {

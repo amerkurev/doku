@@ -8,12 +8,13 @@ import (
 	"path"
 	"time"
 
+	dockerTypes "github.com/docker/docker/api/types"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/store"
 	"github.com/amerkurev/doku/app/types"
 	"github.com/amerkurev/doku/app/util"
-	dockerTypes "github.com/docker/docker/api/types"
-	log "github.com/sirupsen/logrus"
 )
 
 const (

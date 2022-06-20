@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/amerkurev/doku/app/store"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/amerkurev/doku/app/store"
 )
 
 // Server is a server for http.
@@ -40,7 +41,7 @@ func (s *Server) Run(ctx context.Context) error {
 		IdleTimeout:  s.Timeouts.Idle,
 	}
 
-	done := make(chan bool, 1)
+	done := make(chan struct{}, 1)
 
 	go func() {
 		<-ctx.Done()
@@ -49,7 +50,7 @@ func (s *Server) Run(ctx context.Context) error {
 		ctx, cancel := context.WithTimeout(context.Background(), s.Timeouts.Shutdown)
 		defer func() {
 			cancel()
-			done <- true
+			done <- struct{}{}
 		}()
 
 		go func() {

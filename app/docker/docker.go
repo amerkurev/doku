@@ -60,7 +60,6 @@ func (c *Client) ContainerJSONList(ctx context.Context) ([]*types.ContainerJSON,
 
 // NewClient creates a new Docker client.
 func NewClient(host, certPath, version string, verify bool) (*Client, error) {
-
 	cli, err := docker.NewClientWithOpts(func(c *docker.Client) error {
 		return setOpts(c, host, certPath, version, verify)
 	})
@@ -68,7 +67,6 @@ func NewClient(host, certPath, version string, verify bool) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &Client{cli}, nil
 }
 

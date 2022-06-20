@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/amerkurev/doku/app/http/handler"
-	"github.com/amerkurev/doku/app/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/amerkurev/doku/app/http/handler"
+	"github.com/amerkurev/doku/app/store"
 )
 
 var emptyObject = []byte("{}")
@@ -71,7 +72,7 @@ func CreateRouter(s *Server) *chi.Mux {
 
 	if s.BasicAuthEnabled {
 		log.Debugln("basic auth is enabled")
-		r.Use(handler.BasicAuthHandler(s.BasicAuthAllowed))
+		r.Use(handler.BasicAuthentication(s.BasicAuthAllowed))
 	}
 
 	r.Group(func(r chi.Router) {

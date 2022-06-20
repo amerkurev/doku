@@ -17,7 +17,7 @@ build: info
 	- cd app && GOOS=$(GOOS) GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.revision=$(REV) -s -w" -o ../dist/$(BIN)
 
 test:
-	- cd app && go test -race -mod=vendor -timeout=60s -count 1 ./...
+	- go test -v -timeout=60s -race -mod=vendor -covermode=atomic -coverprofile=coverage.txt ./...
 
 run: build
 	- @./dist/$(BIN)

@@ -11,6 +11,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type payload struct {
@@ -50,7 +51,9 @@ func TestStore_UninitializedNotifyAll(t *testing.T) {
 
 func TestStore(t *testing.T) {
 	err := Initialize()
-	assert.Nil(t, err)
+	require.NoError(t, err)
+	err = Initialize()
+	require.NoError(t, err)
 
 	key := "some-key"
 	wrongKey := "non-existent-key"
