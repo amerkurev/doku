@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"io/ioutil"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -24,21 +25,25 @@ func recoverUninitializedStore(t *testing.T) {
 }
 
 func TestStore_UninitializedGet(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	Get("key")
 }
 
 func TestStore_UninitializedSet(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	Set("key", struct{}{})
 }
 
 func TestStore_UninitializedWait(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	Wait(context.Background(), time.Minute)
 }
 
 func TestStore_UninitializedNotifyAll(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	NotifyAll()
 }
