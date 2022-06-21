@@ -24,24 +24,9 @@ type Client struct {
 	*docker.Client
 }
 
-// Events returns a stream of events in the Docker daemon.
-func (c *Client) Events(ctx context.Context) (<-chan events.Message, <-chan error) {
-	return c.Client.Events(ctx, types.EventsOptions{})
-}
-
-// Info returns information about the Docker server.
-func (c *Client) Info(ctx context.Context) (types.Info, error) {
-	return c.Client.Info(ctx)
-}
-
-// DiskUsage requests the current data usage from the Docker daemon.
-func (c *Client) DiskUsage(ctx context.Context) (types.DiskUsage, error) {
-	return c.Client.DiskUsage(ctx)
-}
-
 // ContainerJSONList returns the list of the container information.
 func (c *Client) ContainerJSONList(ctx context.Context) ([]*types.ContainerJSON, error) {
-	containers, err := c.Client.ContainerList(ctx, types.ContainerListOptions{All: true})
+	containers, err := c.ContainerList(ctx, types.ContainerListOptions{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +34,7 @@ func (c *Client) ContainerJSONList(ctx context.Context) ([]*types.ContainerJSON,
 	res := make([]*types.ContainerJSON, 0, len(containers))
 
 	for _, cont := range containers {
-		ci, err := c.Client.ContainerInspect(ctx, cont.ID)
+		ci, err := c.ContainerInspect(ctx, cont.ID)
 		if err != nil {
 			return nil, err
 		}

@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -18,7 +17,7 @@ import (
 	"github.com/amerkurev/doku/app/store"
 )
 
-func TestServer_Run(t *testing.T) {
+func Test_Server_Run(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	err := store.Initialize()
 	require.NoError(t, err)
@@ -62,7 +61,7 @@ func TestServer_Run(t *testing.T) {
 	}{
 		{"/version"},
 		{"/size-calc-progress"},
-		{"/docker/info"},
+		{"/docker/version"},
 		{"/docker/disk-usage"},
 		{"/docker/log-info"},
 		{"/docker/mounts-bind"},
@@ -90,7 +89,7 @@ func TestServer_Run(t *testing.T) {
 	<-done
 }
 
-func TestServer_RunFailed(t *testing.T) {
+func Test_Server_RunFailed(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	err := store.Initialize()
 	require.NoError(t, err)
@@ -117,7 +116,7 @@ func TestServer_RunFailed(t *testing.T) {
 	go func() {
 		err := httpServer.Run(ctx)
 		assert.Error(t, err)
-		assert.True(t, strings.Contains(err.Error(), "http server failed: listen tcp: address 1000000: invalid port"))
+		assert.Contains(t, err.Error(), "http server failed: listen tcp: address 1000000: invalid port")
 		done <- struct{}{}
 	}()
 

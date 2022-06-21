@@ -20,8 +20,8 @@ func version(w http.ResponseWriter, _ *http.Request) {
 	w.Write(b) // nolint:gosec
 }
 
-func dockerInfo(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerInfo")
+func dockerVersion(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("dockerVersion")
 	if !ok {
 		v = emptyObject
 	}
@@ -87,7 +87,7 @@ func CreateRouter(s *Server) *chi.Mux {
 		})
 
 		r.Route("/docker", func(r chi.Router) {
-			r.Get("/info", dockerInfo)
+			r.Get("/version", dockerVersion)
 			r.Get("/disk-usage", dockerDiskUsage)
 			r.Get("/log-info", dockerLogInfo)
 			r.Get("/mounts-bind", dockerMountsBind)

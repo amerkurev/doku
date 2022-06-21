@@ -22,34 +22,34 @@ func recoverUninitializedStore(t *testing.T) {
 	r := recover()
 	assert.IsType(t, r, new(log.Entry))
 	entry := r.(*log.Entry)
-	assert.Equal(t, entry.Message, errStoreUninitialized)
+	assert.Equal(t, errStoreUninitialized, entry.Message)
 }
 
-func TestStore_UninitializedGet(t *testing.T) {
+func Test_Store_UninitializedGet(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	Get("key")
 }
 
-func TestStore_UninitializedSet(t *testing.T) {
+func Test_Store_UninitializedSet(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	Set("key", struct{}{})
 }
 
-func TestStore_UninitializedWait(t *testing.T) {
+func Test_Store_UninitializedWait(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	Wait(context.Background(), time.Minute)
 }
 
-func TestStore_UninitializedNotifyAll(t *testing.T) {
+func Test_Store_UninitializedNotifyAll(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	defer recoverUninitializedStore(t)
 	NotifyAll()
 }
 
-func TestStore(t *testing.T) {
+func Test_Store(t *testing.T) {
 	err := Initialize()
 	require.NoError(t, err)
 	err = Initialize()
@@ -58,7 +58,7 @@ func TestStore(t *testing.T) {
 	key := "some-key"
 	wrongKey := "non-existent-key"
 
-	d := payload{"Bart"}
+	d := payload{"username"}
 	Set(key, d)
 
 	v, ok := Get(wrongKey)
@@ -71,7 +71,7 @@ func TestStore(t *testing.T) {
 
 	data, ok := v.(payload)
 	assert.True(t, ok)
-	assert.Equal(t, d, data)
+	assert.Equal(t, data, d)
 
 	go func() {
 		time.Sleep(time.Millisecond * 500)
@@ -81,7 +81,7 @@ func TestStore(t *testing.T) {
 	ctx := context.Background()
 	start := time.Now()
 	ch := Wait(ctx, time.Minute)
-	assert.Equal(t, <-ch, struct{}{})
+	assert.Equal(t, struct{}{}, <-ch)
 	assert.Less(t, time.Since(start), time.Second)
 
 	var counter int64
@@ -103,5 +103,5 @@ func TestStore(t *testing.T) {
 	}
 
 	wg.Wait()
-	assert.Equal(t, counter, int64(24750))
+	assert.Equal(t, int64(24750), counter)
 }

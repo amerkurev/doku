@@ -17,14 +17,11 @@ import (
 	"github.com/amerkurev/doku/app/util"
 )
 
-const (
-	pollingShortInterval = time.Second
-	pollingLongInterval  = time.Minute
-)
+const pollingInterval = time.Minute
 
 // Run starts a goroutine to poll the Docker daemon.
 func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
-	messages, errs := d.Events(ctx)
+	messages, errs := d.Events(ctx, dockerTypes.EventsOptions{})
 	numMessages := 0 // count of Docker daemon events.
 
 	// calculate the size of directories that mounted into containers (bind type)
@@ -48,8 +45,8 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 
 					// reconnect to the Docker daemon
 					select {
-					case <-time.After(pollingLongInterval):
-						messages, errs = d.Events(ctx)
+					case <-time.After(pollingInterval):
+						messages, errs = d.Events(ctx, dockerTypes.EventsOptions{})
 					case <-ctx.Done():
 						log.Info("gracefully poller shutdown")
 						return
@@ -58,7 +55,7 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 			case <-ctx.Done():
 				log.Info("gracefully poller shutdown")
 				return
-			case <-time.After(pollingShortInterval):
+			case <-time.After(time.Second):
 				// execute poll only if was happened Docker daemon events
 				if numMessages > 0 {
 					numMessages = 0
@@ -66,8 +63,8 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 					lastPoll = time.Now()
 				}
 
-				// forced poll every minute
-				if time.Since(lastPoll) > pollingLongInterval {
+				// forced poll in a minute after the last poll
+				if time.Since(lastPoll) > pollingInterval {
 					poll(ctx, d, volumes)
 					lastPoll = time.Now()
 				}
@@ -80,8 +77,8 @@ func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	defer util.PrintExecTime("poll execution progress")()
 	defer store.NotifyAll() // wake up those who are waiting.
 
-	if err := dockerInfo(ctx, d); err != nil {
-		log.WithField("err", err).Error("failed to get information about the docker server")
+	if err := dockerVersion(ctx, d); err != nil {
+		log.WithField("err", err).Error("failed to get information of the docker client and server host")
 	}
 
 	if err := dockerDiskUsage(ctx, d); err != nil {
@@ -91,10 +88,12 @@ func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	if err := dockerLogInfo(ctx, d, volumes); err != nil {
 		log.WithField("err", err).Error("failed to get information about the container log")
 	}
+
+	fmt.Println("tut")
 }
 
-func dockerInfo(ctx context.Context, d *docker.Client) error {
-	res, err := d.Info(ctx)
+func dockerVersion(ctx context.Context, d *docker.Client) error {
+	res, err := d.ServerVersion(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to execute request: %w", err)
 	}
@@ -104,7 +103,7 @@ func dockerInfo(ctx context.Context, d *docker.Client) error {
 		return fmt.Errorf("failed to encode as JSON: %w", err)
 	}
 
-	store.Set("dockerInfo", b)
+	store.Set("dockerVersion", b)
 	return nil
 }
 
