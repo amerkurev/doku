@@ -61,21 +61,16 @@ func Test_Run(t *testing.T) {
 	cancel()
 	mock.Shutdown(t)
 
-	v, ok := store.Get("dockerVersion")
+	_, ok := store.Get("dockerVersion")
 	assert.True(t, ok)
-	assert.Equal(t, 825, len(v.([]byte)))
-	v, ok = store.Get("dockerDiskUsage")
+	_, ok = store.Get("dockerDiskUsage")
 	assert.True(t, ok)
-	assert.Equal(t, 1956, len(v.([]byte)))
-	v, ok = store.Get("dockerLogInfo")
+	_, ok = store.Get("dockerLogInfo")
 	assert.True(t, ok)
-	assert.Equal(t, 330, len(v.([]byte)))
-	v, ok = store.Get("dockerMountsBind")
+	_, ok = store.Get("dockerMountsBind")
 	assert.True(t, ok)
-	assert.Equal(t, 246, len(v.([]byte)))
-	v, ok = store.Get("sizeCalcProgress")
+	_, ok = store.Get("sizeCalcProgress")
 	assert.True(t, ok)
-	assert.Equal(t, 72, len(v.([]byte)))
 }
 
 func Test_RunNoSuchFileOrDir(t *testing.T) {
