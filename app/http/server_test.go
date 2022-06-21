@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -22,18 +23,14 @@ func Test_Server_Run(t *testing.T) {
 	err := store.Initialize()
 	require.NoError(t, err)
 
-	port := rand.Intn(10000) + 40000
+	port := 1000 + rand.Intn(1000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
-
-	revision := "0.0.0"
-	store.Set("revision", revision)
 
 	allowed := []string{
 		"user:$2y$10$ViWb72wAg4nEKdHh.9p2yeEKLSN0EBkbZ0Mf0bqNHZmItsQt6K8he",
 	}
 
 	httpServer := &Server{
-		Version: revision,
 		Address: addr,
 		Timeouts: Timeouts{
 			Read:        5 * time.Second,
@@ -98,7 +95,6 @@ func Test_Server_RunFailed(t *testing.T) {
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	httpServer := &Server{
-		Version: "0.0.0",
 		Address: addr,
 		Timeouts: Timeouts{
 			Read:        5 * time.Second,
@@ -116,7 +112,7 @@ func Test_Server_RunFailed(t *testing.T) {
 	go func() {
 		err := httpServer.Run(ctx)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "http server failed: listen tcp: address 1000000: invalid port")
+		assert.EqualError(t, errors.New("http server failed: listen tcp: address 1000000: invalid port"), err.Error())
 		done <- struct{}{}
 	}()
 

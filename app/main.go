@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -79,7 +80,12 @@ func run(volumes []types.HostVolume) error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize the store: %w", err)
 	}
-	store.Set("revision", revision)
+	// save revision in the store
+	b, err := json.Marshal(types.AppVersion{Version: revision})
+	store.Set("revision", b)
+	if err != nil {
+		return fmt.Errorf("failed to encode as JSON: %w", err)
+	}
 
 	d, err := docker.NewClient(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
 	if err != nil {
@@ -96,7 +102,6 @@ func run(volumes []types.HostVolume) error {
 
 	addr := listenAddress(opts.Listen)
 	httpServer := &http.Server{
-		Version: revision,
 		Address: addr,
 		Timeouts: http.Timeouts{
 			Read:        5 * time.Second,

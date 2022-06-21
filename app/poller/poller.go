@@ -88,8 +88,6 @@ func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	if err := dockerLogInfo(ctx, d, volumes); err != nil {
 		log.WithField("err", err).Error("failed to get information about the container log")
 	}
-
-	fmt.Println("tut")
 }
 
 func dockerVersion(ctx context.Context, d *docker.Client) error {

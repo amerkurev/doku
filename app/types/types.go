@@ -1,5 +1,10 @@
 package types
 
+// AppVersion contains version of the Doku app.
+type AppVersion struct {
+	Version string `json:"version"`
+}
+
 // HostVolume contains input information for a volume and the result for utilization percentage.
 type HostVolume struct {
 	Name string `json:"name"`

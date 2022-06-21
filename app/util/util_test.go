@@ -2,9 +2,8 @@ package util
 
 import (
 	"bytes"
-	"errors"
+	"io/fs"
 	"os"
-	"path"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
@@ -13,19 +12,23 @@ import (
 )
 
 func Test_DirSize(t *testing.T) {
-	p := t.TempDir()
-
-	d := []byte("some content")
-	err := os.WriteFile(path.Join(p, "greeting.txt"), d, 0644)
+	fh, err := os.CreateTemp(t.TempDir(), "doku_dir_size_*")
 	require.NoError(t, err)
+	defer fh.Close()
 
-	size, files, err := DirSize(p)
+	s := "some content"
+	n, err := fh.WriteString(s)
+	require.NoError(t, err)
+	require.Equal(t, len(s), n)
+
+	size, files, err := DirSize(fh.Name())
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), files)
-	assert.Equal(t, int64(len(d)), size)
+	assert.Equal(t, int64(len(s)), size)
 
 	size, files, err = DirSize("/the-wrong-path")
-	assert.True(t, errors.Is(err, os.ErrNotExist))
+	var perr *fs.PathError
+	assert.ErrorAs(t, err, &perr)
 	assert.Equal(t, int64(0), files)
 	assert.Equal(t, int64(0), size)
 }

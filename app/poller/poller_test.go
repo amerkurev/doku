@@ -2,12 +2,17 @@ package poller
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"os"
-	"path"
 	"testing"
 	"time"
 
+	dockerTypes "github.com/docker/docker/api/types"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/amerkurev/doku/app/docker"
@@ -17,35 +22,32 @@ import (
 
 func Test_Run(t *testing.T) {
 	var err error
-	tmp := t.TempDir()
+	s := "some content"
 
-	// prepare log dir
-	logDir := path.Join(tmp, "logs")
-	err = os.Mkdir(logDir, 0777)
+	// prepare log file
+	fh, err := os.CreateTemp(t.TempDir(), "doku_log_*")
 	require.NoError(t, err)
-	logPath := path.Join(logDir, "container-log.json")
-	err = os.WriteFile(logPath, []byte("some content"), 0644)
+	defer fh.Close()
+	n, err := fh.WriteString(s)
 	require.NoError(t, err)
+	require.Equal(t, len(s), n)
+	logFile := fh.Name()
 
 	// prepare mount dir
-	mountDir := path.Join(tmp, "mount")
+	mountDir := t.TempDir()
+	fh, err = os.CreateTemp(mountDir, "doku_mount_*")
 	require.NoError(t, err)
-	err = os.Mkdir(mountDir, 0777)
+	defer fh.Close()
+	n, err = fh.WriteString(s)
 	require.NoError(t, err)
-	require.NoError(t, err)
-	err = os.WriteFile(path.Join(mountDir, "payload.txt"), []byte("some content"), 0644)
-	require.NoError(t, err)
+	require.Equal(t, len(s), n)
 
 	// options
 	version := "v1.22"
-	addr := "127.0.0.1:3000"
-	mock := docker.NewMockServer(addr, version, logPath, mountDir)
+	port := 3000 + rand.Intn(1000)
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	mock := docker.NewMockServer(addr, version, logFile, mountDir)
 	mock.Start(t)
-
-	volumes := []types.HostVolume{
-		{Name: "root", Path: "/"},
-	}
-
 	time.Sleep(10 * time.Millisecond)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -55,39 +57,53 @@ func Test_Run(t *testing.T) {
 	err = store.Initialize()
 	require.NoError(t, err)
 
+	volumes := []types.HostVolume{
+		{Name: "root", Path: "/"},
+	}
+
+	log.SetOutput(ioutil.Discard)
 	Run(ctx, d, volumes)
 	time.Sleep(3 * time.Second)
 
 	cancel()
 	mock.Shutdown(t)
 
-	_, ok := store.Get("dockerVersion")
+	v, ok := store.Get("dockerVersion")
 	assert.True(t, ok)
-	_, ok = store.Get("dockerDiskUsage")
+	ver := types.AppVersion{}
+	err = json.Unmarshal(v.([]byte), &ver)
+	require.NoError(t, err)
+
+	v, ok = store.Get("dockerDiskUsage")
 	assert.True(t, ok)
-	_, ok = store.Get("dockerLogInfo")
+	du := dockerTypes.DiskUsage{}
+	err = json.Unmarshal(v.([]byte), &du)
+	require.NoError(t, err)
+
+	v, ok = store.Get("dockerLogInfo")
 	assert.True(t, ok)
-	_, ok = store.Get("dockerMountsBind")
+	logs := make(map[string]*types.LogFileInfo)
+	err = json.Unmarshal(v.([]byte), &logs)
+	require.NoError(t, err)
+
+	v, ok = store.Get("dockerMountsBind")
 	assert.True(t, ok)
-	_, ok = store.Get("sizeCalcProgress")
+	mnt := make(map[string]*types.HostPathInfo)
+	err = json.Unmarshal(v.([]byte), &mnt)
+	require.NoError(t, err)
+
+	v, ok = store.Get("sizeCalcProgress")
 	assert.True(t, ok)
+	err = json.Unmarshal(v.([]byte), &progress{})
+	require.NoError(t, err)
 }
 
 func Test_RunNoSuchFileOrDir(t *testing.T) {
-	var err error
-	tmp := t.TempDir()
-
-	// prepare log dir
-	logDir := path.Join(tmp, "logs")
-	logPath := path.Join(logDir, "container-log.json")
-
-	// prepare mount dir
-	mountDir := path.Join(tmp, "mount")
-
 	// options
 	version := "v1.22"
-	addr := "127.0.0.1:3000"
-	mock := docker.NewMockServer(addr, version, logPath, mountDir)
+	port := 4000 + rand.Intn(1000)
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	mock := docker.NewMockServer(addr, version, "incorrect-path", "incorrect-path")
 	mock.Start(t)
 
 	volumes := []types.HostVolume{
@@ -103,9 +119,20 @@ func Test_RunNoSuchFileOrDir(t *testing.T) {
 	err = store.Initialize()
 	require.NoError(t, err)
 
+	log.SetOutput(ioutil.Discard)
 	Run(ctx, d, volumes)
 	time.Sleep(3 * time.Second)
 
 	cancel()
 	mock.Shutdown(t)
+}
+
+func Test_contains(t *testing.T) {
+	numbers := []int{1, 2, 3, 4, 5}
+	assert.True(t, contains[int](5, numbers))
+	assert.False(t, contains[int](11, numbers))
+
+	str := []string{"a", "b", "c"}
+	assert.True(t, contains[string]("a", str))
+	assert.False(t, contains[string]("d", str))
 }

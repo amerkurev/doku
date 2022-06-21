@@ -13,7 +13,6 @@ import (
 
 // Server is a server for http.
 type Server struct {
-	Version          string
 	Address          string
 	Timeouts         Timeouts
 	BasicAuthEnabled bool

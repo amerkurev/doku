@@ -2,14 +2,14 @@ package docker
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // ServerMock is a mock implementation of DockerServer.
@@ -67,7 +67,7 @@ func NewMockServer(addr, version, logPath, mountSource string) ServerMock {
 func (s *serverMock) Start(t *testing.T) {
 	go func() {
 		err := s.server.ListenAndServe()
-		assert.True(t, errors.Is(err, http.ErrServerClosed))
+		assert.ErrorIs(t, http.ErrServerClosed, err)
 		s.done <- struct{}{}
 	}()
 }

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -15,9 +14,11 @@ import (
 var emptyObject = []byte("{}")
 
 func version(w http.ResponseWriter, _ *http.Request) {
-	v, _ := store.Get("revision")
-	b := []byte(fmt.Sprintf(`{"version": "%s"}`, v.(string)))
-	w.Write(b) // nolint:gosec
+	v, ok := store.Get("revision")
+	if !ok {
+		v = emptyObject
+	}
+	w.Write(v.([]byte)) // nolint:gosec
 }
 
 func dockerVersion(w http.ResponseWriter, _ *http.Request) {

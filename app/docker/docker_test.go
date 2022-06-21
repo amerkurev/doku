@@ -3,7 +3,9 @@ package docker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -15,9 +17,9 @@ import (
 
 func Test_Client(t *testing.T) {
 	version := "v1.22"
-	addr := "127.0.0.1:3001"
-	tmp := t.TempDir()
-	mock := NewMockServer(addr, version, tmp, tmp)
+	port := 2000 + rand.Intn(1000)
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	mock := NewMockServer(addr, version, "", "")
 	mock.Start(t)
 
 	time.Sleep(10 * time.Millisecond)
@@ -25,12 +27,12 @@ func Test_Client(t *testing.T) {
 	// bad host
 	_, err := NewClient(addr, "", version, false)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "unable to parse docker host")
+	require.EqualError(t, fmt.Errorf("unable to parse docker host `%s`", addr), err.Error())
 
 	// bad certPath
-	_, err = NewClient("http://"+addr, t.TempDir(), version, true)
+	_, err = NewClient("http://"+addr, "/certPath", version, true)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "could not read CA certificate")
+	assert.EqualError(t, errors.New("could not read CA certificate \"/certPath/ca.pem\": open /certPath/ca.pem: no such file or directory"), err.Error())
 
 	// OK
 	ctx := context.Background()
@@ -63,7 +65,7 @@ func Test_Client(t *testing.T) {
 
 	// get a stream of events in the docker daemon
 	eventCount, err := getEvents(ctx, d)
-	assert.True(t, errors.Is(err, io.EOF))
+	assert.ErrorIs(t, err, io.EOF)
 	assert.Equal(t, 8, eventCount)
 
 	mock.Shutdown(t)
