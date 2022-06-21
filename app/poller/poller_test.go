@@ -63,7 +63,7 @@ func Test_Run(t *testing.T) {
 
 	log.SetOutput(ioutil.Discard)
 	Run(ctx, d, volumes)
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	cancel()
 	mock.Shutdown(t)
@@ -98,18 +98,13 @@ func Test_Run(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func Test_RunNoSuchFileOrDir(t *testing.T) {
+func Test_Run_NoSuchFileOrDir(t *testing.T) {
 	// options
 	version := "v1.22"
 	port := 4000 + rand.Intn(1000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := docker.NewMockServer(addr, version, "incorrect-path", "incorrect-path")
 	mock.Start(t)
-
-	volumes := []types.HostVolume{
-		{Name: "root", Path: "/hostroot"},
-	}
-
 	time.Sleep(10 * time.Millisecond)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -119,9 +114,38 @@ func Test_RunNoSuchFileOrDir(t *testing.T) {
 	err = store.Initialize()
 	require.NoError(t, err)
 
+	volumes := []types.HostVolume{
+		{Name: "root", Path: "/hostroot"},
+	}
+
 	log.SetOutput(ioutil.Discard)
 	Run(ctx, d, volumes)
-	time.Sleep(3 * time.Second)
+	time.Sleep(time.Second)
+
+	cancel()
+	mock.Shutdown(t)
+}
+
+func Test_poll_Failed(t *testing.T) {
+	// options
+	port := 7000 + rand.Intn(1000)
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	mock := docker.NewMockServer(addr, "", "", "")
+	mock.Start(t)
+	time.Sleep(10 * time.Millisecond)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	d, err := docker.NewClient("http://"+addr, "", "", false)
+	require.NoError(t, err)
+
+	err = store.Initialize()
+	require.NoError(t, err)
+
+	volumes := []types.HostVolume{
+		{Name: "root", Path: "/hostroot"},
+	}
+
+	poll(ctx, d, volumes)
 
 	cancel()
 	mock.Shutdown(t)
