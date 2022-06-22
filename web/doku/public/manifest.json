@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Doku",
+  "name": "Doku is a Docker disk space usage dashboard",
   "icons": [
     {
       "src": "favicon.ico",

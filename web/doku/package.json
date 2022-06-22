@@ -1,26 +1,24 @@
 {
   "name": "doku",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^13.0.0",
-    "@testing-library/user-event": "^13.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.0"
-  },
   "scripts": {
-    "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "lint": "eslint --ext .jsx,.js src/",
+    "prettier": "prettier --write src/",
+    "start": "react-scripts start",
+    "test": "react-scripts test"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "CI=true yarn run test"
+    }
+  },
+  "lint-staged": {
+    "*.(js|jsx)": [
+      "yarn prettier",
+      "yarn lint"
     ]
   },
   "browserslist": {
@@ -34,5 +32,43 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "1.8.2",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^13.0.0",
+    "@testing-library/user-event": "^13.2.1",
+    "axios": "0.27.2",
+    "classnames": "2.3.1",
+    "json-bigint": "1.0.0",
+    "lodash": "4.17.21",
+    "node-sass": "7.0.1",
+    "prop-types": "15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "1.3.0",
+    "react-icons": "4.4.0",
+    "react-redux": "8.0.2",
+    "react-router-dom": "6.3.0",
+    "react-scripts": "5.0.1",
+    "redux": "4.2.0",
+    "spinkit": "2.0.1",
+    "use-query-params": "1.2.3",
+    "web-vitals": "^2.1.0"
+  },
+  "devDependencies": {
+    "eslint": "8.18.0",
+    "eslint-config-google": "0.14.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-react": "7.30.0",
+    "eslint-plugin-jsx-a11y": "6.5.1",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-react-redux": "4.0.0",
+    "eslint-plugin-testing-library": "5.5.1",
+    "husky": "8.0.1",
+    "lint-staged": "13.0.2",
+    "prettier": "2.7.1"
   }
 }
