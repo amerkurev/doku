@@ -41,7 +41,7 @@ func Test_Server_Run(t *testing.T) {
 		},
 		BasicAuthEnabled: true,
 		BasicAuthAllowed: allowed,
-		StaticFolder:     "../../frontend/static",
+		StaticFolder:     "../../web/doku/public", // for index.html
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -59,12 +59,13 @@ func Test_Server_Run(t *testing.T) {
 	}{
 		{"/"},
 		{"/favicon.ico"},
+		{"/manifest.json"},
 		{"/version"},
 		{"/size-calc-progress"},
 		{"/docker/version"},
 		{"/docker/disk-usage"},
-		{"/docker/log-info"},
-		{"/docker/mounts-bind"},
+		{"/docker/log-size"},
+		{"/docker/bind-mounts"},
 		// {"/docker/_/docker/disk-usage"},
 	}
 

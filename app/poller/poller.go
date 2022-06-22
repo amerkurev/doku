@@ -25,7 +25,7 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	numMessages := 0 // count of Docker daemon events.
 
 	// calculate the size of directories that mounted into containers (bind type)
-	mountsBindSize(ctx, d, volumes)
+	bindMountsSize(ctx, d, volumes)
 
 	go func() {
 		// run it immediately on start
@@ -85,7 +85,7 @@ func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 		log.WithField("err", err).Error("failed to request the current data usage from the docker daemon")
 	}
 
-	if err := dockerLogInfo(ctx, d, volumes); err != nil {
+	if err := dockerLogSize(ctx, d, volumes); err != nil {
 		log.WithField("err", err).Error("failed to get information about the container log")
 	}
 }
@@ -120,7 +120,7 @@ func dockerDiskUsage(ctx context.Context, d *docker.Client) error {
 	return nil
 }
 
-func dockerLogInfo(ctx context.Context, d *docker.Client, volumes []types.HostVolume) error {
+func dockerLogSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) error {
 	containers, err := d.ContainerJSONList(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to execute request: %w", err)
@@ -141,7 +141,7 @@ func dockerLogInfo(ctx context.Context, d *docker.Client, volumes []types.HostVo
 		return fmt.Errorf("failed to encode as JSON: %w", err)
 	}
 
-	store.Set("dockerLogInfo", b)
+	store.Set("dockerLogSize", b)
 	return nil
 }
 

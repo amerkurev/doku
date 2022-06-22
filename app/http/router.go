@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"path"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -37,16 +38,16 @@ func dockerDiskUsage(w http.ResponseWriter, _ *http.Request) {
 	w.Write(v.([]byte)) // nolint:gosec
 }
 
-func dockerLogInfo(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerLogInfo")
+func dockerLogSize(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("dockerLogSize")
 	if !ok {
 		v = emptyObject
 	}
 	w.Write(v.([]byte)) // nolint:gosec
 }
 
-func dockerMountsBind(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerMountsBind")
+func dockerBindMounts(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("dockerBindMounts")
 	if !ok {
 		v = emptyObject
 	}
@@ -72,7 +73,8 @@ func CreateRouter(s *Server) *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	// Misc
-	r.Get("/favicon.ico", handler.FavIcon(s.StaticFolder))
+	r.Get("/favicon.ico", handler.ServeFile(path.Join(s.StaticFolder, "favicon.ico")))
+	r.Get("/manifest.json", handler.ServeFile(path.Join(s.StaticFolder, "manifest.json")))
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
@@ -96,8 +98,8 @@ func CreateRouter(s *Server) *chi.Mux {
 			r.Route("/docker", func(r chi.Router) {
 				r.Get("/version", dockerVersion)
 				r.Get("/disk-usage", dockerDiskUsage)
-				r.Get("/log-info", dockerLogInfo)
-				r.Get("/mounts-bind", dockerMountsBind)
+				r.Get("/log-size", dockerLogSize)
+				r.Get("/bind-mounts", dockerBindMounts)
 			})
 		})
 
@@ -106,7 +108,8 @@ func CreateRouter(s *Server) *chi.Mux {
 			r.Use(middleware.Compress(5, "text/html", "text/css", "text/javascript", "application/javascript"))
 
 			// SPA
-			r.Get("/", handler.SinglePageApplication(s.StaticFolder, s.UITitle, s.UIHeader))
+			indexHTML := path.Join(s.StaticFolder, "index.html")
+			r.Get("/", handler.SinglePageApplication(indexHTML, s.UITitle, s.UIHeader))
 
 			// Everything else falls back on static content
 			// https://github.com/go-chi/chi/issues/403#issuecomment-900144943

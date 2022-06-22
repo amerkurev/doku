@@ -25,7 +25,7 @@ type progress struct {
 	Done     bool      `json:"done"`
 }
 
-func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
+func bindMountsSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	go func() {
 		for {
 			op := progress{Start: time.Now()}
@@ -55,7 +55,7 @@ func mountsBindSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 								if err != nil {
 									log.WithField("err", err).Error("failed to encode as JSON")
 								} else {
-									store.Set("dockerMountsBind", b) // for early access by API
+									store.Set("dockerBindMounts", b) // for early access by API
 								}
 							}
 

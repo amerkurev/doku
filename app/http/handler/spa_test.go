@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"testing"
 
@@ -12,21 +13,28 @@ import (
 )
 
 func Test_SinglePageApplication(t *testing.T) {
+	// wrong template
+	fhErr, err := os.CreateTemp(t.TempDir(), "doku_spa_*")
+	require.NoError(t, err)
+	defer fhErr.Close()
+	_, err = fhErr.WriteString("{{ .DoesExist }}")
+	require.NoError(t, err)
+
 	tbl := []struct {
-		staticFolder string
-		title        string
-		header       string
-		code         int
+		indexHTML string
+		title     string
+		header    string
+		code      int
 	}{
-		{staticFolder: "../../../frontend/static", title: "YgsGWsIASy8sUnDF", header: "YsLExc8bsrviguGv", code: 200},
-		{staticFolder: "../../../testdata", title: "", header: "", code: 200},
-		{staticFolder: "", title: "YgsGWsIASy8sUnDF", header: "YsLExc8bsrviguGv", code: 404},
+		{indexHTML: "../../../web/doku/public/index.html", title: "YgsGWsIASy8sUnDF", header: "YsLExc8bsrviguGv", code: 200},
+		{indexHTML: fhErr.Name(), title: "", header: "", code: 200},
+		{indexHTML: "index.html", title: "YgsGWsIASy8sUnDF", header: "YsLExc8bsrviguGv", code: 404},
 	}
 
 	for i, tt := range tbl {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			wr := httptest.NewRecorder()
-			handler := SinglePageApplication(tt.staticFolder, tt.title, tt.header)
+			handler := SinglePageApplication(tt.indexHTML, tt.title, tt.header)
 
 			req, err := http.NewRequest("GET", "http://example.com", http.NoBody)
 			require.NoError(t, err)

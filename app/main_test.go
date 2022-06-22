@@ -63,7 +63,7 @@ func Test_Main(t *testing.T) {
 		"--volume=root:/",
 		"--log.stdout",
 		"--log.level=debug",
-		"--ui.home=../frontend/static",
+		"--ui.home=../web/doku/public", // for index.html
 		"--ui.title=" + titleHTML,
 	}
 

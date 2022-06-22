@@ -80,13 +80,13 @@ func Test_Run(t *testing.T) {
 	err = json.Unmarshal(v.([]byte), &du)
 	require.NoError(t, err)
 
-	v, ok = store.Get("dockerLogInfo")
+	v, ok = store.Get("dockerLogSize")
 	assert.True(t, ok)
 	logs := make(map[string]*types.LogFileInfo)
 	err = json.Unmarshal(v.([]byte), &logs)
 	require.NoError(t, err)
 
-	v, ok = store.Get("dockerMountsBind")
+	v, ok = store.Get("dockerBindMounts")
 	assert.True(t, ok)
 	mnt := make(map[string]*types.HostPathInfo)
 	err = json.Unmarshal(v.([]byte), &mnt)

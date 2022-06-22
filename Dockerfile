@@ -21,6 +21,18 @@ RUN \
     cd app && go build -o /build/doku -ldflags "-X main.revision=${version} -s -w"
 
 
+FROM node:16.14.0-alpine as build-frontend
+
+ARG NODE_ENV=production
+ARG CI=true
+
+ADD web/doku /srv/frontend
+WORKDIR /srv/frontend
+
+RUN yarn install --immutable && yarn build
+CMD yarn run test
+
+
 FROM ghcr.io/umputun/baseimage/app:v1.9.1 as base
 
 FROM scratch
@@ -32,6 +44,10 @@ COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=base /etc/passwd /etc/passwd
 COPY --from=base /etc/group /etc/group
+COPY --from=build-frontend /srv/frontend/build/static /srv/web/static
+COPY --from=build-frontend /srv/frontend/build/favicon.ico /srv/web/static
+COPY --from=build-frontend /srv/frontend/build/index.html /srv/web/static
+COPY --from=build-frontend /srv/frontend/build/manifest.json /srv/web/static
 
 WORKDIR /srv
 ENTRYPOINT ["/srv/doku"]

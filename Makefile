@@ -26,6 +26,18 @@ info:
 	- @echo "os $(GOOS)"
 	- @echo "revision $(REV)"
 
+
+## React App ##
+build-web:
+	- cd web/doku && yarn build
+	- @cp -r web/doku/build/static web/static
+	- @cp web/doku/build/favicon.ico web/static
+	- @cp web/doku/build/index.html web/static
+	- @cp web/doku/build/manifest.json web/static
+
+clean:
+	- @rm -rf web/static
+
 ## Docker ##
 docker:
 	docker build -t amerkurev/$(BIN):master --progress=plain .
@@ -33,4 +45,4 @@ docker:
 docker-run: docker
 	docker run --rm -p 9090:9090 --name $(BIN) amerkurev/$(BIN):master
 
-.PHONY: info build test docker dist
+.PHONY: info build build-web clean test docker dist

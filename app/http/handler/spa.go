@@ -1,19 +1,18 @@
 package handler
 
 import (
+	log "github.com/sirupsen/logrus"
 	"html/template"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // SinglePageApplication renders and serves the index.html.
-func SinglePageApplication(staticFolder, title, header string) http.HandlerFunc {
+func SinglePageApplication(indexHTML, title, header string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		t, err := template.ParseFiles(staticFolder + "/index.html")
+		t, err := template.ParseFiles(indexHTML)
 		if err != nil {
 			log.WithField("err", err).Error("failed to parse template")
-			http.ServeFile(w, r, staticFolder+"/index.html")
+			http.ServeFile(w, r, indexHTML)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
@@ -28,7 +27,7 @@ func SinglePageApplication(staticFolder, title, header string) http.HandlerFunc 
 
 		if err != nil {
 			log.WithField("err", err).Error("failed to apply a parsed template to the specified data")
-			http.ServeFile(w, r, staticFolder+"/index.html")
+			http.ServeFile(w, r, indexHTML)
 			return
 		}
 	}
