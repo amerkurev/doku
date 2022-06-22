@@ -55,9 +55,9 @@ func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 			case <-ctx.Done():
 				log.Info("gracefully poller shutdown")
 				return
-			case <-time.After(time.Second):
-				// execute poll only if was happened Docker daemon events
-				if numMessages > 0 {
+			case <-time.After(50 * time.Millisecond):
+				// execute poll only if was happened a few Docker daemon events
+				if numMessages > 0 && time.Since(lastPoll) > time.Second {
 					numMessages = 0
 					poll(ctx, d, volumes)
 					lastPoll = time.Now()

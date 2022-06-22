@@ -16,6 +16,7 @@ import (
 	"time"
 
 	dockerTypes "github.com/docker/docker/api/types"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -121,6 +122,26 @@ func waitForHTTPServerStart(addr string) {
 			_ = resp.Body.Close()
 			return
 		}
+	}
+}
+
+func Test_configureLogging(t *testing.T) {
+
+	tbl := []struct {
+		opt   string
+		level log.Level
+	}{
+		{"debug", log.DebugLevel},
+		{"info", log.InfoLevel},
+		{"warning", log.WarnLevel},
+		{"error", log.ErrorLevel},
+	}
+
+	for i, tt := range tbl {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			configureLogging(tt.opt, true)
+			assert.Equal(t, tt.level, log.GetLevel())
+		})
 	}
 }
 

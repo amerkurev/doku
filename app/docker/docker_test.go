@@ -86,8 +86,8 @@ func getEvents(ctx context.Context, d *Client) (int, error) {
 
 func Test_IsSignificantEvent(t *testing.T) {
 	tbl := []struct {
-		EventType string
-		OK        bool
+		eventType string
+		ok        bool
 	}{
 		{events.BuilderEventType, true},
 		{events.ContainerEventType, true},
@@ -103,6 +103,6 @@ func Test_IsSignificantEvent(t *testing.T) {
 	}
 
 	for _, tt := range tbl {
-		assert.Equal(t, tt.OK, IsSignificantEvent(tt.EventType))
+		assert.Equal(t, tt.ok, IsSignificantEvent(tt.eventType))
 	}
 }

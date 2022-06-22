@@ -54,7 +54,7 @@ func Test_Server_Run(t *testing.T) {
 	}()
 
 	tbl := []struct {
-		Endpoint string
+		endpoint string
 	}{
 		{"/version"},
 		{"/size-calc-progress"},
@@ -71,7 +71,7 @@ func Test_Server_Run(t *testing.T) {
 
 	for i, tt := range tbl {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			req, err := http.NewRequest("GET", "http://127.0.0.1:"+strconv.Itoa(port)+tt.Endpoint, http.NoBody)
+			req, err := http.NewRequest("GET", "http://127.0.0.1:"+strconv.Itoa(port)+tt.endpoint, http.NoBody)
 			require.NoError(t, err)
 			req.SetBasicAuth("user", "1111")
 			resp, err := client.Do(req)

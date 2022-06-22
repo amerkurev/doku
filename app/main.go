@@ -51,7 +51,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	configureLogging()
+	configureLogging(opts.Log.Level, opts.Log.StdOut)
 
 	volumes, err := parseVolumes(opts.Volumes)
 	if err != nil {
@@ -118,16 +118,16 @@ func run(volumes []types.HostVolume) error {
 	return httpServer.Run(ctx)
 }
 
-func configureLogging() {
+func configureLogging(level string, stdout bool) {
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
 	})
 
-	if opts.Log.StdOut {
+	if stdout {
 		log.SetOutput(os.Stdout)
 	}
 
-	switch opts.Log.Level {
+	switch level {
 	case "debug":
 		log.SetLevel(log.DebugLevel)
 	case "info":

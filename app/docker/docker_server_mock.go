@@ -47,7 +47,10 @@ func NewMockServer(addr, version, logPath, mountSource string) ServerMock {
 	r.Get(prefix+"/events", func(w http.ResponseWriter, r *http.Request) {
 		for _, event := range eventsResponse {
 			w.Write([]byte(event)) // nolint:gosec
-			time.Sleep(200 * time.Millisecond)
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			}
+			time.Sleep(150 * time.Millisecond) // 150!
 		}
 	})
 
