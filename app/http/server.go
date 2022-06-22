@@ -17,6 +17,9 @@ type Server struct {
 	Timeouts         Timeouts
 	BasicAuthEnabled bool
 	BasicAuthAllowed []string
+	StaticFolder     string
+	UITitle          string
+	UIHeader         string
 }
 
 // Timeouts consolidate timeouts for both server and transport

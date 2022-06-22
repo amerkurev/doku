@@ -71,27 +71,47 @@ func CreateRouter(s *Server) *chi.Mux {
 	r.Use(handler.NewStructuredLogger(log.StandardLogger()))
 	r.Use(middleware.Recoverer)
 
-	if s.BasicAuthEnabled {
-		log.Debugln("basic auth is enabled")
-		r.Use(handler.BasicAuthentication(s.BasicAuthAllowed))
-	}
+	// Misc
+	r.Get("/favicon.ico", handler.FavIcon(s.StaticFolder))
 
+	// Protected routes
 	r.Group(func(r chi.Router) {
-		r.Use(handler.ContentTypeJSON)
-		r.Get("/version", version)
-		r.Get("/size-calc-progress", sizeCalcProgress)
+		if s.BasicAuthEnabled {
+			log.Debugln("basic auth is enabled")
+			r.Use(handler.BasicAuthentication(s.BasicAuthAllowed))
+		}
 
-		// long polling routes
+		// API for frontend
 		r.Group(func(r chi.Router) {
-			r.Use(handler.LongPolling(s.Timeouts.LongPolling))
-			r.Get("/_/docker/disk-usage", dockerDiskUsage)
+			r.Use(handler.ContentTypeJSON)
+			r.Get("/version", version)
+			r.Get("/size-calc-progress", sizeCalcProgress)
+
+			// long polling routes
+			r.Group(func(r chi.Router) {
+				r.Use(handler.LongPolling(s.Timeouts.LongPolling))
+				r.Get("/_/docker/disk-usage", dockerDiskUsage)
+			})
+
+			r.Route("/docker", func(r chi.Router) {
+				r.Get("/version", dockerVersion)
+				r.Get("/disk-usage", dockerDiskUsage)
+				r.Get("/log-info", dockerLogInfo)
+				r.Get("/mounts-bind", dockerMountsBind)
+			})
 		})
 
-		r.Route("/docker", func(r chi.Router) {
-			r.Get("/version", dockerVersion)
-			r.Get("/disk-usage", dockerDiskUsage)
-			r.Get("/log-info", dockerLogInfo)
-			r.Get("/mounts-bind", dockerMountsBind)
+		// Static
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Compress(5, "text/html", "text/css", "text/javascript", "application/javascript"))
+
+			// SPA
+			r.Get("/", handler.SinglePageApplication(s.StaticFolder, s.UITitle, s.UIHeader))
+
+			// Everything else falls back on static content
+			// https://github.com/go-chi/chi/issues/403#issuecomment-900144943
+			fileServer := http.FileServer(http.Dir(s.StaticFolder))
+			r.Handle("/static/*", http.StripPrefix("/static", fileServer))
 		})
 	})
 	return r

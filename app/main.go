@@ -33,6 +33,12 @@ var opts struct {
 		Version  string `long:"version" env:"API_VERSION" description:"version of the API to reach, leave empty for latest"`
 	} `group:"docker" namespace:"docker" env-namespace:"DOCKER"`
 
+	UI struct {
+		Home   string `long:"home" env:"HOME" default:"frontend/static" description:"path to the location of the static folder"`
+		Title  string `long:"title" env:"TITLE" default:"Docker disk space usage" description:"title of the document"`
+		Header string `long:"header" env:"HEADER" default:"Docker disk space usage dashboard" description:"header at the top of the dashboard"`
+	} `group:"ui" namespace:"ui" env-namespace:"UI"`
+
 	Log struct {
 		StdOut bool   `long:"stdout" env:"STDOUT" description:"enable stdout logging"`
 		Level  string `long:"level" env:"LEVEL" description:"logging level" choice:"debug" choice:"info" choice:"warning" choice:"error" default:"info"`
@@ -112,6 +118,9 @@ func run(volumes []types.HostVolume) error {
 		},
 		BasicAuthEnabled: len(basicAuthAllowed) > 0,
 		BasicAuthAllowed: basicAuthAllowed,
+		StaticFolder:     opts.UI.Home,
+		UITitle:          opts.UI.Title,
+		UIHeader:         opts.UI.Header,
 	}
 
 	log.Info(fmt.Sprintf("starting http server at %s", addr))

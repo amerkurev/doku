@@ -41,6 +41,7 @@ func Test_Server_Run(t *testing.T) {
 		},
 		BasicAuthEnabled: true,
 		BasicAuthAllowed: allowed,
+		StaticFolder:     "../../frontend/static",
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -56,6 +57,8 @@ func Test_Server_Run(t *testing.T) {
 	tbl := []struct {
 		endpoint string
 	}{
+		{"/"},
+		{"/favicon.ico"},
 		{"/version"},
 		{"/size-calc-progress"},
 		{"/docker/version"},

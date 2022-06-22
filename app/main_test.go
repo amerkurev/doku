@@ -54,6 +54,7 @@ func Test_Main(t *testing.T) {
 
 	port := 5000 + rand.Intn(1000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	titleHTML := "Doku test"
 	os.Args = []string{
 		"test",
 		"--listen=" + addr,
@@ -62,6 +63,8 @@ func Test_Main(t *testing.T) {
 		"--volume=root:/",
 		"--log.stdout",
 		"--log.level=debug",
+		"--ui.home=../frontend/static",
+		"--ui.title=" + titleHTML,
 	}
 
 	done := make(chan struct{})
@@ -88,6 +91,16 @@ func Test_Main(t *testing.T) {
 	time.Sleep(time.Second)
 
 	client := http.Client{}
+	{
+		resp, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/", port)) // index.html
+		require.NoError(t, err)
+		defer resp.Body.Close()
+		assert.Equal(t, 200, resp.StatusCode)
+		b, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
+		assert.Contains(t, string(b), titleHTML)
+	}
+
 	{
 		resp, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/version", port))
 		require.NoError(t, err)
