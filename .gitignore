@@ -22,3 +22,7 @@ coverage.txt
 
 # System
 .DS_Store
+
+# React App
+frontend/doku/build
+frontend/doku/node_modules
