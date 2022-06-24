@@ -19,10 +19,13 @@ import (
 
 const pollingInterval = time.Minute
 
+var logPathErrors map[string]bool // to prevent repeated log output
+
 // Run starts a goroutine to poll the Docker daemon.
 func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	messages, errs := d.Events(ctx, dockerTypes.EventsOptions{})
 	numMessages := 0 // count of Docker daemon events.
+	logPathErrors = make(map[string]bool)
 
 	// calculate the size of directories that mounted into containers (bind type)
 	bindMountsSize(ctx, d, volumes)
@@ -131,7 +134,10 @@ func dockerLogSize(ctx context.Context, d *docker.Client, volumes []types.HostVo
 	for _, cont := range containers {
 		l, errSize := logFileSize(cont, volumes) // get size of container log file
 		if errSize != nil {
-			return fmt.Errorf("failed to get log file size: %w", errSize)
+			if _, ok := logPathErrors[cont.LogPath]; !ok {
+				logPathErrors[cont.LogPath] = true
+				return fmt.Errorf("failed to get log file size: %w", errSize)
+			}
 		}
 		logs[cont.ID] = l
 	}

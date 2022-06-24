@@ -1605,7 +1605,7 @@
   resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.1.3.tgz#6801033be7ff87a6b7cadaf5b337c9f366a3c4b0"
   integrity sha512-WiBSI6JBIhC6LRIsB2Kwh8DsGTlbBU+mLRxJmAe3LjHTdkDpwIbEOZgoXBbZilk/vlfjK8i6nKRAvIRn1XaIMw==
 
-"@semantic-ui-react/css-patch@^1.0.0":
+"@semantic-ui-react/css-patch@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@semantic-ui-react/css-patch/-/css-patch-1.0.0.tgz#903637479eca4010749e81f15b91dfd5f019b08d"
   integrity sha512-TV1+dyQ7dlqZ0spteDjGLVuHBix7T2OAsAdX0En1mWLxr9fYWnHAz9cbwKVoKPh+W/A46CSB8T4q0IoDPP8rlQ==
@@ -8031,6 +8031,11 @@ prettier@2.7.1:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.7.1.tgz#e235806850d057f97bb08368a4f7d899f7760c64"
   integrity sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==
 
+pretty-bytes@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-6.0.0.tgz#928be2ad1f51a2e336add8ba764739f9776a8140"
+  integrity sha512-6UqkYefdogmzqAZWzJ7laYeJnaXDy2/J+ZqiiMtS7t7OfpXWTlaeGMwX8U6EFvPV/YWWEKRkS8hKS4k60WHTOg==
+
 pretty-bytes@^5.3.0, pretty-bytes@^5.4.1:
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-5.6.0.tgz#356256f643804773c82f64723fe78c92c62beaeb"
@@ -9156,11 +9161,6 @@ spdy@^4.0.2:
     http-deceiver "^1.2.7"
     select-hose "^2.0.0"
     spdy-transport "^3.0.0"
-
-spinkit@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/spinkit/-/spinkit-2.0.1.tgz#aefcd0acfdf15a90aa8e1f069d7e618515891f74"
-  integrity sha512-oYBGY0GV1H1dX+ZdKnB6JVsYC1w/Xl20H111eb+WSS8nUYmlHgGb4y5buFSkzzceEeYYh5kMhXoAmoTpiQauiA==
 
 sprintf-js@~1.0.2:
   version "1.0.3"

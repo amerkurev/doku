@@ -130,3 +130,16 @@ export const appReducer = appSlice.reducer;
 export const { cleanupApp } = appSlice.actions;
 
 export const selectVersion = (state) => state.app.version;
+export const selectSizeCalcProgress = (state) => state.app.sizeCalcProgress;
+
+export const selectDockerVersion = (state) => state.app.dockerVersion;
+export const selectDockerVersionStatus = (state) => state.app.dockerVersionStatus;
+
+export const selectDockerDiskUsage = (state) => state.app.dockerDiskUsage;
+export const selectDockerDiskUsageStatus = (state) => state.app.dockerDiskUsageStatus;
+
+export const selectDockerLogSize = (state) => state.app.dockerLogSize;
+export const selectDockerLogSizeStatus = (state) => state.app.dockerLogSizeStatus;
+
+export const selectDockerBindMounts = (state) => state.app.dockerBindMounts;
+export const selectDockerBindMountsStatus = (state) => state.app.dockerBindMountsStatus;

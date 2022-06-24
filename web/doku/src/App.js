@@ -40,7 +40,7 @@ function App() {
   return (
     <BrowserRouter basename="/">
       <TopMenu />
-      <Container text style={{ marginTop: '7em' }}>
+      <Container style={{ paddingTop: '6em' }}>
         <Routes>
           <Route path="/" element={<Dashboard />} exact />
           <Route path="/images" element={<Images />} exact />

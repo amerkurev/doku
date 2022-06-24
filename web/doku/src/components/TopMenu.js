@@ -2,9 +2,13 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Container, Header, Menu } from 'semantic-ui-react';
 
+const styles = {
+  backgroundColor: 'azure',
+};
+
 function TopMenu() {
   return (
-    <Menu pointing secondary size="small" fixed="top">
+    <Menu pointing secondary size="small" fixed="top" style={styles}>
       <Container>
         <Menu.Item as={NavLink} to="/">
           Dashboard
