@@ -2,25 +2,25 @@
 GET http://127.0.0.1:9090/
 
 ### GET version
-GET http://127.0.0.1:9090/version
+GET http://127.0.0.1:9090/v0/version
 Accept: application/json
 
 ### GET docker info
-GET http://127.0.0.1:9090/docker/version
+GET http://127.0.0.1:9090/v0/docker/version
 Accept: application/json
 
 ### GET docker disk usage
-GET http://127.0.0.1:9090/docker/disk-usage
+GET http://127.0.0.1:9090/v0/docker/disk-usage
 Accept: application/json
 
 ### GET docker container log info
-GET http://127.0.0.1:9090/docker/log-size
+GET http://127.0.0.1:9090/v0/docker/log-size
 Accept: application/json
 
 ### GET docker mounts
-GET http://127.0.0.1:9090/docker/mounts-bind
+GET http://127.0.0.1:9090/v0/docker/mounts-bind
 Accept: application/json
 
 ### GET size calculation progress
-GET http://127.0.0.1:9090/size-calc-progress
+GET http://127.0.0.1:9090/v0/size-calc-progress
 Accept: application/json

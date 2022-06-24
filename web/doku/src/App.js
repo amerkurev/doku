@@ -12,13 +12,29 @@ import BindMounts from './components/BindMounts';
 import BuildCache from './components/BuildCache';
 import TopMenu from './components/TopMenu';
 import Footer from './components/Footer';
-import { getVersion } from './AppSlice';
+import {
+  getVersion,
+  getDockerVersion,
+  getDockerDiskUsage,
+  getDockerDiskUsageLongPolling,
+  getDockerLogSize,
+  getDockerBindMounts,
+} from './AppSlice';
+
+function polling(dispatch) {
+  dispatch(getDockerLogSize());
+  dispatch(getDockerBindMounts());
+  dispatch(getDockerDiskUsageLongPolling()).then(() => polling(dispatch)); // long polling
+}
 
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getVersion());
+    dispatch(getDockerVersion());
+    dispatch(getDockerDiskUsage());
+    polling(dispatch);
   }, [dispatch]);
 
   return (

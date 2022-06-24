@@ -102,7 +102,7 @@ func Test_Main(t *testing.T) {
 	}
 
 	{
-		resp, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/version", port))
+		resp, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/v0/version", port))
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		assert.Equal(t, 200, resp.StatusCode)
@@ -114,7 +114,7 @@ func Test_Main(t *testing.T) {
 	}
 
 	{
-		resp, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/docker/disk-usage", port))
+		resp, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/v0/docker/disk-usage", port))
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		assert.Equal(t, 200, resp.StatusCode)

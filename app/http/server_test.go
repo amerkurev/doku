@@ -64,13 +64,13 @@ func Test_Server_Run(t *testing.T) {
 		{"/"},
 		{"/favicon.ico"},
 		{"/manifest.json"},
-		{"/version"},
-		{"/size-calc-progress"},
-		{"/docker/version"},
-		{"/docker/disk-usage"},
-		{"/docker/log-size"},
-		{"/docker/bind-mounts"},
-		// {"/docker/_/docker/disk-usage"},
+		{"/v0/version"},
+		{"/v0/size-calc-progress"},
+		{"/v0/docker/version"},
+		{"/v0/docker/disk-usage"},
+		{"/v0/docker/log-size"},
+		{"/v0/docker/bind-mounts"},
+		// {"/v0/docker/_/docker/disk-usage"},
 	}
 
 	time.Sleep(10 * time.Millisecond)

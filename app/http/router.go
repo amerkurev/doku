@@ -89,7 +89,7 @@ func CreateRouter(s *Server) *chi.Mux {
 		}
 
 		// API for frontend
-		r.Group(func(r chi.Router) {
+		r.Route("/v0", func(r chi.Router) {
 			r.Use(handler.ContentTypeJSON)
 			r.Get("/version", version)
 			r.Get("/size-calc-progress", sizeCalcProgress)
