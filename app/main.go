@@ -35,8 +35,8 @@ var opts struct {
 
 	UI struct {
 		Home   string `long:"home" env:"HOME" default:"web/static" description:"path to the location of the static folder"`
-		Title  string `long:"title" env:"TITLE" default:"Docker disk space usage" description:"title of the document"`
-		Header string `long:"header" env:"HEADER" default:"Docker disk space usage dashboard" description:"header at the top of the dashboard"`
+		Title  string `long:"title" env:"TITLE" default:"Docker disk usage" description:"title of the document"`
+		Header string `long:"header" env:"HEADER" default:"Docker disk space usage" description:"header at the top of the dashboard"`
 	} `group:"ui" namespace:"ui" env-namespace:"UI"`
 
 	Log struct {

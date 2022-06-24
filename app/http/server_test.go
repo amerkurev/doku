@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"testing"
 	"time"
@@ -19,8 +20,11 @@ import (
 )
 
 func Test_Server_Run(t *testing.T) {
+	err := os.Setenv("ENVIRONMENT", "dev") // CORS
+	require.NoError(t, err)
+
 	log.SetOutput(ioutil.Discard)
-	err := store.Initialize()
+	err = store.Initialize()
 	require.NoError(t, err)
 
 	port := 1000 + rand.Intn(1000)

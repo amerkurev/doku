@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"os"
 	"path"
 
 	"github.com/go-chi/chi/v5"
@@ -71,6 +72,10 @@ func CreateRouter(s *Server) *chi.Mux {
 	r.Use(middleware.RealIP)
 	r.Use(handler.NewStructuredLogger(log.StandardLogger()))
 	r.Use(middleware.Recoverer)
+
+	if os.Getenv("ENVIRONMENT") == "dev" {
+		r.Use(handler.DevCORS)
+	}
 
 	// Misc
 	r.Get("/favicon.ico", handler.ServeFile(path.Join(s.StaticFolder, "favicon.ico")))

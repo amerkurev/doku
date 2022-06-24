@@ -1,20 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Container } from 'semantic-ui-react';
+
+import Dashboard from './components/Dashboard';
+import Images from './components/Images';
+import Containers from './components/Containers';
+import Volumes from './components/Volumes';
+import Logs from './components/Logs';
+import BindMounts from './components/BindMounts';
+import BuildCache from './components/BuildCache';
+import TopMenu from './components/TopMenu';
+import Footer from './components/Footer';
+import { getVersion } from './AppSlice';
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getVersion());
+  }, [dispatch]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter basename="/">
+      <TopMenu />
+      <Container text style={{ marginTop: '7em' }}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} exact />
+          <Route path="/images" element={<Images />} exact />
+          <Route path="/containers" element={<Containers />} exact />
+          <Route path="/volumes" element={<Volumes />} exact />
+          <Route path="/bind-mounts" element={<BindMounts />} exact />
+          <Route path="/logs" element={<Logs />} exact />
+          <Route path="/build-cache" element={<BuildCache />} exact />
+        </Routes>
+      </Container>
+      <Footer />
+    </BrowserRouter>
   );
 }
 

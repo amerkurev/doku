@@ -29,7 +29,8 @@ info:
 
 ## React App ##
 build-web:
-	- cd web/doku && yarn build
+	- cd web/doku && NODE_ENV=production yarn build
+	- @rm -rf web/static
 	- @cp -r web/doku/build/static web/static
 	- @cp web/doku/build/favicon.ico web/static
 	- @cp web/doku/build/index.html web/static
