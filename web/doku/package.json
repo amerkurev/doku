@@ -42,6 +42,7 @@
     "axios": "0.27.2",
     "json-bigint": "1.0.0",
     "lodash": "4.17.21",
+    "moment": "2.29.3",
     "node-sass": "7.0.1",
     "pretty-bytes": "6.0.0",
     "prop-types": "15.8.1",
