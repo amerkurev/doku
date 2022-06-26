@@ -20,7 +20,7 @@ function TopMenu() {
           Containers
         </Menu.Item>
         <Menu.Item as={NavLink} to="/volumes/">
-          Local Volumes
+          Volumes
         </Menu.Item>
         <Menu.Item as={NavLink} to="/bind-mounts/">
           Bind Mounts
