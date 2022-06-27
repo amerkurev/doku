@@ -19,7 +19,7 @@ import (
 
 const pollingInterval = time.Minute
 
-var logPathErrors map[string]bool // to prevent repeated log output
+var logPathErrors map[string]bool // to prevent the output of the same errors in the log
 
 // Run starts a goroutine to poll the Docker daemon.
 func Run(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
@@ -129,20 +129,31 @@ func dockerLogSize(ctx context.Context, d *docker.Client, volumes []types.HostVo
 		return fmt.Errorf("failed to execute request: %w", err)
 	}
 
-	logs := make(map[string]*types.LogFileInfo, len(containers))
+	logs := make([]*types.LogFileInfo, 0)
+	var totalSize int64
 
 	for _, cont := range containers {
 		l, errSize := logFileSize(cont, volumes) // get size of container log file
 		if errSize != nil {
 			if _, ok := logPathErrors[cont.LogPath]; !ok {
+				// to prevent the output of the same errors in the log
 				logPathErrors[cont.LogPath] = true
-				return fmt.Errorf("failed to get log file size: %w", errSize)
+				log.WithField("err", errSize).Error("failed to get log file size")
 			}
+			continue
 		}
-		logs[cont.ID] = l
+		logs = append(logs, l)
+		totalSize += l.Size
+		delete(logPathErrors, cont.LogPath)
 	}
 
-	b, err := json.Marshal(logs)
+	b, err := json.Marshal(struct {
+		Logs      []*types.LogFileInfo
+		TotalSize int64
+	}{
+		Logs:      logs,
+		TotalSize: totalSize,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to encode as JSON: %w", err)
 	}

@@ -112,14 +112,14 @@ func CreateRouter(s *Server) *chi.Mux {
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Compress(5, "text/html", "text/css", "text/javascript", "application/javascript"))
 
-			// SPA
-			indexHTML := path.Join(s.StaticFolder, "index.html")
-			r.Get("/", handler.SinglePageApplication(indexHTML, s.UITitle, s.UIHeader))
-
 			// Everything else falls back on static content
 			// https://github.com/go-chi/chi/issues/403#issuecomment-900144943
 			fileServer := http.FileServer(http.Dir(s.StaticFolder))
 			r.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
+			// SPA
+			indexHTML := path.Join(s.StaticFolder, "index.html")
+			r.Get("/*", handler.SinglePageApplication(indexHTML, s.UITitle, s.UIHeader))
 		})
 	})
 	return r

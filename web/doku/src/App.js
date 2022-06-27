@@ -24,7 +24,10 @@ import {
 function polling(dispatch) {
   dispatch(getDockerLogSize());
   dispatch(getDockerBindMounts());
-  dispatch(getDockerDiskUsageLongPolling()).then(() => polling(dispatch)); // long polling
+  dispatch(getDockerDiskUsageLongPolling()) // long polling
+    .unwrap()
+    .then(() => polling(dispatch))
+    .catch(() => setTimeout(() => polling(dispatch), 30000));
 }
 
 function App() {

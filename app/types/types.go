@@ -7,25 +7,25 @@ type AppVersion struct {
 
 // HostVolume contains input information for a volume and the result for utilization percentage.
 type HostVolume struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
+	Name string
+	Path string
 }
 
 // LogFileInfo contains information about a container log file.
 type LogFileInfo struct {
-	ContainerID   string `json:"containerID"`
-	ContainerName string `json:"containerName"`
-	Path          string `json:"path"`
-	Size          int64  `json:"size"`
-	LastCheck     int64  `json:"lastCheck"`
+	ContainerID   string
+	ContainerName string
+	Path          string
+	Size          int64
+	LastCheck     int64
 }
 
 // HostPathInfo contains information about a filesystem path (file or directory).
 type HostPathInfo struct {
-	Path      string `json:"path"`
-	Size      int64  `json:"size"`
-	IsDir     bool   `json:"isDir"`
-	Files     int64  `json:"files"`
-	ReadOnly  bool   `json:"readOnly"`
-	LastCheck int64  `json:"lastCheck"`
+	Path      string
+	Size      int64
+	IsDir     bool
+	Files     int64
+	ReadOnly  bool
+	LastCheck int64
 }

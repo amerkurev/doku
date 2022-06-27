@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { makeURL } from './conf/net';
+import { makeURL } from './util/net';
 
 const initialState = {
   version: '',

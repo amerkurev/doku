@@ -82,7 +82,10 @@ func Test_Run(t *testing.T) {
 
 	v, ok = store.Get("dockerLogSize")
 	assert.True(t, ok)
-	logs := make(map[string]*types.LogFileInfo)
+	logs := struct {
+		Logs      []*types.LogFileInfo
+		TotalSize int64
+	}{}
 	err = json.Unmarshal(v.([]byte), &logs)
 	require.NoError(t, err)
 

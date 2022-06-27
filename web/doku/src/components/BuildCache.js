@@ -1,51 +1,26 @@
 import React, { useReducer } from 'react';
-import { Loader, Container, Statistic, Table, Message, Popup, Icon } from 'semantic-ui-react';
+import { Container, Statistic, Table, Message, Popup, Icon } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
 import { selectDockerDiskUsage, selectDockerDiskUsageStatus } from '../AppSlice';
 import prettyBytes from 'pretty-bytes';
 import moment from 'moment';
 import { sortBy } from 'lodash/collection';
-import { CHANGE_SORT, ASC, DESC } from '../conf/constants';
-
-function tableSortReducer(state, action) {
-  switch (action.type) {
-    case CHANGE_SORT:
-      if (state.column === action.column) {
-        return {
-          ...state,
-          direction: state.direction === ASC ? DESC : ASC,
-        };
-      }
-
-      return {
-        column: action.column,
-        direction: ASC,
-      };
-    default:
-      throw new Error();
-  }
-}
+import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
+import statusPage from './StatusPage';
+import { replaceWithNbsp } from '../util/fmt';
 
 function BuildCache() {
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
+  const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
 
-  const [state, dispatch] = useReducer(tableSortReducer, {
-    column: 'Size',
-    direction: DESC,
-  });
-
-  if (diskUsageStatus === 'loading' && diskUsage == null) {
-    return (
-      <Container>
-        <Loader active>Loading</Loader>
-      </Container>
-    );
-  } else if (diskUsage === null) {
-    return <div />; // initial state
+  const s = statusPage(diskUsage, diskUsageStatus);
+  if (s !== null) {
+    return s;
   }
 
-  let buildCacheTable = null;
+  let dataTable = null;
+
   if (Array.isArray(diskUsage.BuildCache) && diskUsage.BuildCache.length > 0) {
     const { column, direction } = state;
     const data = sortBy(diskUsage.BuildCache, [column]);
@@ -53,7 +28,7 @@ function BuildCache() {
       data.reverse();
     }
 
-    buildCacheTable = (
+    dataTable = (
       <Table selectable sortable celled compact size="small">
         <Table.Header>
           <Table.Row>
@@ -107,12 +82,12 @@ function BuildCache() {
         <Table.Body>
           {data.map(({ ID, Description, Size, UsageCount, InUse, Shared, Type, LastUsedAt, CreatedAt, Parent }) => (
             <Table.Row key={ID}>
-              <Table.Cell textAlign="center">
+              <Table.Cell>
                 <small>
                   <code>{ID}</code>
                 </small>
               </Table.Cell>
-              <Table.Cell textAlign="right">{prettyBytes(Size)}</Table.Cell>
+              <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(Size))}</Table.Cell>
               <Table.Cell textAlign="center">{UsageCount}</Table.Cell>
               <Table.Cell>{Type}</Table.Cell>
               <Table.Cell textAlign="center">{Shared ? 'yes' : 'no'}</Table.Cell>
@@ -138,21 +113,27 @@ function BuildCache() {
     <Container>
       <Statistic>
         <Statistic.Label>Builder Size</Statistic.Label>
-        <Statistic.Value>{prettyBytes(diskUsage.BuilderSize)}</Statistic.Value>
+        <Statistic.Value>{replaceWithNbsp(prettyBytes(diskUsage.BuilderSize))}</Statistic.Value>
       </Statistic>
-      <Message success size="tiny">
-        <Message.Content>
-          <Message.Header>
-            <code>{'$ docker builder prune'}</code>
-          </Message.Header>
-          Remove build cache. See details of{' '}
-          <a target="_blank" href="https://docs.docker.com/engine/reference/commandline/builder_prune/">
-            docker builder prune
-          </a>
-        </Message.Content>
-      </Message>
-      {buildCacheTable}
+      <HelpText />
+      {dataTable}
     </Container>
+  );
+}
+
+function HelpText() {
+  return (
+    <Message success size="tiny">
+      <Message.Content>
+        <Message.Header>
+          <code>{'$ docker builder prune'}</code>
+        </Message.Header>
+        Remove build cache. See details of{' '}
+        <a rel="noreferrer" target="_blank" href="https://docs.docker.com/engine/reference/commandline/builder_prune/">
+          docker builder prune
+        </a>
+      </Message.Content>
+    </Message>
   );
 }
 
