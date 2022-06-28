@@ -20,12 +20,14 @@ type LogFileInfo struct {
 	LastCheck     int64
 }
 
-// HostPathInfo contains information about a filesystem path (file or directory).
-type HostPathInfo struct {
+// BindMountInfo contains information about a bind mount.
+type BindMountInfo struct {
 	Path      string
 	Size      int64
 	IsDir     bool
 	Files     int64
 	ReadOnly  bool
 	LastCheck int64
+	Prepared  bool
+	Err       string
 }

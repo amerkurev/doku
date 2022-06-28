@@ -34,7 +34,7 @@ func (c *Client) ContainerJSONList(ctx context.Context) ([]*types.ContainerJSON,
 	res := make([]*types.ContainerJSON, 0, len(containers))
 
 	for _, cont := range containers {
-		ci, err := c.ContainerInspect(ctx, cont.ID)
+		ci, _, err := c.ContainerInspectWithRaw(ctx, cont.ID, true)
 		if err != nil {
 			return nil, err
 		}

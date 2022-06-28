@@ -74,6 +74,14 @@ func Test_Run(t *testing.T) {
 	err = json.Unmarshal(v.([]byte), &ver)
 	require.NoError(t, err)
 
+	v, ok = store.Get("dockerContainerList")
+	assert.True(t, ok)
+	c := struct {
+		Containers []*dockerTypes.ContainerJSON
+	}{}
+	err = json.Unmarshal(v.([]byte), &c)
+	require.NoError(t, err)
+
 	v, ok = store.Get("dockerDiskUsage")
 	assert.True(t, ok)
 	du := dockerTypes.DiskUsage{}
@@ -91,13 +99,11 @@ func Test_Run(t *testing.T) {
 
 	v, ok = store.Get("dockerBindMounts")
 	assert.True(t, ok)
-	mnt := make(map[string]*types.HostPathInfo)
-	err = json.Unmarshal(v.([]byte), &mnt)
-	require.NoError(t, err)
-
-	v, ok = store.Get("sizeCalcProgress")
-	assert.True(t, ok)
-	err = json.Unmarshal(v.([]byte), &progress{})
+	bindMounts := struct {
+		BindMounts []*types.BindMountInfo
+		TotalSize  int64
+	}{}
+	err = json.Unmarshal(v.([]byte), &bindMounts)
 	require.NoError(t, err)
 }
 

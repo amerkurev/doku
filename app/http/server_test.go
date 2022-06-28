@@ -65,7 +65,6 @@ func Test_Server_Run(t *testing.T) {
 		{"/favicon.ico"},
 		{"/manifest.json"},
 		{"/v0/version"},
-		{"/v0/size-calc-progress"},
 		{"/v0/docker/version"},
 		{"/v0/docker/disk-usage"},
 		{"/v0/docker/log-size"},

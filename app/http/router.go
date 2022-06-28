@@ -31,6 +31,14 @@ func dockerVersion(w http.ResponseWriter, _ *http.Request) {
 	w.Write(v.([]byte)) // nolint:gosec
 }
 
+func dockerContainerList(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("dockerContainerList")
+	if !ok {
+		v = emptyObject
+	}
+	w.Write(v.([]byte)) // nolint:gosec
+}
+
 func dockerDiskUsage(w http.ResponseWriter, _ *http.Request) {
 	v, ok := store.Get("dockerDiskUsage")
 	if !ok {
@@ -49,14 +57,6 @@ func dockerLogSize(w http.ResponseWriter, _ *http.Request) {
 
 func dockerBindMounts(w http.ResponseWriter, _ *http.Request) {
 	v, ok := store.Get("dockerBindMounts")
-	if !ok {
-		v = emptyObject
-	}
-	w.Write(v.([]byte)) // nolint:gosec
-}
-
-func sizeCalcProgress(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("sizeCalcProgress")
 	if !ok {
 		v = emptyObject
 	}
@@ -92,7 +92,6 @@ func CreateRouter(s *Server) *chi.Mux {
 		r.Route("/v0", func(r chi.Router) {
 			r.Use(handler.ContentTypeJSON)
 			r.Get("/version", version)
-			r.Get("/size-calc-progress", sizeCalcProgress)
 
 			// long polling routes
 			r.Group(func(r chi.Router) {
@@ -102,6 +101,7 @@ func CreateRouter(s *Server) *chi.Mux {
 
 			r.Route("/docker", func(r chi.Router) {
 				r.Get("/version", dockerVersion)
+				r.Get("/containers", dockerContainerList)
 				r.Get("/disk-usage", dockerDiskUsage)
 				r.Get("/log-size", dockerLogSize)
 				r.Get("/bind-mounts", dockerBindMounts)

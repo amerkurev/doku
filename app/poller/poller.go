@@ -81,15 +81,19 @@ func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	defer store.NotifyAll() // wake up those who are waiting.
 
 	if err := dockerVersion(ctx, d); err != nil {
-		log.WithField("err", err).Error("failed to get information of the docker client and server host")
+		log.WithField("err", err).Error("poll: docker version")
+	}
+
+	if err := dockerContainerList(ctx, d); err != nil {
+		log.WithField("err", err).Error("poll: docker container list")
 	}
 
 	if err := dockerDiskUsage(ctx, d); err != nil {
-		log.WithField("err", err).Error("failed to request the current data usage from the docker daemon")
+		log.WithField("err", err).Error("poll: docker disk usage")
 	}
 
 	if err := dockerLogSize(ctx, d, volumes); err != nil {
-		log.WithField("err", err).Error("failed to get information about the container log")
+		log.WithField("err", err).Error("poll: docker log size")
 	}
 }
 
@@ -105,6 +109,26 @@ func dockerVersion(ctx context.Context, d *docker.Client) error {
 	}
 
 	store.Set("dockerVersion", b)
+	return nil
+}
+
+func dockerContainerList(ctx context.Context, d *docker.Client) error {
+	res, err := d.ContainerJSONList(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	b, err := json.Marshal(struct {
+		Containers []*dockerTypes.ContainerJSON
+	}{
+		Containers: res,
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to encode as JSON: %w", err)
+	}
+
+	store.Set("dockerContainerList", b)
 	return nil
 }
 

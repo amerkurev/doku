@@ -4,10 +4,12 @@ import { makeURL } from './util/net';
 
 const initialState = {
   version: '',
-  sizeCalcProgress: null,
 
   dockerVersion: null,
   dockerVersionStatus: 'idle',
+
+  dockerContainerList: null,
+  dockerContainerListStatus: 'idle',
 
   dockerDiskUsage: null,
   dockerDiskUsageStatus: 'idle',
@@ -24,13 +26,13 @@ export const getVersion = createAsyncThunk('app/getVersion', async () => {
   return response.data;
 });
 
-export const getSizeCalcProgress = createAsyncThunk('app/getSizeCalcProgress', async () => {
-  const response = await axios.get(makeURL('/v0/size-calc-progress'));
+export const getDockerVersion = createAsyncThunk('app/getDockerVersion', async () => {
+  const response = await axios.get(makeURL('/v0/docker/version'));
   return response.data;
 });
 
-export const getDockerVersion = createAsyncThunk('app/getDockerVersion', async () => {
-  const response = await axios.get(makeURL('/v0/docker/version'));
+export const getDockerContainerList = createAsyncThunk('app/getDockerContainerList', async () => {
+  const response = await axios.get(makeURL('/v0/docker/containers'));
   return response.data;
 });
 
@@ -64,9 +66,6 @@ export const appSlice = createSlice({
     [getVersion.fulfilled]: (state, action) => {
       state.version = action.payload.version;
     },
-    [getSizeCalcProgress.fulfilled]: (state, action) => {
-      state.sizeCalcProgress = action.payload.version;
-    },
     // Docker Version
     [getDockerVersion.pending]: (state) => {
       state.dockerVersionStatus = 'loading';
@@ -77,6 +76,17 @@ export const appSlice = createSlice({
     },
     [getDockerVersion.rejected]: (state, action) => {
       state.dockerVersionStatus = 'idle';
+    },
+    // Docker Container List
+    [getDockerContainerList.pending]: (state) => {
+      state.dockerContainerListStatus = 'loading';
+    },
+    [getDockerContainerList.fulfilled]: (state, action) => {
+      state.dockerContainerListStatus = 'idle';
+      state.dockerContainerList = action.payload;
+    },
+    [getDockerContainerList.rejected]: (state, action) => {
+      state.dockerContainerListStatus = 'idle';
     },
     // Docker Disk Usage
     [getDockerDiskUsage.pending]: (state) => {
@@ -130,10 +140,12 @@ export const appReducer = appSlice.reducer;
 export const { cleanupApp } = appSlice.actions;
 
 export const selectVersion = (state) => state.app.version;
-export const selectSizeCalcProgress = (state) => state.app.sizeCalcProgress;
 
 export const selectDockerVersion = (state) => state.app.dockerVersion;
 export const selectDockerVersionStatus = (state) => state.app.dockerVersionStatus;
+
+export const selectDockerContainerList = (state) => state.app.dockerContainerList;
+export const selectDockerContainerListStatus = (state) => state.app.dockerContainerListStatus;
 
 export const selectDockerDiskUsage = (state) => state.app.dockerDiskUsage;
 export const selectDockerDiskUsageStatus = (state) => state.app.dockerDiskUsageStatus;

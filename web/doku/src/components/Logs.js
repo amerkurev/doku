@@ -1,12 +1,12 @@
 import React, { useReducer } from 'react';
-import { Container, Message, Statistic, Table } from 'semantic-ui-react';
+import { Container, Grid, Header, Message, Statistic, Table } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
 import { selectDockerDiskUsage, selectDockerLogSize, selectDockerLogSizeStatus } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import { sortBy } from 'lodash/collection';
 import prettyBytes from 'pretty-bytes';
 import statusPage from './StatusPage';
-import { replaceWithNbsp } from '../util/fmt';
+import { prettyContainerID, prettyContainerName, replaceWithNbsp } from '../util/fmt';
 
 function Logs() {
   const diskUsage = useSelector(selectDockerDiskUsage);
@@ -55,10 +55,10 @@ function Logs() {
             <Table.Row key={ContainerID}>
               <Table.Cell>
                 <small>
-                  <code>{ContainerID.slice(0, 12)}</code>
+                  <code>{prettyContainerID(ContainerID)}</code>
                 </small>
               </Table.Cell>
-              <Table.Cell>{ContainerName}</Table.Cell>
+              <Table.Cell>{prettyContainerName(ContainerName)}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(Size))}</Table.Cell>
               <Table.Cell>
                 <small>{Path}</small>
@@ -74,10 +74,19 @@ function Logs() {
 
   return (
     <Container>
-      <Statistic>
-        <Statistic.Label>Size of logs</Statistic.Label>
-        <Statistic.Value>{replaceWithNbsp(prettyBytes(logSize.TotalSize))}</Statistic.Value>
-      </Statistic>
+      <Grid columns={2}>
+        <Grid.Row>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Label>Total size</Statistic.Label>
+              <Statistic.Value>{replaceWithNbsp(prettyBytes(logSize.TotalSize))}</Statistic.Value>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column textAlign="right" verticalAlign="bottom">
+            <Header>Logs</Header>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
       {showWarning ? <NoAccessWarning /> : null}
       {dataTable}
     </Container>

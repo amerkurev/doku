@@ -1,13 +1,12 @@
 import React, { useReducer } from 'react';
-import { Container, Statistic, Table, Message, Popup, Icon } from 'semantic-ui-react';
+import { Container, Statistic, Table, Message, Popup, Icon, Grid, Header } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
 import { selectDockerDiskUsage, selectDockerDiskUsageStatus } from '../AppSlice';
 import prettyBytes from 'pretty-bytes';
-import moment from 'moment';
 import { sortBy } from 'lodash/collection';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
-import { replaceWithNbsp } from '../util/fmt';
+import { prettyTime, replaceWithNbsp } from '../util/fmt';
 
 function BuildCache() {
   const diskUsage = useSelector(selectDockerDiskUsage);
@@ -32,10 +31,7 @@ function BuildCache() {
       <Table selectable sortable celled compact size="small">
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell
-              width={1}
-              sorted={column === 'ID' ? direction : null}
-              onClick={() => dispatch({ type: CHANGE_SORT, column: 'ID' })}>
+            <Table.HeaderCell sorted={column === 'ID' ? direction : null} onClick={() => dispatch({ type: CHANGE_SORT, column: 'ID' })}>
               Build Cache ID
             </Table.HeaderCell>
             <Table.HeaderCell
@@ -50,21 +46,16 @@ function BuildCache() {
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'UsageCount' })}>
               Usage Count
             </Table.HeaderCell>
-            <Table.HeaderCell
-              width={1}
-              sorted={column === 'Type' ? direction : null}
-              onClick={() => dispatch({ type: CHANGE_SORT, column: 'Type' })}>
+            <Table.HeaderCell sorted={column === 'Type' ? direction : null} onClick={() => dispatch({ type: CHANGE_SORT, column: 'Type' })}>
               Type
             </Table.HeaderCell>
             <Table.HeaderCell
-              width={1}
               textAlign="center"
               sorted={column === 'Shared' ? direction : null}
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'Shared' })}>
               Shared
             </Table.HeaderCell>
             <Table.HeaderCell
-              width={1}
               textAlign="center"
               sorted={column === 'InUse' ? direction : null}
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'InUse' })}>
@@ -92,9 +83,10 @@ function BuildCache() {
               <Table.Cell>{Type}</Table.Cell>
               <Table.Cell textAlign="center">{Shared ? 'yes' : 'no'}</Table.Cell>
               <Table.Cell textAlign="center">{InUse ? 'yes' : 'no'}</Table.Cell>
-              <Table.Cell textAlign="center">{moment(LastUsedAt).format('YYYY-MM-DD\u00a0\u00a0HH:mm:ss Z')}</Table.Cell>
+              <Table.Cell textAlign="center">{prettyTime(LastUsedAt)}</Table.Cell>
               <Popup
                 wide="very"
+                header="Description"
                 content={Description}
                 trigger={
                   <Table.Cell textAlign="center">
@@ -111,10 +103,19 @@ function BuildCache() {
 
   return (
     <Container>
-      <Statistic>
-        <Statistic.Label>Builder Size</Statistic.Label>
-        <Statistic.Value>{replaceWithNbsp(prettyBytes(diskUsage.BuilderSize))}</Statistic.Value>
-      </Statistic>
+      <Grid columns={2}>
+        <Grid.Row>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Label>Total size</Statistic.Label>
+              <Statistic.Value>{replaceWithNbsp(prettyBytes(diskUsage.BuilderSize))}</Statistic.Value>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column textAlign="right" verticalAlign="bottom">
+            <Header>Build Cache</Header>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
       <HelpText />
       {dataTable}
     </Container>
