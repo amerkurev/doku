@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { selectDockerContainerList, selectDockerContainerListStatus, selectTotalSizeContainers, selectCountContainers } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
-import { Container, Grid, Header, Message, Statistic, Table } from 'semantic-ui-react';
+import { Container, Grid, Header, Icon, Message, Popup, Statistic, Table } from 'semantic-ui-react';
 import { prettyContainerID, prettyContainerName, prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
 import { sortBy } from 'lodash/collection';
@@ -53,13 +53,25 @@ function Containers() {
               textAlign="right"
               sorted={column === 'SizeRw' ? direction : null}
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'SizeRw' })}>
-              Size
+              {'Size RW '}
+              <Popup
+                wide="very"
+                header="Size RW"
+                content={'The size of files that have been created or changed by this container'}
+                trigger={<Icon name="question circle outline" />}
+              />
             </Table.HeaderCell>
             <Table.HeaderCell
               textAlign="right"
               sorted={column === 'SizeRootFs' ? direction : null}
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'SizeRootFs' })}>
-              Virtual Size
+              {'Virtual Size '}
+              <Popup
+                wide="very"
+                header="Virtual Size"
+                content={'The total size of all the files in this container'}
+                trigger={<Icon name="question circle outline" />}
+              />
             </Table.HeaderCell>
             <Table.HeaderCell
               textAlign="center"

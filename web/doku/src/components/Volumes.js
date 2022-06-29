@@ -51,7 +51,7 @@ function Volumes() {
               textAlign="right"
               sorted={column === 'RefCount' ? direction : null}
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'RefCount' })}>
-              RefCount
+              Ref.Count
             </Table.HeaderCell>
             <Table.HeaderCell
               textAlign="center"
