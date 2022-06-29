@@ -1,16 +1,18 @@
 import React, { useReducer } from 'react';
 import { Container, Statistic, Table, Message, Popup, Icon, Grid, Header } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { selectDockerDiskUsage, selectDockerDiskUsageStatus } from '../AppSlice';
+import { selectCountBuildCache, selectDockerDiskUsage, selectDockerDiskUsageStatus, selectTotalSizeBuildCache } from '../AppSlice';
 import prettyBytes from 'pretty-bytes';
 import { sortBy } from 'lodash/collection';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
-import { prettyTime, replaceWithNbsp } from '../util/fmt';
+import { prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
 
 function BuildCache() {
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
+  const totalSize = useSelector(selectTotalSizeBuildCache);
+  const count = useSelector(selectCountBuildCache);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
 
   const s = statusPage(diskUsage, diskUsageStatus);
@@ -108,11 +110,11 @@ function BuildCache() {
           <Grid.Column>
             <Statistic>
               <Statistic.Label>Total size</Statistic.Label>
-              <Statistic.Value>{replaceWithNbsp(prettyBytes(diskUsage.BuilderSize))}</Statistic.Value>
+              <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Build Cache</Header>
+            <Header>Build Cache {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>
@@ -129,9 +131,9 @@ function HelpText() {
         <Message.Header>
           <code>{'$ docker builder prune'}</code>
         </Message.Header>
-        Remove build cache. See details of{' '}
+        Remove build cache. For more details, see{' '}
         <a rel="noreferrer" target="_blank" href="https://docs.docker.com/engine/reference/commandline/builder_prune/">
-          docker builder prune
+          docker builder prune.
         </a>
       </Message.Content>
     </Message>

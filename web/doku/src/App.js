@@ -17,14 +17,14 @@ import {
   getDockerVersion,
   getDockerDiskUsage,
   getDockerDiskUsageLongPolling,
-  getDockerLogSize,
+  getDockerLogs,
   getDockerBindMounts,
   getDockerContainerList,
 } from './AppSlice';
 
 function polling(dispatch) {
   dispatch(getDockerContainerList());
-  dispatch(getDockerLogSize());
+  dispatch(getDockerLogs());
   dispatch(getDockerBindMounts());
   dispatch(getDockerDiskUsageLongPolling()) // long polling
     .unwrap()

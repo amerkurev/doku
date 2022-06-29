@@ -103,6 +103,9 @@ func dockerVersion(ctx context.Context, d *docker.Client) error {
 		return fmt.Errorf("failed to execute request: %w", err)
 	}
 
+	// hide sensitive (and not only) data
+	res.Components = nil
+
 	b, err := json.Marshal(res)
 	if err != nil {
 		return fmt.Errorf("failed to encode as JSON: %w", err)
@@ -118,10 +121,26 @@ func dockerContainerList(ctx context.Context, d *docker.Client) error {
 		return fmt.Errorf("failed to execute request: %w", err)
 	}
 
+	var totalSize int64
+	for _, c := range res {
+		// hide sensitive (and not only) data
+		c.HostConfig = nil
+		c.GraphDriver.Data = nil
+		c.GraphDriver.Name = ""
+		c.NetworkSettings = nil
+		c.Image = c.Config.Image // Image ID -> Image Tag
+		c.Config = nil
+		if c.SizeRw != nil {
+			totalSize += *c.SizeRw
+		}
+	}
+
 	b, err := json.Marshal(struct {
 		Containers []*dockerTypes.ContainerJSON
+		TotalSize  int64
 	}{
 		Containers: res,
+		TotalSize:  totalSize,
 	})
 
 	if err != nil {
@@ -137,6 +156,9 @@ func dockerDiskUsage(ctx context.Context, d *docker.Client) error {
 	if err != nil {
 		return fmt.Errorf("failed to execute request: %w", err)
 	}
+
+	// hide sensitive (and not only) data
+	res.Containers = nil
 
 	b, err := json.Marshal(res)
 	if err != nil {

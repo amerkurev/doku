@@ -1,32 +1,35 @@
 import React, { useReducer } from 'react';
 import { Container, Grid, Header, Message, Statistic, Table } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { selectDockerDiskUsage, selectDockerLogSize, selectDockerLogSizeStatus } from '../AppSlice';
+import { selectDockerContainerList, selectDockerLogs, selectDockerLogsStatus, selectTotalSizeLogs, selectCountLogs } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import { sortBy } from 'lodash/collection';
 import prettyBytes from 'pretty-bytes';
 import statusPage from './StatusPage';
-import { prettyContainerID, prettyContainerName, replaceWithNbsp } from '../util/fmt';
+import { prettyContainerID, prettyContainerName, prettyCount, replaceWithNbsp } from '../util/fmt';
 
 function Logs() {
-  const diskUsage = useSelector(selectDockerDiskUsage);
-  const logSize = useSelector(selectDockerLogSize);
-  const logSizeStatus = useSelector(selectDockerLogSizeStatus);
+  const containerList = useSelector(selectDockerContainerList);
+  const logs = useSelector(selectDockerLogs);
+  const logsStatus = useSelector(selectDockerLogsStatus);
+  const totalSize = useSelector(selectTotalSizeLogs);
+  const count = useSelector(selectCountLogs);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
 
-  const s = statusPage(logSize, logSizeStatus);
+  const s = statusPage(logs, logsStatus);
   if (s !== null) {
     return s;
   }
 
   let dataTable = null;
 
-  if (Array.isArray(logSize.Logs) && logSize.Logs.length > 0) {
+  if (Array.isArray(logs.Logs) && logs.Logs.length > 0) {
     const { column, direction } = state;
-    const data = sortBy(logSize.Logs, [column]);
+    const data = sortBy(logs.Logs, [column]);
     if (direction === 'descending') {
       data.reverse();
     }
+
     dataTable = (
       <Table selectable sortable celled compact size="small">
         <Table.Header>
@@ -70,7 +73,7 @@ function Logs() {
     );
   }
 
-  const showWarning = diskUsage && Array.isArray(diskUsage.Containers) && diskUsage.Containers.length > 0 && dataTable === null;
+  const showWarning = containerList && Array.isArray(containerList.Containers) && containerList.Containers.length > 0 && dataTable === null;
 
   return (
     <Container>
@@ -79,11 +82,11 @@ function Logs() {
           <Grid.Column>
             <Statistic>
               <Statistic.Label>Total size</Statistic.Label>
-              <Statistic.Value>{replaceWithNbsp(prettyBytes(logSize.TotalSize))}</Statistic.Value>
+              <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Logs</Header>
+            <Header>Logs {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>

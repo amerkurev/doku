@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { makeURL } from './util/net';
+import { sumBy } from 'lodash/math';
 
 const initialState = {
   version: '',
@@ -14,11 +15,25 @@ const initialState = {
   dockerDiskUsage: null,
   dockerDiskUsageStatus: 'idle',
 
-  dockerLogSize: null,
-  dockerLogSizeStatus: 'idle',
+  dockerLogs: null,
+  dockerLogsStatus: 'idle',
 
   dockerBindMounts: null,
   dockerBindMountsStatus: 'idle',
+
+  totalSizeImages: 0,
+  totalSizeContainers: 0,
+  totalSizeVolumes: 0,
+  totalSizeBindMounts: 0,
+  totalSizeLogs: 0,
+  totalSizeBuildCache: 0,
+
+  countImages: 0,
+  countContainers: 0,
+  countVolumes: 0,
+  countBindMounts: 0,
+  countLogs: 0,
+  countBuildCache: 0,
 };
 
 export const getVersion = createAsyncThunk('app/getVersion', async () => {
@@ -46,7 +61,7 @@ export const getDockerDiskUsageLongPolling = createAsyncThunk('app/getDockerDisk
   return response.data;
 });
 
-export const getDockerLogSize = createAsyncThunk('app/getDockerLogSize', async () => {
+export const getDockerLogs = createAsyncThunk('app/getDockerLogs', async () => {
   const response = await axios.get(makeURL('/v0/docker/log-size'));
   return response.data;
 });
@@ -55,6 +70,30 @@ export const getDockerBindMounts = createAsyncThunk('app/getDockerBindMounts', a
   const response = await axios.get(makeURL('/v0/docker/bind-mounts'));
   return response.data;
 });
+
+const diskUsageFulfilled = (state, action) => {
+  state.dockerDiskUsageStatus = 'idle';
+  state.dockerDiskUsage = action.payload;
+
+  const sharedSizes = [];
+  state.totalSizeImages = sumBy(action.payload.Images, (x) => {
+    const sharedSize = x.SharedSize;
+    if (sharedSize) {
+      if (sharedSizes.indexOf(sharedSize) > -1) {
+        return x.Size - sharedSize;
+      } else {
+        sharedSizes.push(sharedSize);
+      }
+    }
+    return x.Size;
+  });
+  state.totalSizeVolumes = sumBy(action.payload.Volumes, (x) => x.UsageData.Size);
+  state.totalSizeBuildCache = action.payload.BuilderSize;
+
+  state.countImages = action.payload.Images.length;
+  state.countVolumes = action.payload.Volumes.length;
+  state.countBuildCache = action.payload.BuildCache.length;
+};
 
 export const appSlice = createSlice({
   name: 'app',
@@ -84,6 +123,8 @@ export const appSlice = createSlice({
     [getDockerContainerList.fulfilled]: (state, action) => {
       state.dockerContainerListStatus = 'idle';
       state.dockerContainerList = action.payload;
+      state.totalSizeContainers = action.payload.TotalSize;
+      state.countContainers = action.payload.Containers.length;
     },
     [getDockerContainerList.rejected]: (state, action) => {
       state.dockerContainerListStatus = 'idle';
@@ -92,10 +133,7 @@ export const appSlice = createSlice({
     [getDockerDiskUsage.pending]: (state) => {
       state.dockerDiskUsageStatus = 'loading';
     },
-    [getDockerDiskUsage.fulfilled]: (state, action) => {
-      state.dockerDiskUsageStatus = 'idle';
-      state.dockerDiskUsage = action.payload;
-    },
+    [getDockerDiskUsage.fulfilled]: diskUsageFulfilled,
     [getDockerDiskUsage.rejected]: (state, action) => {
       state.dockerDiskUsageStatus = 'idle';
     },
@@ -103,23 +141,22 @@ export const appSlice = createSlice({
     [getDockerDiskUsageLongPolling.pending]: (state) => {
       state.dockerDiskUsageStatus = 'loading';
     },
-    [getDockerDiskUsageLongPolling.fulfilled]: (state, action) => {
-      state.dockerDiskUsageStatus = 'idle';
-      state.dockerDiskUsage = action.payload;
-    },
+    [getDockerDiskUsageLongPolling.fulfilled]: diskUsageFulfilled,
     [getDockerDiskUsageLongPolling.rejected]: (state, action) => {
       state.dockerDiskUsageStatus = 'idle';
     },
     // Docker Log Size
-    [getDockerLogSize.pending]: (state) => {
-      state.dockerLogSizeStatus = 'loading';
+    [getDockerLogs.pending]: (state) => {
+      state.dockerLogsStatus = 'loading';
     },
-    [getDockerLogSize.fulfilled]: (state, action) => {
-      state.dockerLogSizeStatus = 'idle';
-      state.dockerLogSize = action.payload;
+    [getDockerLogs.fulfilled]: (state, action) => {
+      state.dockerLogsStatus = 'idle';
+      state.dockerLogs = action.payload;
+      state.totalSizeLogs = action.payload.TotalSize;
+      state.countLogs = action.payload.Logs.length;
     },
-    [getDockerLogSize.rejected]: (state, action) => {
-      state.dockerLogSizeStatus = 'idle';
+    [getDockerLogs.rejected]: (state, action) => {
+      state.dockerLogsStatus = 'idle';
     },
     // Docker Bind Mounts
     [getDockerBindMounts.pending]: (state) => {
@@ -128,6 +165,8 @@ export const appSlice = createSlice({
     [getDockerBindMounts.fulfilled]: (state, action) => {
       state.dockerBindMountsStatus = 'idle';
       state.dockerBindMounts = action.payload;
+      state.totalSizeBindMounts = action.payload.TotalSize;
+      state.countBindMounts = action.payload.BindMounts.length;
     },
     [getDockerBindMounts.rejected]: (state, action) => {
       state.dockerBindMountsStatus = 'idle';
@@ -150,8 +189,22 @@ export const selectDockerContainerListStatus = (state) => state.app.dockerContai
 export const selectDockerDiskUsage = (state) => state.app.dockerDiskUsage;
 export const selectDockerDiskUsageStatus = (state) => state.app.dockerDiskUsageStatus;
 
-export const selectDockerLogSize = (state) => state.app.dockerLogSize;
-export const selectDockerLogSizeStatus = (state) => state.app.dockerLogSizeStatus;
+export const selectDockerLogs = (state) => state.app.dockerLogs;
+export const selectDockerLogsStatus = (state) => state.app.dockerLogsStatus;
 
 export const selectDockerBindMounts = (state) => state.app.dockerBindMounts;
 export const selectDockerBindMountsStatus = (state) => state.app.dockerBindMountsStatus;
+
+export const selectTotalSizeImages = (state) => state.app.totalSizeImages;
+export const selectTotalSizeContainers = (state) => state.app.totalSizeContainers;
+export const selectTotalSizeVolumes = (state) => state.app.totalSizeVolumes;
+export const selectTotalSizeBindMounts = (state) => state.app.totalSizeBindMounts;
+export const selectTotalSizeLogs = (state) => state.app.totalSizeLogs;
+export const selectTotalSizeBuildCache = (state) => state.app.totalSizeBuildCache;
+
+export const selectCountImages = (state) => state.app.countImages;
+export const selectCountContainers = (state) => state.app.countContainers;
+export const selectCountVolumes = (state) => state.app.countVolumes;
+export const selectCountBindMounts = (state) => state.app.countBindMounts;
+export const selectCountLogs = (state) => state.app.countLogs;
+export const selectCountBuildCache = (state) => state.app.countBuildCache;

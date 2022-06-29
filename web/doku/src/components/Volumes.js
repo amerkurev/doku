@@ -1,17 +1,18 @@
 import React, { useReducer } from 'react';
 import { useSelector } from 'react-redux';
-import { selectDockerDiskUsage, selectDockerDiskUsageStatus } from '../AppSlice';
+import { selectDockerDiskUsage, selectDockerDiskUsageStatus, selectTotalSizeVolumes, selectCountVolumes } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
 import { Container, Grid, Header, Icon, Message, Popup, Statistic, Table } from 'semantic-ui-react';
-import { prettyTime, replaceWithNbsp } from '../util/fmt';
+import { prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
-import { sumBy } from 'lodash/math';
 
 function Volumes() {
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
+  const totalSize = useSelector(selectTotalSizeVolumes);
+  const count = useSelector(selectCountVolumes);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
 
   const s = statusPage(diskUsage, diskUsageStatus);
@@ -20,7 +21,6 @@ function Volumes() {
   }
 
   let dataTable = null;
-  let totalSize = 0;
 
   if (Array.isArray(diskUsage.Volumes) && diskUsage.Volumes.length > 0) {
     const { column, direction } = state;
@@ -102,8 +102,6 @@ function Volumes() {
         </Table.Body>
       </Table>
     );
-
-    totalSize = sumBy(data, (x) => x.Size);
   }
 
   return (
@@ -117,7 +115,7 @@ function Volumes() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Volumes</Header>
+            <Header>Volumes {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>
@@ -134,9 +132,9 @@ function HelpText() {
         <Message.Header>
           <code>{'$ docker volume prune'}</code>
         </Message.Header>
-        Remove all unused local volumes. See details of{' '}
+        Remove all unused local volumes. For more details, see{' '}
         <a rel="noreferrer" target="_blank" href="https://docs.docker.com/engine/reference/commandline/volume_prune/">
-          docker volume prune
+          docker volume prune.
         </a>
       </Message.Content>
     </Message>

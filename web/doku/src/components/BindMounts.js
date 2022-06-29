@@ -1,17 +1,19 @@
 import React, { useReducer } from 'react';
 import { Container, Statistic, Table, Icon, Message, Grid, Header } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { selectDockerBindMounts, selectDockerBindMountsStatus } from '../AppSlice';
+import { selectDockerBindMounts, selectDockerBindMountsStatus, selectTotalSizeBindMounts, selectCountBindMounts } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
-import { prettyTime, replaceWithNbsp } from '../util/fmt';
+import { prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
 import { findIndex } from 'lodash/array';
 
 function BindMounts() {
   const bindMounts = useSelector(selectDockerBindMounts);
   const bindMountsStatus = useSelector(selectDockerBindMountsStatus);
+  const totalSize = useSelector(selectTotalSizeBindMounts);
+  const count = useSelector(selectCountBindMounts);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
 
   const s = statusPage(bindMounts, bindMountsStatus);
@@ -27,6 +29,7 @@ function BindMounts() {
     if (direction === 'descending') {
       data.reverse();
     }
+
     const customView = (prepared, err, value) => {
       if (!prepared) return <Icon loading name="spinner" />;
       if (err.length > 0) return '-'; // error
@@ -90,15 +93,16 @@ function BindMounts() {
           <Grid.Column>
             <Statistic>
               <Statistic.Label>Total size</Statistic.Label>
-              <Statistic.Value>{replaceWithNbsp(prettyBytes(bindMounts.TotalSize))}</Statistic.Value>
+              <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Bind Mounts</Header>
+            <Header>Bind Mounts {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>
       {showWarning ? <NoAccessWarning /> : null}
+      <HelpText />
       {dataTable}
     </Container>
   );
@@ -112,6 +116,24 @@ function NoAccessWarning() {
           <code>{'No access to some mounted files or directories'}</code>
         </Message.Header>
         {"Doku doesn't have access to some mounted files or directories and can't calculate the size of these files."}
+      </Message.Content>
+    </Message>
+  );
+}
+
+function HelpText() {
+  return (
+    <Message info size="tiny">
+      <Message.Content>
+        <Message.Header>
+          <Icon name="info circle" />
+          <code>{'Note'}</code>
+        </Message.Header>
+        When you use a bind mount, a file or directory on the host machine is mounted into a container. The file or directory is referenced
+        by its absolute path on the host machine. In this case, disk space usage is not directly related to Docker. For more details, see{' '}
+        <a rel="noreferrer" target="_blank" href="https://docs.docker.com/storage/bind-mounts/">
+          bind mounts.
+        </a>
       </Message.Content>
     </Message>
   );

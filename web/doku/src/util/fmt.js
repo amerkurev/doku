@@ -4,6 +4,10 @@ export const replaceWithNbsp = function (s) {
   return s.replace(/ /g, '\u00a0');
 };
 
+export const prettyCount = function (c) {
+  return c > 0 ? `(${c})` : '';
+};
+
 export const prettyContainerName = function (s) {
   if (s.length > 0 && s[0] === '/') {
     return s.slice(1);

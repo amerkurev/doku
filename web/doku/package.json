@@ -34,6 +34,8 @@
     ]
   },
   "dependencies": {
+    "@nivo/core": "0.79.0",
+    "@nivo/pie": "^0.79.1",
     "@reduxjs/toolkit": "1.8.2",
     "@semantic-ui-react/css-patch": "1.0.0",
     "@testing-library/jest-dom": "5.16.4",

@@ -1,17 +1,18 @@
 import React, { useReducer } from 'react';
 import { useSelector } from 'react-redux';
-import { selectDockerContainerList, selectDockerContainerListStatus } from '../AppSlice';
+import { selectDockerContainerList, selectDockerContainerListStatus, selectTotalSizeContainers, selectCountContainers } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
-import { Container, Grid, Header, Icon, Message, Popup, Statistic, Table } from 'semantic-ui-react';
-import { prettyContainerID, prettyContainerName, prettyTime, replaceWithNbsp } from '../util/fmt';
+import { Container, Grid, Header, Message, Statistic, Table } from 'semantic-ui-react';
+import { prettyContainerID, prettyContainerName, prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
 import { sortBy } from 'lodash/collection';
-import { sumBy } from 'lodash/math';
 
 function Containers() {
   const containerList = useSelector(selectDockerContainerList);
   const containerListStatus = useSelector(selectDockerContainerListStatus);
+  const totalSize = useSelector(selectTotalSizeContainers);
+  const count = useSelector(selectCountContainers);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
 
   const s = statusPage(containerList, containerListStatus);
@@ -20,13 +21,12 @@ function Containers() {
   }
 
   let dataTable = null;
-  let totalSize = 0;
 
   if (Array.isArray(containerList.Containers) && containerList.Containers.length > 0) {
     const { column, direction } = state;
     const data = sortBy(
       containerList.Containers.map((x) => {
-        return { ...x, ...{ ImageName: x.Config.Image, Status: x.State.Status, ID: x.Id } };
+        return { ...x, ...{ Status: x.State.Status, ID: x.Id } };
       }),
       [column]
     );
@@ -73,11 +73,10 @@ function Containers() {
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'Created' })}>
               Created
             </Table.HeaderCell>
-            <Table.HeaderCell />
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ ID, Name, ImageName, Image, Command, Created, SizeRw, SizeRootFs, Status }) => (
+          {data.map(({ ID, Name, Image, Command, Created, SizeRw, SizeRootFs, Status }) => (
             <Table.Row key={ID}>
               <Table.Cell>
                 <small>
@@ -85,28 +84,16 @@ function Containers() {
                 </small>
               </Table.Cell>
               <Table.Cell style={{ whiteSpace: 'pre-line' }}>{prettyContainerName(Name)}</Table.Cell>
-              <Table.Cell>{ImageName}</Table.Cell>
+              <Table.Cell>{Image}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(SizeRw))}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(SizeRootFs))}</Table.Cell>
               <Table.Cell textAlign="center">{Status}</Table.Cell>
               <Table.Cell textAlign="center">{prettyTime(Created)}</Table.Cell>
-              <Popup
-                wide="very"
-                header="Image ID"
-                content={Image}
-                trigger={
-                  <Table.Cell textAlign="center">
-                    <Icon name="question circle outline" />
-                  </Table.Cell>
-                }
-              />
             </Table.Row>
           ))}
         </Table.Body>
       </Table>
     );
-
-    totalSize = sumBy(data, (x) => x.SizeRw);
   }
 
   return (
@@ -120,7 +107,7 @@ function Containers() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Containers</Header>
+            <Header>Containers {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>
@@ -137,9 +124,9 @@ function HelpText() {
         <Message.Header>
           <code>{'$ docker container prune'}</code>
         </Message.Header>
-        Remove all stopped containers. See details of{' '}
+        Remove all stopped containers. For more details, see{' '}
         <a rel="noreferrer" target="_blank" href="https://docs.docker.com/engine/reference/commandline/container_prune/">
-          docker container prune
+          docker container prune.
         </a>
       </Message.Content>
     </Message>

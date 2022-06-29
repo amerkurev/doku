@@ -1,17 +1,18 @@
 import React, { useReducer } from 'react';
 import { useSelector } from 'react-redux';
-import { selectDockerDiskUsage, selectDockerDiskUsageStatus } from '../AppSlice';
+import { selectDockerDiskUsage, selectDockerDiskUsageStatus, selectTotalSizeImages, selectCountImages } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
-import { sumBy } from 'lodash/math';
 import { Container, Icon, Message, Popup, Statistic, Table, Grid, Header } from 'semantic-ui-react';
-import { prettyImageID, prettyUnixTime, replaceWithNbsp } from '../util/fmt';
+import { prettyCount, prettyImageID, prettyUnixTime, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
 
 function Images() {
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
+  const totalSize = useSelector(selectTotalSizeImages);
+  const count = useSelector(selectCountImages);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
 
   const s = statusPage(diskUsage, diskUsageStatus);
@@ -20,7 +21,6 @@ function Images() {
   }
 
   let dataTable = null;
-  let totalSize = 0;
 
   if (Array.isArray(diskUsage.Images) && diskUsage.Images.length > 0) {
     const { column, direction } = state;
@@ -103,20 +103,6 @@ function Images() {
         </Table.Body>
       </Table>
     );
-
-    const sharedSizes = [];
-
-    totalSize = sumBy(data, (x) => {
-      const sharedSize = x.SharedSize;
-      if (sharedSize) {
-        if (sharedSizes.indexOf(sharedSize) > -1) {
-          return x.Size - sharedSize;
-        } else {
-          sharedSizes.push(sharedSize);
-        }
-      }
-      return x.Size;
-    });
   }
 
   return (
@@ -130,7 +116,7 @@ function Images() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Images</Header>
+            <Header>Images {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>
@@ -147,9 +133,9 @@ function HelpText() {
         <Message.Header>
           <code>{'$ docker image prune'}</code>
         </Message.Header>
-        Remove unused images. See details of{' '}
+        Remove unused images. For more details, see{' '}
         <a rel="noreferrer" target="_blank" href="https://docs.docker.com/engine/reference/commandline/image_prune/">
-          docker image prune
+          docker image prune.
         </a>
       </Message.Content>
     </Message>
