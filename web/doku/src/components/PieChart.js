@@ -100,7 +100,7 @@ function PieChart() {
     <Pie
       colors={{ datum: 'data.color' }}
       data={pieData}
-      width={450}
+      width={600}
       height={450}
       margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
       innerRadius={0.7}

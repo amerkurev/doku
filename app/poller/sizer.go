@@ -3,7 +3,6 @@ package poller
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -34,6 +33,7 @@ func bindMountsSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 
 					for _, m := range cont.Mounts {
 						if m.Type == "bind" && !contains(m.Source, seen) {
+							seen = append(seen, m.Source)
 							bindMounts = append(bindMounts, &types.BindMountInfo{
 								Path:      m.Source,
 								ReadOnly:  !m.RW,
@@ -105,8 +105,6 @@ func bindMountInfo(m *types.BindMountInfo, volumes []types.HostVolume) error {
 
 		m.Size = fi.Size()
 		m.LastCheck = time.Now().UnixMilli()
-
-		fmt.Printf("%+v\n", m)
 
 		if fi.IsDir() {
 			size, files, e := util.DirSize(p)

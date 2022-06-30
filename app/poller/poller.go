@@ -128,7 +128,6 @@ func dockerContainerList(ctx context.Context, d *docker.Client) error {
 		c.GraphDriver.Data = nil
 		c.GraphDriver.Name = ""
 		c.NetworkSettings = nil
-		c.Image = c.Config.Image // Image ID -> Image Tag
 		c.Config = nil
 		if c.SizeRw != nil {
 			totalSize += *c.SizeRw
@@ -179,6 +178,10 @@ func dockerLogSize(ctx context.Context, d *docker.Client, volumes []types.HostVo
 	var totalSize int64
 
 	for _, cont := range containers {
+		if len(cont.LogPath) == 0 {
+			continue
+		}
+
 		l, errSize := logFileSize(cont, volumes) // get size of container log file
 		if errSize != nil {
 			if _, ok := logPathErrors[cont.LogPath]; !ok {

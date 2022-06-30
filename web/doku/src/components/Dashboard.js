@@ -143,12 +143,12 @@ function Dashboard() {
   return (
     <Container>
       <DockerVersion />
-      <Grid columns={2}>
+      <Grid columns={'equal'}>
         <Grid.Row>
-          <Grid.Column textAlign="right">
+          <Grid.Column textAlign="right" width={9}>
             <PieChart />
           </Grid.Column>
-          <Grid.Column textAlign="center">
+          <Grid.Column textAlign="center" width={7}>
             <Container style={{ marginTop: '60px' }}>
               <Statistic inverted={isDarkTheme}>
                 <Statistic.Label>Docker disk space usage</Statistic.Label>
@@ -166,11 +166,11 @@ function Dashboard() {
   );
 }
 
-function getImageSize(diskUsage, imageName) {
+function getImageSize(diskUsage, imageID) {
   if (diskUsage && Array.isArray(diskUsage.Images) && diskUsage.Images.length > 0) {
     for (let i = 0; i < diskUsage.Images.length; i++) {
       const x = diskUsage.Images[i];
-      if (Array.isArray(x.RepoTags) && x.RepoTags.indexOf(imageName) > -1) {
+      if (x.Id === imageID) {
         return x.Size;
       }
     }

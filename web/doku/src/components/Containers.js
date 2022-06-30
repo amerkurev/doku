@@ -6,6 +6,7 @@ import {
   selectTotalSizeContainers,
   selectCountContainers,
   selectIsDarkTheme,
+  selectDockerDiskUsage,
 } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
@@ -16,6 +17,7 @@ import { sortBy } from 'lodash/collection';
 
 function Containers() {
   const isDarkTheme = useSelector(selectIsDarkTheme);
+  const diskUsage = useSelector(selectDockerDiskUsage);
   const containerList = useSelector(selectDockerContainerList);
   const containerListStatus = useSelector(selectDockerContainerListStatus);
   const totalSize = useSelector(selectTotalSizeContainers);
@@ -33,7 +35,12 @@ function Containers() {
     const { column, direction } = state;
     const data = sortBy(
       containerList.Containers.map((x) => {
-        const extra = { Status: x.State.Status, ID: x.Id };
+        const extra = {
+          ID: x.Id,
+          Size: x.SizeRw,
+          Status: x.State.Status,
+          ImageNames: getImageNames(diskUsage, x.Image),
+        };
         return { ...x, ...extra };
       }),
       [column]
@@ -53,14 +60,14 @@ function Containers() {
               Name
             </Table.HeaderCell>
             <Table.HeaderCell
-              sorted={column === 'ImageName' ? direction : null}
-              onClick={() => dispatch({ type: CHANGE_SORT, column: 'ImageName' })}>
+              sorted={column === 'ImageNames' ? direction : null}
+              onClick={() => dispatch({ type: CHANGE_SORT, column: 'ImageNames' })}>
               Image
             </Table.HeaderCell>
             <Table.HeaderCell
               textAlign="right"
-              sorted={column === 'SizeRw' ? direction : null}
-              onClick={() => dispatch({ type: CHANGE_SORT, column: 'SizeRw' })}>
+              sorted={column === 'Size' ? direction : null}
+              onClick={() => dispatch({ type: CHANGE_SORT, column: 'Size' })}>
               {'Size RW '}
               <Popup
                 inverted={isDarkTheme}
@@ -95,10 +102,11 @@ function Containers() {
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'Created' })}>
               Created
             </Table.HeaderCell>
+            <Table.HeaderCell />
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ ID, Name, Image, Command, Created, SizeRw, SizeRootFs, Status }) => (
+          {data.map(({ ID, Name, Image, ImageNames, Created, Size, SizeRootFs, Status }) => (
             <Table.Row key={ID}>
               <Table.Cell>
                 <small>
@@ -106,11 +114,22 @@ function Containers() {
                 </small>
               </Table.Cell>
               <Table.Cell>{prettyContainerName(Name)}</Table.Cell>
-              <Table.Cell>{Image}</Table.Cell>
-              <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(SizeRw))}</Table.Cell>
+              <Table.Cell style={{ whiteSpace: 'pre-line' }}>{ImageNames}</Table.Cell>
+              <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(Size))}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(SizeRootFs))}</Table.Cell>
               <Table.Cell textAlign="center">{Status}</Table.Cell>
               <Table.Cell textAlign="center">{prettyTime(Created)}</Table.Cell>
+              <Popup
+                inverted={isDarkTheme}
+                wide="very"
+                header="Image ID"
+                content={Image}
+                trigger={
+                  <Table.Cell textAlign="center">
+                    <Icon name="question circle outline" />
+                  </Table.Cell>
+                }
+              />
             </Table.Row>
           ))}
         </Table.Body>
@@ -129,7 +148,7 @@ function Containers() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Containers {prettyCount(count)}</Header>
+            <Header inverted={isDarkTheme}>Containers {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>
@@ -153,6 +172,18 @@ function HelpText() {
       </Message.Content>
     </Message>
   );
+}
+
+function getImageNames(diskUsage, ImageID) {
+  if (diskUsage && Array.isArray(diskUsage.Images) && diskUsage.Images.length > 0) {
+    for (let i = 0; i < diskUsage.Images.length; i++) {
+      const x = diskUsage.Images[i];
+      if (x.Id === ImageID) {
+        return x.RepoTags.join('\n');
+      }
+    }
+  }
+  return ImageID;
 }
 
 export default Containers;

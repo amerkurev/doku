@@ -129,7 +129,7 @@ function Volumes() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Volumes {prettyCount(count)}</Header>
+            <Header inverted={isDarkTheme}>Volumes {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>

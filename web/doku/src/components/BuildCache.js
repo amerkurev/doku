@@ -122,7 +122,7 @@ function BuildCache() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Build Cache {prettyCount(count)}</Header>
+            <Header inverted={isDarkTheme}>Build Cache {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>

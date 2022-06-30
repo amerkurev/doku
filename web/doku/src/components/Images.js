@@ -129,7 +129,7 @@ function Images() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Images {prettyCount(count)}</Header>
+            <Header inverted={isDarkTheme}>Images {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>

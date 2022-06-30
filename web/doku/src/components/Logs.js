@@ -94,7 +94,7 @@ function Logs() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Logs {prettyCount(count)}</Header>
+            <Header inverted={isDarkTheme}>Logs {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>

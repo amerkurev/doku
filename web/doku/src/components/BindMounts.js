@@ -104,7 +104,7 @@ function BindMounts() {
             </Statistic>
           </Grid.Column>
           <Grid.Column textAlign="right" verticalAlign="bottom">
-            <Header>Bind Mounts {prettyCount(count)}</Header>
+            <Header inverted={isDarkTheme}>Bind Mounts {prettyCount(count)}</Header>
           </Grid.Column>
         </Grid.Row>
       </Grid>
