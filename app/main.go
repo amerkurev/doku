@@ -24,7 +24,7 @@ import (
 var opts struct {
 	Listen            string   `short:"l" long:"listen" env:"LISTEN" description:"listen on host:port (default: 0.0.0.0:9090 under docker, 127.0.0.1:9090 without)"`
 	AuthBasicHtpasswd string   `long:"basic-htpasswd" env:"BASIC_HTPASSWD" description:"htpasswd file for basic auth"`
-	Volumes           []string `short:"v" long:"volume" env:"VOLUMES" default:"root:/" env-delim:"," description:"volumes to report"`
+	Volumes           []string `short:"v" long:"volume" env:"VOLUMES" default:"root:/hostroot" env-delim:"," description:"volumes to report"`
 
 	Docker struct {
 		Host     string `long:"host" env:"HOST" default:"unix:///var/run/docker.sock" description:"url to the docker server"`
