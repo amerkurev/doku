@@ -1,16 +1,25 @@
 import React, { useReducer } from 'react';
 import { useSelector } from 'react-redux';
-import { selectDockerDiskUsage, selectDockerDiskUsageStatus, selectTotalSizeVolumes, selectCountVolumes } from '../AppSlice';
+import {
+  selectDockerDiskUsage,
+  selectDockerDiskUsageStatus,
+  selectTotalSizeVolumes,
+  selectCountVolumes,
+  selectDockerContainerList,
+  selectIsDarkTheme,
+} from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
 import { Container, Grid, Header, Icon, Message, Popup, Statistic, Table } from 'semantic-ui-react';
-import { prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
+import { prettyContainerName, prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
 
 function Volumes() {
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
+  const containerList = useSelector(selectDockerContainerList);
   const totalSize = useSelector(selectTotalSizeVolumes);
   const count = useSelector(selectCountVolumes);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
@@ -26,7 +35,12 @@ function Volumes() {
     const { column, direction } = state;
     const data = sortBy(
       diskUsage.Volumes.map((x) => {
-        return { ...x, ...{ RefCount: x.UsageData.RefCount, Size: x.UsageData.Size } };
+        const extra = {
+          Containers: getContainers(containerList, x.Name),
+          RefCount: x.UsageData.RefCount,
+          Size: x.UsageData.Size,
+        };
+        return { ...x, ...extra };
       }),
       [column]
     );
@@ -35,23 +49,22 @@ function Volumes() {
     }
 
     dataTable = (
-      <Table selectable sortable celled compact size="small">
+      <Table selectable sortable celled compact size="small" inverted={isDarkTheme}>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell sorted={column === 'Name' ? direction : null} onClick={() => dispatch({ type: CHANGE_SORT, column: 'Name' })}>
               Name
             </Table.HeaderCell>
             <Table.HeaderCell
+              sorted={column === 'ContainerName' ? direction : null}
+              onClick={() => dispatch({ type: CHANGE_SORT, column: 'ContainerName' })}>
+              Containers
+            </Table.HeaderCell>
+            <Table.HeaderCell
               textAlign="right"
               sorted={column === 'Size' ? direction : null}
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'Size' })}>
               Size
-            </Table.HeaderCell>
-            <Table.HeaderCell
-              textAlign="right"
-              sorted={column === 'RefCount' ? direction : null}
-              onClick={() => dispatch({ type: CHANGE_SORT, column: 'RefCount' })}>
-              Ref.Count
             </Table.HeaderCell>
             <Table.HeaderCell
               textAlign="center"
@@ -75,19 +88,20 @@ function Volumes() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ CreatedAt, Driver, Labels, Mountpoint, Name, Options, Scope, Size, RefCount }) => (
+          {data.map(({ CreatedAt, Driver, Containers, Mountpoint, Name, Options, Scope, Size, RefCount }) => (
             <Table.Row key={Name}>
               <Table.Cell>
                 <small>
                   <code>{Name}</code>
                 </small>
               </Table.Cell>
+              <Table.Cell style={{ whiteSpace: 'pre-line' }}>{Containers}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(Size))}</Table.Cell>
-              <Table.Cell textAlign="right">{RefCount}</Table.Cell>
               <Table.Cell textAlign="center">{Driver}</Table.Cell>
               <Table.Cell textAlign="center">{Scope}</Table.Cell>
               <Table.Cell textAlign="center">{prettyTime(CreatedAt)}</Table.Cell>
               <Popup
+                inverted={isDarkTheme}
                 wide="very"
                 header="Mountpoint"
                 content={Mountpoint}
@@ -109,7 +123,7 @@ function Volumes() {
       <Grid columns={2}>
         <Grid.Row>
           <Grid.Column>
-            <Statistic>
+            <Statistic inverted={isDarkTheme}>
               <Statistic.Label>Total size</Statistic.Label>
               <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>
@@ -139,6 +153,20 @@ function HelpText() {
       </Message.Content>
     </Message>
   );
+}
+
+function getContainers(containers, volumeName) {
+  const res = [];
+  if (containers && Array.isArray(containers.Containers) && containers.Containers.length > 0) {
+    for (let i = 0; i < containers.Containers.length; i++) {
+      const x = containers.Containers[i];
+      const volumes = x.Mounts.map((m) => m.Name);
+      if (volumes.indexOf(volumeName) > -1) {
+        res.push(prettyContainerName(x.Name));
+      }
+    }
+  }
+  return res.length === 0 ? '-' : res.join('\n');
 }
 
 export default Volumes;

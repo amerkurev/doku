@@ -8,6 +8,7 @@ import App from './App';
 import { appReducer } from './AppSlice';
 
 import 'semantic-ui-css/semantic.min.css';
+import './custom.css';
 
 export const store = configureStore({
   reducer: {

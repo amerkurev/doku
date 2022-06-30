@@ -1,7 +1,13 @@
 import React, { useReducer } from 'react';
 import { Container, Statistic, Table, Icon, Message, Grid, Header } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { selectDockerBindMounts, selectDockerBindMountsStatus, selectTotalSizeBindMounts, selectCountBindMounts } from '../AppSlice';
+import {
+  selectDockerBindMounts,
+  selectDockerBindMountsStatus,
+  selectTotalSizeBindMounts,
+  selectCountBindMounts,
+  selectIsDarkTheme,
+} from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
@@ -10,6 +16,7 @@ import prettyBytes from 'pretty-bytes';
 import { findIndex } from 'lodash/array';
 
 function BindMounts() {
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const bindMounts = useSelector(selectDockerBindMounts);
   const bindMountsStatus = useSelector(selectDockerBindMountsStatus);
   const totalSize = useSelector(selectTotalSizeBindMounts);
@@ -37,7 +44,7 @@ function BindMounts() {
     };
 
     dataTable = (
-      <Table selectable sortable celled compact size="small">
+      <Table selectable sortable celled compact size="small" inverted={isDarkTheme}>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell sorted={column === 'Path' ? direction : null} onClick={() => dispatch({ type: CHANGE_SORT, column: 'Path' })}>
@@ -91,7 +98,7 @@ function BindMounts() {
       <Grid columns={2}>
         <Grid.Row>
           <Grid.Column>
-            <Statistic>
+            <Statistic inverted={isDarkTheme}>
               <Statistic.Label>Total size</Statistic.Label>
               <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>

@@ -1,6 +1,12 @@
 import React, { useReducer } from 'react';
 import { useSelector } from 'react-redux';
-import { selectDockerDiskUsage, selectDockerDiskUsageStatus, selectTotalSizeImages, selectCountImages } from '../AppSlice';
+import {
+  selectDockerDiskUsage,
+  selectDockerDiskUsageStatus,
+  selectTotalSizeImages,
+  selectCountImages,
+  selectIsDarkTheme,
+} from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
@@ -9,6 +15,7 @@ import { prettyCount, prettyImageID, prettyUnixTime, replaceWithNbsp } from '../
 import prettyBytes from 'pretty-bytes';
 
 function Images() {
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
   const totalSize = useSelector(selectTotalSizeImages);
@@ -28,7 +35,12 @@ function Images() {
       diskUsage.Images.map((x) => {
         const repoTags = Array.isArray(x.RepoTags) ? x.RepoTags.join('\n') : '';
         const repoDigests = Array.isArray(x.RepoDigests) ? x.RepoDigests.join('\n') : '';
-        return { ...x, ...{ RepoTags: repoTags, RepoDigests: repoDigests, ID: x.Id } };
+        const extra = {
+          ID: x.Id,
+          RepoTags: repoTags,
+          RepoDigests: repoDigests,
+        };
+        return { ...x, ...extra };
       }),
       [column]
     );
@@ -37,7 +49,7 @@ function Images() {
     }
 
     dataTable = (
-      <Table selectable sortable celled compact size="small">
+      <Table selectable sortable celled compact size="small" inverted={isDarkTheme}>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell sorted={column === 'ID' ? direction : null} onClick={() => dispatch({ type: CHANGE_SORT, column: 'ID' })}>
@@ -89,6 +101,7 @@ function Images() {
               <Table.Cell textAlign="center">{Containers}</Table.Cell>
               <Table.Cell textAlign="center">{prettyUnixTime(Created)}</Table.Cell>
               <Popup
+                inverted={isDarkTheme}
                 wide="very"
                 header="Digests"
                 content={RepoDigests}
@@ -110,7 +123,7 @@ function Images() {
       <Grid columns={2}>
         <Grid.Row>
           <Grid.Column>
-            <Statistic>
+            <Statistic inverted={isDarkTheme}>
               <Statistic.Label>Total size</Statistic.Label>
               <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>

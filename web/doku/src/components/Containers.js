@@ -1,6 +1,12 @@
 import React, { useReducer } from 'react';
 import { useSelector } from 'react-redux';
-import { selectDockerContainerList, selectDockerContainerListStatus, selectTotalSizeContainers, selectCountContainers } from '../AppSlice';
+import {
+  selectDockerContainerList,
+  selectDockerContainerListStatus,
+  selectTotalSizeContainers,
+  selectCountContainers,
+  selectIsDarkTheme,
+} from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { Container, Grid, Header, Icon, Message, Popup, Statistic, Table } from 'semantic-ui-react';
@@ -9,6 +15,7 @@ import prettyBytes from 'pretty-bytes';
 import { sortBy } from 'lodash/collection';
 
 function Containers() {
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const containerList = useSelector(selectDockerContainerList);
   const containerListStatus = useSelector(selectDockerContainerListStatus);
   const totalSize = useSelector(selectTotalSizeContainers);
@@ -26,7 +33,8 @@ function Containers() {
     const { column, direction } = state;
     const data = sortBy(
       containerList.Containers.map((x) => {
-        return { ...x, ...{ Status: x.State.Status, ID: x.Id } };
+        const extra = { Status: x.State.Status, ID: x.Id };
+        return { ...x, ...extra };
       }),
       [column]
     );
@@ -35,7 +43,7 @@ function Containers() {
     }
 
     dataTable = (
-      <Table selectable sortable celled compact size="small">
+      <Table selectable sortable celled compact size="small" inverted={isDarkTheme}>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell sorted={column === 'ID' ? direction : null} onClick={() => dispatch({ type: CHANGE_SORT, column: 'ID' })}>
@@ -55,6 +63,7 @@ function Containers() {
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'SizeRw' })}>
               {'Size RW '}
               <Popup
+                inverted={isDarkTheme}
                 wide="very"
                 header="Size RW"
                 content={'The size of files that have been created or changed by this container'}
@@ -67,6 +76,7 @@ function Containers() {
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'SizeRootFs' })}>
               {'Virtual Size '}
               <Popup
+                inverted={isDarkTheme}
                 wide="very"
                 header="Virtual Size"
                 content={'The total size of all the files in this container'}
@@ -95,7 +105,7 @@ function Containers() {
                   <code>{prettyContainerID(ID)}</code>
                 </small>
               </Table.Cell>
-              <Table.Cell style={{ whiteSpace: 'pre-line' }}>{prettyContainerName(Name)}</Table.Cell>
+              <Table.Cell>{prettyContainerName(Name)}</Table.Cell>
               <Table.Cell>{Image}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(SizeRw))}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(SizeRootFs))}</Table.Cell>
@@ -113,7 +123,7 @@ function Containers() {
       <Grid columns={2}>
         <Grid.Row>
           <Grid.Column>
-            <Statistic>
+            <Statistic inverted={isDarkTheme}>
               <Statistic.Label>Total size</Statistic.Label>
               <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>

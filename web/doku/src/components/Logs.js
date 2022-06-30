@@ -1,7 +1,14 @@
 import React, { useReducer } from 'react';
 import { Container, Grid, Header, Message, Statistic, Table } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { selectDockerContainerList, selectDockerLogs, selectDockerLogsStatus, selectTotalSizeLogs, selectCountLogs } from '../AppSlice';
+import {
+  selectDockerContainerList,
+  selectDockerLogs,
+  selectDockerLogsStatus,
+  selectTotalSizeLogs,
+  selectCountLogs,
+  selectIsDarkTheme,
+} from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import { sortBy } from 'lodash/collection';
 import prettyBytes from 'pretty-bytes';
@@ -9,6 +16,7 @@ import statusPage from './StatusPage';
 import { prettyContainerID, prettyContainerName, prettyCount, replaceWithNbsp } from '../util/fmt';
 
 function Logs() {
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const containerList = useSelector(selectDockerContainerList);
   const logs = useSelector(selectDockerLogs);
   const logsStatus = useSelector(selectDockerLogsStatus);
@@ -31,7 +39,7 @@ function Logs() {
     }
 
     dataTable = (
-      <Table selectable sortable celled compact size="small">
+      <Table selectable sortable celled compact size="small" inverted={isDarkTheme}>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell
@@ -80,7 +88,7 @@ function Logs() {
       <Grid columns={2}>
         <Grid.Row>
           <Grid.Column>
-            <Statistic>
+            <Statistic inverted={isDarkTheme}>
               <Statistic.Label>Total size</Statistic.Label>
               <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>

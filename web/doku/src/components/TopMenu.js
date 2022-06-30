@@ -1,14 +1,19 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Container, Header, Menu } from 'semantic-ui-react';
+import { Container, Header, Menu, Icon } from 'semantic-ui-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectIsDarkTheme, setDarkTheme, setLightTheme } from '../AppSlice';
 
-const styles = {
+const azureBackgroundColor = {
   backgroundColor: 'azure',
 };
 
 function TopMenu() {
+  const dispatch = useDispatch();
+  const isDarkTheme = useSelector(selectIsDarkTheme);
+
   return (
-    <Menu pointing secondary size="small" fixed="top" style={styles}>
+    <Menu pointing secondary size="small" fixed="top" inverted={isDarkTheme} style={isDarkTheme ? null : azureBackgroundColor}>
       <Container>
         <Menu.Item as={NavLink} to="/">
           Dashboard
@@ -31,9 +36,15 @@ function TopMenu() {
         <Menu.Item as={NavLink} to="/build-cache/">
           Build Cache
         </Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            isDarkTheme ? dispatch(setLightTheme()) : dispatch(setDarkTheme());
+          }}>
+          {isDarkTheme ? <Icon name="sun outline" /> : <Icon name="moon outline" />}
+        </Menu.Item>
         <Menu.Menu position="right">
           <Menu.Item>
-            <Header>{window.config.header}</Header>
+            <Header inverted={isDarkTheme}>{window.config.header}</Header>
           </Menu.Item>
         </Menu.Menu>
       </Container>

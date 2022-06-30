@@ -1,0 +1,11 @@
+body.dark-theme {
+  background-color: #222222;
+}
+
+.dark-theme .ui.inverted.menu {
+  background-color: #2b2b2b;
+}
+
+.dark-theme .ui.grid > .row > .column {
+  color: #ffffff;
+}

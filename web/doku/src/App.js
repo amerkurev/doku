@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Container } from 'semantic-ui-react';
@@ -20,6 +20,7 @@ import {
   getDockerLogs,
   getDockerBindMounts,
   getDockerContainerList,
+  setupTheme,
 } from './AppSlice';
 
 function polling(dispatch) {
@@ -34,6 +35,10 @@ function polling(dispatch) {
 
 function App() {
   const dispatch = useDispatch();
+
+  useLayoutEffect(() => {
+    dispatch(setupTheme());
+  });
 
   useEffect(() => {
     dispatch(getVersion());

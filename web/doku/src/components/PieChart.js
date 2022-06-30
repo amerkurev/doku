@@ -13,13 +13,16 @@ import {
   selectCountImages,
   selectCountLogs,
   selectCountVolumes,
+  selectIsDarkTheme,
 } from '../AppSlice';
 import { prettyCount, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
+import { Icon } from 'semantic-ui-react';
 
 function PieChart() {
   const navigate = useNavigate();
 
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const totalSizeImages = useSelector(selectTotalSizeImages);
   const totalSizeContainers = useSelector(selectTotalSizeContainers);
   const totalSizeVolumes = useSelector(selectTotalSizeVolumes);
@@ -70,6 +73,27 @@ function PieChart() {
     },
   ];
 
+  const textColor = isDarkTheme ? '#ffffff' : 'rgba(0,0,0,.87)';
+  const backgroundColor = isDarkTheme ? '#2b2b2b' : '#ffffff';
+  const borderColor = isDarkTheme ? '#444444' : '#dddddd';
+
+  const tooltip = (d) => {
+    const styles = {
+      border: `1px solid ${borderColor}`,
+      backgroundColor: backgroundColor,
+      color: textColor,
+      padding: '9px 12px',
+    };
+    return (
+      <div style={styles}>
+        <div>
+          <Icon name="square" style={{ color: d.datum.color }} />
+          {d.datum.id}: {d.datum.formattedValue}
+        </div>
+      </div>
+    );
+  };
+
   // https://nivo.rocks/storybook/?path=/story/pie--formatted-values
   // noinspection RequiredAttributes
   return (
@@ -89,7 +113,7 @@ function PieChart() {
         modifiers: [['darker', 0.2]],
       }}
       arcLinkLabelsSkipAngle={10} // Skip label if corresponding slice's angle is lower than provided value.
-      arcLinkLabelsTextColor="rgba(0,0,0,.87)"
+      arcLinkLabelsTextColor={textColor}
       arcLinkLabelsThickness={2}
       arcLinkLabelsColor={{ from: 'color' }}
       arcLabelsSkipAngle={10} // Skip label if corresponding arc's angle is lower than provided value.
@@ -98,6 +122,7 @@ function PieChart() {
         modifiers: [['darker', 2]],
       }}
       valueFormat={(size) => replaceWithNbsp(prettyBytes(size))}
+      tooltip={tooltip}
       legends={[
         {
           onClick: (d) => navigate(d.data.to),
@@ -109,7 +134,7 @@ function PieChart() {
           itemsSpacing: 0,
           itemWidth: 110,
           itemHeight: 24,
-          itemTextColor: 'rgba(0,0,0,.87)',
+          itemTextColor: textColor,
           itemDirection: 'left-to-right',
           itemOpacity: 1,
           symbolSize: 20,
@@ -118,7 +143,7 @@ function PieChart() {
             {
               on: 'hover',
               style: {
-                itemTextColor: '#000',
+                itemTextColor: textColor,
               },
             },
           ],

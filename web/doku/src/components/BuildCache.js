@@ -1,7 +1,13 @@
 import React, { useReducer } from 'react';
 import { Container, Statistic, Table, Message, Popup, Icon, Grid, Header } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { selectCountBuildCache, selectDockerDiskUsage, selectDockerDiskUsageStatus, selectTotalSizeBuildCache } from '../AppSlice';
+import {
+  selectCountBuildCache,
+  selectDockerDiskUsage,
+  selectDockerDiskUsageStatus,
+  selectIsDarkTheme,
+  selectTotalSizeBuildCache,
+} from '../AppSlice';
 import prettyBytes from 'pretty-bytes';
 import { sortBy } from 'lodash/collection';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
@@ -9,6 +15,7 @@ import statusPage from './StatusPage';
 import { prettyCount, prettyTime, replaceWithNbsp } from '../util/fmt';
 
 function BuildCache() {
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
   const totalSize = useSelector(selectTotalSizeBuildCache);
@@ -30,7 +37,7 @@ function BuildCache() {
     }
 
     dataTable = (
-      <Table selectable sortable celled compact size="small">
+      <Table selectable sortable celled compact size="small" inverted={isDarkTheme}>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell sorted={column === 'ID' ? direction : null} onClick={() => dispatch({ type: CHANGE_SORT, column: 'ID' })}>
@@ -87,6 +94,7 @@ function BuildCache() {
               <Table.Cell textAlign="center">{InUse ? 'yes' : 'no'}</Table.Cell>
               <Table.Cell textAlign="center">{prettyTime(LastUsedAt)}</Table.Cell>
               <Popup
+                inverted={isDarkTheme}
                 wide="very"
                 header="Description"
                 content={Description}
@@ -108,7 +116,7 @@ function BuildCache() {
       <Grid columns={2}>
         <Grid.Row>
           <Grid.Column>
-            <Statistic>
+            <Statistic inverted={isDarkTheme}>
               <Statistic.Label>Total size</Statistic.Label>
               <Statistic.Value>{replaceWithNbsp(prettyBytes(totalSize))}</Statistic.Value>
             </Statistic>

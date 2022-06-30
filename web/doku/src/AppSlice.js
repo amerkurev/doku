@@ -2,8 +2,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { makeURL } from './util/net';
 import { sumBy } from 'lodash/math';
+import { getLocalStorage, setLocalStorage } from './util/localstorage';
 
 const initialState = {
+  theme: 'light-theme',
   version: '',
 
   dockerVersion: null,
@@ -100,6 +102,20 @@ export const appSlice = createSlice({
   initialState,
   reducers: {
     cleanupApp: (state) => initialState,
+    setupTheme: (state) => {
+      state.theme = getLocalStorage('theme');
+      document.getElementById('body').className = state.theme;
+    },
+    setDarkTheme: (state) => {
+      state.theme = 'dark-theme';
+      document.getElementById('body').className = state.theme;
+      setLocalStorage('theme', state.theme);
+    },
+    setLightTheme: (state) => {
+      state.theme = 'light-theme';
+      document.getElementById('body').className = state.theme;
+      setLocalStorage('theme', state.theme);
+    },
   },
   extraReducers: {
     [getVersion.fulfilled]: (state, action) => {
@@ -176,8 +192,9 @@ export const appSlice = createSlice({
 
 export const appReducer = appSlice.reducer;
 
-export const { cleanupApp } = appSlice.actions;
+export const { cleanupApp, setupTheme, setDarkTheme, setLightTheme } = appSlice.actions;
 
+export const selectIsDarkTheme = (state) => state.app.theme === 'dark-theme';
 export const selectVersion = (state) => state.app.version;
 
 export const selectDockerVersion = (state) => state.app.dockerVersion;

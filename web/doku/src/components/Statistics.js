@@ -4,6 +4,7 @@ import { replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
 import { useSelector } from 'react-redux';
 import {
+  selectIsDarkTheme,
   selectTotalSizeBuildCache,
   selectTotalSizeContainers,
   selectTotalSizeImages,
@@ -12,6 +13,7 @@ import {
 } from '../AppSlice';
 
 function Statistics() {
+  const isDarkTheme = useSelector(selectIsDarkTheme);
   const totalSizeImages = useSelector(selectTotalSizeImages);
   const totalSizeContainers = useSelector(selectTotalSizeContainers);
   const totalSizeVolumes = useSelector(selectTotalSizeVolumes);
@@ -19,7 +21,7 @@ function Statistics() {
   const totalSizeBuildCache = useSelector(selectTotalSizeBuildCache);
 
   return (
-    <Grid columns={2}>
+    <Grid columns={2} inverted={isDarkTheme}>
       <Grid.Row />
       <Grid.Row>
         <Grid.Column textAlign="right">
