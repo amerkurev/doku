@@ -33,7 +33,7 @@ Doku will be available at [http://localhost:9090/](http://localhost:9090/). You 
 
 ## Basic auth
 
-Doku supports basic auth for all requests. This is useful for protecting endpoints during the development and testing, before allowing unrestricted access to them. This functionality is disabled by default.
+Doku supports basic auth for all requests. This functionality is disabled by default.
 
 In order to enable basic auth, user should set the typical htpasswd file with `--basic-htpasswd=<file location>` or `env BASIC_HTPASSWD=<file location>`. 
 
