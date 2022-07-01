@@ -13,6 +13,10 @@ Doku should work for most. It has been tested with dozen of hosts.
 
 </div>
 
+<div align="center">
+  <img class="laptop_doku" src="https://github.com/amerkurev/static/blob/e15c6f02845477d94af300f559852313ff869bef/doku/laptop_doku.svg" alt="Laptop with Doku"/>
+</div>
+
 ## Getting Doku
 
 Doku is a very small Docker container (6 MB compressed). Pull the latest release from the index:
