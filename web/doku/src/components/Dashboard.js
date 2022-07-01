@@ -48,12 +48,16 @@ function Dashboard() {
     const { column, direction } = state;
     const data = sortBy(
       containerList.Containers.map((x) => {
+        const ImageSize = getImageSize(diskUsage, x.Image);
+        const VolumesSize = getVolumesSize(diskUsage, x.Mounts);
+        const LogsSize = getLogSize(logs, x.ID);
         const extra = {
           ID: x.Id,
           Status: x.State.Status,
-          ImageSize: getImageSize(diskUsage, x.Image),
-          VolumesSize: getVolumesSize(diskUsage, x.Mounts),
-          LogsSize: getLogSize(logs, x.ID),
+          ImageSize: ImageSize,
+          VolumesSize: VolumesSize,
+          LogsSize: LogsSize,
+          Size: x.SizeRw + ImageSize + VolumesSize + LogsSize,
         };
         return { ...x, ...extra };
       }),
@@ -160,7 +164,7 @@ function Dashboard() {
         </Grid.Row>
       </Grid>
       <br />
-      <Header inverted={isDarkTheme}>Disk space used by the docker containers</Header>
+      <Header inverted={isDarkTheme}>Disk space used by the Docker containers</Header>
       {dataTable}
     </Container>
   );
