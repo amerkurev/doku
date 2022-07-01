@@ -31,6 +31,27 @@ The simplest way to use Doku is to run the Docker container. Mount the Docker Un
 
 Doku will be available at [http://localhost:9090/](http://localhost:9090/). You can change `-p 9090:9090` to any port. For example, if you want to view Doku over port 8080 then you would do `-p 8080:9090`.
 
+## Basic auth
+
+Doku supports basic auth for all requests. This is useful for protecting endpoints during the development and testing, before allowing unrestricted access to them. This functionality is disabled by default.
+
+In order to enable basic auth, user should set the typical htpasswd file with `--basic-htpasswd=<file location>` or `env BASIC_HTPASSWD=<file location>`. 
+
+Doku expects htpasswd file to be in the following format:
+
+```
+username1:bcrypt(password2)
+username2:bcrypt(password2)
+...
+```
+
+this can be generated with `htpasswd -nbB` command, i.e. `htpasswd -nbB test passwd`
+
+## Supported architectures:
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+
 ## Special thanks to
 
 The following great works inspired me:
