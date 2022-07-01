@@ -27,7 +27,7 @@ Doku is a very small Docker container (6 MB compressed). Pull the latest release
 
 The simplest way to use Doku is to run the Docker container. Mount the Docker Unix socket with `-v` to `/var/run/docker.sock`. Also, you need to mount the top-level directory (`/`) on the host machine in `ro` mode. Otherwise, Doku will not be able to calculate the size of the logs and bind mounts.
 
-    docker run --rm -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v /:/hostroot:ro -p 9090:9090 amerkurev/doku:latest
+    docker run --name doku -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v /:/hostroot:ro -p 9090:9090 amerkurev/doku
 
 Doku will be available at [http://localhost:9090/](http://localhost:9090/). You can change `-p 9090:9090` to any port. For example, if you want to view Doku over port 8080 then you would do `-p 8080:9090`.
 
