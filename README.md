@@ -47,7 +47,7 @@ username2:bcrypt(password2)
 
 this can be generated with `htpasswd -nbB` command, i.e. `htpasswd -nbB test passwd`
 
-## Supported architectures:
+## Supported architectures
 - linux/amd64
 - linux/arm/v7
 - linux/arm64
