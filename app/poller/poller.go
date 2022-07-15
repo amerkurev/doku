@@ -159,6 +159,17 @@ func dockerDiskUsage(ctx context.Context, d *docker.Client) error {
 	// hide sensitive (and not only) data
 	res.Containers = nil
 
+	// prevent null value for JSON array fields
+	if res.Images == nil {
+		res.Images = make([]*dockerTypes.ImageSummary, 0)
+	}
+	if res.Volumes == nil {
+		res.Volumes = make([]*dockerTypes.Volume, 0)
+	}
+	if res.BuildCache == nil {
+		res.BuildCache = make([]*dockerTypes.BuildCache, 0)
+	}
+
 	b, err := json.Marshal(res)
 	if err != nil {
 		return fmt.Errorf("failed to encode as JSON: %w", err)
