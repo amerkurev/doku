@@ -23,6 +23,14 @@ func version(w http.ResponseWriter, _ *http.Request) {
 	w.Write(v.([]byte)) // nolint:gosec
 }
 
+func diskUsage(w http.ResponseWriter, _ *http.Request) {
+	v, ok := store.Get("diskUsage")
+	if !ok {
+		v = emptyObject
+	}
+	w.Write(v.([]byte)) // nolint:gosec
+}
+
 func dockerVersion(w http.ResponseWriter, _ *http.Request) {
 	v, ok := store.Get("dockerVersion")
 	if !ok {
@@ -92,6 +100,7 @@ func CreateRouter(s *Server) *chi.Mux {
 		r.Route("/v0", func(r chi.Router) {
 			r.Use(handler.ContentTypeJSON)
 			r.Get("/version", version)
+			r.Get("/disk-usage", diskUsage)
 
 			// long polling routes
 			r.Group(func(r chi.Router) {

@@ -7,6 +7,7 @@ import { getLocalStorage, setLocalStorage } from './util/localstorage';
 const initialState = {
   theme: 'light-theme',
   version: '',
+  diskUsage: null,
 
   dockerVersion: null,
   dockerVersionStatus: 'idle',
@@ -40,6 +41,11 @@ const initialState = {
 
 export const getVersion = createAsyncThunk('app/getVersion', async () => {
   const response = await axios.get(makeURL('/v0/version'));
+  return response.data;
+});
+
+export const getDiskUsage = createAsyncThunk('app/getDiskUsage', async () => {
+  const response = await axios.get(makeURL('/v0/disk-usage'));
   return response.data;
 });
 
@@ -121,6 +127,9 @@ export const appSlice = createSlice({
     [getVersion.fulfilled]: (state, action) => {
       state.version = action.payload.version;
     },
+    [getDiskUsage.fulfilled]: (state, action) => {
+      state.diskUsage = action.payload;
+    },
     // Docker Version
     [getDockerVersion.pending]: (state) => {
       state.dockerVersionStatus = 'loading';
@@ -196,6 +205,7 @@ export const { cleanupApp, setupTheme, setDarkTheme, setLightTheme } = appSlice.
 
 export const selectIsDarkTheme = (state) => state.app.theme === 'dark-theme';
 export const selectVersion = (state) => state.app.version;
+export const selectDiskUsage = (state) => state.app.diskUsage;
 
 export const selectDockerVersion = (state) => state.app.dockerVersion;
 export const selectDockerVersionStatus = (state) => state.app.dockerVersionStatus;
