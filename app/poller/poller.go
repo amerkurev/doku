@@ -80,6 +80,10 @@ func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	defer util.PrintExecTime("poll execution progress")()
 	defer store.NotifyAll() // wake up those who are waiting.
 
+	if err := diskUsage(volumes); err != nil {
+		log.WithField("err", err).Error("poll: disk usage")
+	}
+
 	if err := dockerVersion(ctx, d); err != nil {
 		log.WithField("err", err).Error("poll: docker version")
 	}
@@ -95,6 +99,34 @@ func poll(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 	if err := dockerLogSize(ctx, d, volumes); err != nil {
 		log.WithField("err", err).Error("poll: docker log size")
 	}
+}
+
+func diskUsage(volumes []types.HostVolume) error {
+	var lastErr error
+	res := &util.DiskUsage{}
+
+	for _, vol := range volumes {
+		du, err := util.NewDiskUsage(vol.Path)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		if du.Total > res.Total {
+			res = du // the largest volume is taken
+		}
+	}
+
+	if lastErr != nil && res.Total == 0 {
+		return fmt.Errorf("failed to get disk usage: %w", lastErr)
+	}
+
+	b, err := json.Marshal(res)
+	if err != nil {
+		return fmt.Errorf("failed to encode as JSON: %w", err)
+	}
+
+	store.Set("diskUsage", b)
+	return nil
 }
 
 func dockerVersion(ctx context.Context, d *docker.Client) error {

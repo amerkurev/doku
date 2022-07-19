@@ -44,3 +44,19 @@ func Test_PrintExecTime(t *testing.T) {
 	assert.Contains(t, buf.String(), "took=")
 	assert.Contains(t, buf.String(), "time=")
 }
+
+func Test_NewDiskUsage(t *testing.T) {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+	du, err := NewDiskUsage(wd)
+	require.NoError(t, err)
+
+	assert.Greater(t, du.Total, du.Free)
+	assert.GreaterOrEqual(t, du.Free, du.Available)
+	assert.Less(t, du.Percent, 1.)
+	assert.Greater(t, du.Used, uint64(0))
+
+	du, err = NewDiskUsage("*err*")
+	assert.Nil(t, du)
+	require.EqualError(t, err, "no such file or directory")
+}

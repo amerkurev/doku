@@ -21,6 +21,7 @@ import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
 import DockerVersion from './DockerVersion';
+import DiskUsageBar from './DiskUsageBar';
 
 function Dashboard() {
   const isDarkTheme = useSelector(selectIsDarkTheme);
@@ -147,6 +148,7 @@ function Dashboard() {
   return (
     <Container>
       <DockerVersion />
+      <DiskUsageBar />
       <Grid columns={'equal'}>
         <Grid.Row>
           <Grid.Column textAlign="right" width={9}>

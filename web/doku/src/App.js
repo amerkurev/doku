@@ -14,6 +14,7 @@ import TopMenu from './components/TopMenu';
 import Footer from './components/Footer';
 import {
   getVersion,
+  getDiskUsage,
   getDockerVersion,
   getDockerDiskUsage,
   getDockerDiskUsageLongPolling,
@@ -24,6 +25,7 @@ import {
 } from './AppSlice';
 
 function polling(dispatch) {
+  dispatch(getDiskUsage());
   dispatch(getDockerContainerList());
   dispatch(getDockerLogs());
   dispatch(getDockerBindMounts());

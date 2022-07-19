@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/amerkurev/doku/app/docker"
 	"io"
 	"io/fs"
 	"math/rand"
@@ -20,7 +19,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/types"
+	"github.com/amerkurev/doku/app/util"
 )
 
 func Test_Main(t *testing.T) {
@@ -111,6 +112,22 @@ func Test_Main(t *testing.T) {
 		ver := types.AppVersion{}
 		err = json.Unmarshal(b, &ver)
 		require.NoError(t, err)
+	}
+
+	{
+		resp, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/v0/disk-usage", port))
+		require.NoError(t, err)
+		defer resp.Body.Close()
+		assert.Equal(t, 200, resp.StatusCode)
+		b, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
+		du := util.DiskUsage{}
+		err = json.Unmarshal(b, &du)
+		require.NoError(t, err)
+		assert.Greater(t, du.Total, du.Free)
+		assert.GreaterOrEqual(t, du.Free, du.Available)
+		assert.Less(t, du.Percent, 1.)
+		assert.Greater(t, du.Used, uint64(0))
 	}
 
 	{
