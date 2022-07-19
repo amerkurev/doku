@@ -53,7 +53,8 @@ func Test_NewDiskUsage(t *testing.T) {
 
 	assert.Greater(t, du.Total, du.Free)
 	assert.GreaterOrEqual(t, du.Free, du.Available)
-	assert.Less(t, du.Percent, 1.)
+	assert.GreaterOrEqual(t, du.Percent, 0.)
+	assert.LessOrEqual(t, du.Percent, 100.)
 	assert.Greater(t, du.Used, uint64(0))
 
 	du, err = NewDiskUsage("*err*")
