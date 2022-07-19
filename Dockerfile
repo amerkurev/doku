@@ -32,7 +32,7 @@ WORKDIR /srv/frontend
 RUN rm -f /srv/frontend/.eslintrc.json && \
     apk update && \
     apk add zip make gcc g++ python3 && \
-    yarn install --immutable && \
+    yarn install --immutable --network-timeout 100000 && \
     yarn semantic-ui-css-patch && \
     yarn build
 CMD yarn run test
