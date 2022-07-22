@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -168,4 +169,60 @@ func Test_contains(t *testing.T) {
 	str := []string{"a", "b", "c"}
 	assert.True(t, contains[string]("a", str))
 	assert.False(t, contains[string]("d", str))
+}
+
+func Test_bindMountsTotalSize(t *testing.T) {
+
+	tbl := []struct {
+		Mounts            []*types.BindMountInfo
+		ExpectedTotalSize int64
+	}{
+		{[]*types.BindMountInfo{}, 0},
+
+		{[]*types.BindMountInfo{
+			{Path: "/a", Size: 1000},
+		}, 1000},
+
+		{[]*types.BindMountInfo{
+			{Path: "/a", Size: 0},
+			{Path: "/a/b", Size: 10},
+		}, 10},
+
+		{[]*types.BindMountInfo{
+			{Path: "/a", Size: 100},
+			{Path: "/a/b", Size: 40},
+			{Path: "/a/b/c", Size: 10},
+		}, 100},
+
+		{[]*types.BindMountInfo{
+			{Path: "/a/b", Size: 100},
+			{Path: "/c/d", Size: 40},
+			{Path: "/e/a/b", Size: 10},
+		}, 150},
+
+		{[]*types.BindMountInfo{
+			{Path: "/a/b/c", Size: 100},
+			{Path: "/a/b/e", Size: 40},
+			{Path: "/a/b/e/d", Size: 10},
+		}, 140},
+
+		{[]*types.BindMountInfo{
+			{Path: "/a/b/c", Size: 100},
+			{Path: "/a/b", Size: 40},
+			{Path: "/a", Size: 40},
+			{Path: "/d", Size: 10},
+			{Path: "/d/e/f", Size: 10},
+			{Path: "/d/f", Size: 10},
+			{Path: "/x", Size: 10},
+			{Path: "/y", Size: 10},
+			{Path: "/z", Size: 10},
+		}, 80},
+	}
+
+	for i, tt := range tbl {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			actual := bindMountsTotalSize(tt.Mounts)
+			assert.Equal(t, tt.ExpectedTotalSize, actual)
+		})
+	}
 }
