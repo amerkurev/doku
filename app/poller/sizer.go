@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -48,16 +49,16 @@ func bindMountsSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 
 				var totalSize int64
 				for _, m := range bindMounts {
-					err := bindMountInfo(m, volumes) // get size of mounted directory (bind type)
+					err := fillData(m, volumes) // get size of mounted directory (bind type)
 					if err != nil {
 						m.Err = err.Error()
 						log.WithField("err", err).Error("failed to get mounted file or directory")
 					} else {
-						totalSize += m.Size
+						totalSize = bindMountsTotalSize(bindMounts)
 					}
 					storeBindMounts(bindMounts, totalSize)
 
-					// let the processor cool down
+					// let the cpu cool down
 					if interruptionPoint(ctx, time.Second) {
 						return
 					}
@@ -84,10 +85,9 @@ func storeBindMounts(bindMounts []*types.BindMountInfo, totalSize int64) {
 		log.WithField("err", err).Error("failed to encode as JSON")
 	}
 	store.Set("dockerBindMounts", b)
-
 }
 
-func bindMountInfo(m *types.BindMountInfo, volumes []types.HostVolume) error {
+func fillData(m *types.BindMountInfo, volumes []types.HostVolume) error {
 	var err error
 	for _, vol := range volumes {
 		m.Prepared = true
@@ -137,4 +137,40 @@ func contains[T comparable](val T, list []T) bool {
 		}
 	}
 	return false
+}
+
+func bindMountsTotalSize(bindMounts []*types.BindMountInfo) int64 {
+	var mounts []*types.BindMountInfo
+
+	for _, m := range bindMounts {
+		if m.Size > 0 {
+			mounts = append(mounts, m)
+		}
+	}
+
+	length := len(mounts)
+
+	if length == 0 {
+		return 0
+	}
+
+	if length == 1 {
+		return mounts[0].Size
+	}
+
+	sort.Slice(mounts, func(i, j int) bool {
+		return mounts[i].Path < mounts[j].Path
+	})
+
+	paths := []string{mounts[0].Path}
+	totalSize := mounts[0].Size
+
+	for i := 1; i < length; i++ {
+		if !strings.HasPrefix(mounts[i].Path, paths[len(paths)-1]) {
+			paths = append(paths, mounts[i].Path)
+			totalSize += mounts[i].Size
+		}
+	}
+
+	return totalSize
 }
