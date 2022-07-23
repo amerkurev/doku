@@ -51,7 +51,7 @@ function Dashboard() {
       containerList.Containers.map((x) => {
         const ImageSize = getImageSize(diskUsage, x.Image);
         const VolumesSize = getVolumesSize(diskUsage, x.Mounts);
-        const LogsSize = getLogSize(logs, x.ID);
+        const LogsSize = getLogSize(logs, x.Id);
         const extra = {
           ID: x.Id,
           Status: x.State.Status,
