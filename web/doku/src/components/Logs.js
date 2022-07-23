@@ -72,7 +72,9 @@ function Logs() {
               <Table.Cell>{prettyContainerName(ContainerName)}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(Size))}</Table.Cell>
               <Table.Cell>
-                <small>{prettyLogPath(Path)}</small>
+                <small>
+                  <code>{prettyLogPath(Path)}</code>
+                </small>
               </Table.Cell>
             </Table.Row>
           ))}
