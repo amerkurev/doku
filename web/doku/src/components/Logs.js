@@ -13,7 +13,7 @@ import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import { sortBy } from 'lodash/collection';
 import prettyBytes from 'pretty-bytes';
 import statusPage from './StatusPage';
-import { prettyContainerID, prettyContainerName, prettyCount, replaceWithNbsp } from '../util/fmt';
+import { prettyContainerID, prettyContainerName, prettyCount, prettyLogPath, replaceWithNbsp } from '../util/fmt';
 
 function Logs() {
   const isDarkTheme = useSelector(selectIsDarkTheme);
@@ -72,7 +72,7 @@ function Logs() {
               <Table.Cell>{prettyContainerName(ContainerName)}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(Size))}</Table.Cell>
               <Table.Cell>
-                <small>{Path}</small>
+                <small>{prettyLogPath(Path)}</small>
               </Table.Cell>
             </Table.Row>
           ))}

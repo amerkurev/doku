@@ -26,6 +26,18 @@ export const prettyImageID = function (s) {
   return s.slice(0, 12);
 };
 
+const logPathRegExp = new RegExp('(/var/lib/docker/containers/\\w+/\\w{8})\\w+(-json.log)');
+
+export const prettyLogPath = function (s) {
+  if (logPathRegExp.test(s)) {
+    const found = s.match(logPathRegExp);
+    if (found.length === 3) {
+      return found[1] + '***' + found[2];
+    }
+  }
+  return s;
+};
+
 export const prettyTime = function (t) {
   return moment(t).format('YYYY-MM-DD\u00a0\u00a0HH:mm:ss Z');
 };
