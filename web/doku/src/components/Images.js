@@ -6,18 +6,20 @@ import {
   selectTotalSizeImages,
   selectCountImages,
   selectIsDarkTheme,
+  selectDockerContainerList,
 } from '../AppSlice';
 import { CHANGE_SORT, sortReducer, sortReducerInitializer } from '../util/sort';
 import statusPage from './StatusPage';
 import { sortBy } from 'lodash/collection';
 import { Container, Icon, Message, Popup, Statistic, Table, Grid, Header } from 'semantic-ui-react';
-import { prettyCount, prettyImageID, prettyUnixTime, replaceWithNbsp } from '../util/fmt';
+import { prettyContainerName, prettyCount, prettyImageID, prettyUnixTime, replaceWithNbsp } from '../util/fmt';
 import prettyBytes from 'pretty-bytes';
 
 function Images() {
   const isDarkTheme = useSelector(selectIsDarkTheme);
   const diskUsage = useSelector(selectDockerDiskUsage);
   const diskUsageStatus = useSelector(selectDockerDiskUsageStatus);
+  const containerList = useSelector(selectDockerContainerList);
   const totalSize = useSelector(selectTotalSizeImages);
   const count = useSelector(selectCountImages);
   const [state, dispatch] = useReducer(sortReducer, sortReducerInitializer());
@@ -33,10 +35,13 @@ function Images() {
     const { column, direction } = state;
     const data = sortBy(
       diskUsage.Images.map((x) => {
+        const containers = getContainers(containerList, x.Id);
         const repoTags = Array.isArray(x.RepoTags) ? x.RepoTags.join('\n') : '';
         const repoDigests = Array.isArray(x.RepoDigests) ? x.RepoDigests.join('\n') : '';
         const extra = {
           ID: x.Id,
+          Containers: containers.length === 0 ? '-' : containers.join('\n'),
+          ContainersNum: x.Containers,
           RepoTags: repoTags,
           RepoDigests: repoDigests,
         };
@@ -74,8 +79,8 @@ function Images() {
             </Table.HeaderCell>
             <Table.HeaderCell
               textAlign="center"
-              sorted={column === 'Containers' ? direction : null}
-              onClick={() => dispatch({ type: CHANGE_SORT, column: 'Containers' })}>
+              sorted={column === 'ContainersNum' ? direction : null}
+              onClick={() => dispatch({ type: CHANGE_SORT, column: 'ContainersNum' })}>
               Containers
             </Table.HeaderCell>
             <Table.HeaderCell
@@ -153,6 +158,19 @@ function HelpText() {
       </Message.Content>
     </Message>
   );
+}
+
+function getContainers(containers, ImageId) {
+  const res = [];
+  if (containers && Array.isArray(containers.Containers) && containers.Containers.length > 0) {
+    for (let i = 0; i < containers.Containers.length; i++) {
+      const x = containers.Containers[i];
+      if (x.Image === ImageId) {
+        res.push(prettyContainerName(x.Name));
+      }
+    }
+  }
+  return res;
 }
 
 export default Images;
