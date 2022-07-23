@@ -29,10 +29,14 @@ func bindMountsSize(ctx context.Context, d *docker.Client, volumes []types.HostV
 				// gather all bind mounts
 				for _, cont := range containers {
 					if cont.Config != nil && contains("DOKU_IN_DOCKER=1", cont.Config.Env) {
-						continue // skip myself (doku)
+						continue // skip myself (doku container)
 					}
 
 					for _, m := range cont.Mounts {
+						if m.Source == "/var/run/docker.sock" {
+							continue // skip Docker unix socket (for all)
+						}
+
 						if m.Type == "bind" && !contains(m.Source, seen) {
 							seen = append(seen, m.Source)
 							bindMounts = append(bindMounts, &types.BindMountInfo{

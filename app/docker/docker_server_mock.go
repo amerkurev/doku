@@ -200,6 +200,14 @@ const diskUsageResponse = `
           "Mode": "",
           "RW": true,
           "Propagation": "rprivate"
+        },
+		{
+          "Type": "bind",
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
         }
       ]
     }
@@ -281,7 +289,15 @@ const containerListResponse = `
         "Mode": "",
         "RW": true,
         "Propagation": "rprivate"
-      }
+      },
+      {
+	    "Type": "bind",
+	    "Source": "/var/run/docker.sock",
+	    "Destination": "/var/run/docker.sock",
+	    "Mode": "",
+	    "RW": true,
+	    "Propagation": "rprivate"
+	  }
     ]
   }
 ]`
@@ -431,7 +447,15 @@ const containerInspectTemplate = `
       "Mode": "",
       "RW": true,
       "Propagation": "rprivate"
-    }
+    },
+	{
+	  "Type": "bind",
+	  "Source": "/var/run/docker.sock",
+	  "Destination": "/var/run/docker.sock",
+	  "Mode": "",
+	  "RW": true,
+	  "Propagation": "rprivate"
+	}
   ],
   "Config": {
     "Hostname": "ff71fad88dcf",
