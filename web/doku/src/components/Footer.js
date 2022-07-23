@@ -4,13 +4,18 @@ import GitHubLogo from '../assets/logo/github-logo.svg';
 import { useSelector } from 'react-redux';
 import { selectVersion } from '../AppSlice';
 
+const verRegExp = /(^v\d+.\d+.\d+)-.*$/;
+
 function Footer() {
   const revision = useSelector(selectVersion);
   let version = '';
   if (typeof revision === 'string' || revision instanceof String) {
     version = revision;
-    if (revision.includes('-master-')) {
-      version = revision.split('-master-')[0];
+    if (verRegExp.test(revision)) {
+      const found = revision.match(verRegExp);
+      if (found.length > 1) {
+        version = found[1];
+      }
     }
   }
 
