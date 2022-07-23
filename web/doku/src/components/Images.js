@@ -78,7 +78,6 @@ function Images() {
               Shared Size
             </Table.HeaderCell>
             <Table.HeaderCell
-              textAlign="center"
               sorted={column === 'ContainersNum' ? direction : null}
               onClick={() => dispatch({ type: CHANGE_SORT, column: 'ContainersNum' })}>
               Containers
@@ -103,7 +102,7 @@ function Images() {
               <Table.Cell style={{ whiteSpace: 'pre-line' }}>{RepoTags}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(Size))}</Table.Cell>
               <Table.Cell textAlign="right">{replaceWithNbsp(prettyBytes(SharedSize))}</Table.Cell>
-              <Table.Cell textAlign="center">{Containers}</Table.Cell>
+              <Table.Cell style={{ whiteSpace: 'pre-line' }}>{Containers}</Table.Cell>
               <Table.Cell textAlign="center">{prettyUnixTime(Created)}</Table.Cell>
               <Popup
                 inverted={isDarkTheme}
