@@ -62,7 +62,7 @@ function Logs() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ ContainerID, ContainerName, Path, Size, LastCheck }) => (
+          {data.map(({ ContainerID, ContainerName, Path, Size }) => (
             <Table.Row key={ContainerID}>
               <Table.Cell>
                 <small>

@@ -124,7 +124,7 @@ function Dashboard() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ ID, Name, Image, ImageSize, VolumesSize, LogsSize, Created, SizeRw, Status }) => (
+          {data.map(({ ID, Name, ImageSize, VolumesSize, LogsSize, Created, SizeRw, Status }) => (
             <Table.Row key={ID}>
               <Table.Cell>
                 <small>

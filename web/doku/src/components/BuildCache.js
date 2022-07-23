@@ -80,7 +80,7 @@ function BuildCache() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ ID, Description, Size, UsageCount, InUse, Shared, Type, LastUsedAt, CreatedAt, Parent }) => (
+          {data.map(({ ID, Description, Size, UsageCount, InUse, Shared, Type, LastUsedAt }) => (
             <Table.Row key={ID}>
               <Table.Cell>
                 <small>

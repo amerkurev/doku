@@ -35,8 +35,10 @@ function Volumes() {
     const { column, direction } = state;
     const data = sortBy(
       diskUsage.Volumes.map((x) => {
+        const containers = getContainers(containerList, x.Name);
         const extra = {
-          Containers: getContainers(containerList, x.Name),
+          Containers: containers.length === 0 ? '-' : containers.join('\n'),
+          ContainersNum: containers.length,
           RefCount: x.UsageData.RefCount,
           Size: x.UsageData.Size,
         };
@@ -56,8 +58,8 @@ function Volumes() {
               Name
             </Table.HeaderCell>
             <Table.HeaderCell
-              sorted={column === 'ContainerName' ? direction : null}
-              onClick={() => dispatch({ type: CHANGE_SORT, column: 'ContainerName' })}>
+              sorted={column === 'ContainersNum' ? direction : null}
+              onClick={() => dispatch({ type: CHANGE_SORT, column: 'ContainersNum' })}>
               Containers
             </Table.HeaderCell>
             <Table.HeaderCell
@@ -88,7 +90,7 @@ function Volumes() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ CreatedAt, Driver, Containers, Mountpoint, Name, Options, Scope, Size, RefCount }) => (
+          {data.map(({ CreatedAt, Driver, Containers, Mountpoint, Name, Scope, Size }) => (
             <Table.Row key={Name}>
               <Table.Cell>
                 <small>
@@ -166,7 +168,7 @@ function getContainers(containers, volumeName) {
       }
     }
   }
-  return res.length === 0 ? '-' : res.join('\n');
+  return res;
 }
 
 export default Volumes;

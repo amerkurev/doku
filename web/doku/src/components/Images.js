@@ -88,7 +88,7 @@ function Images() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map(({ Containers, Created, ID, Labels, ParentId, RepoDigests, RepoTags, SharedSize, Size, VirtualSize }) => (
+          {data.map(({ Containers, Created, ID, RepoDigests, RepoTags, SharedSize, Size }) => (
             <Table.Row key={ID}>
               <Table.Cell>
                 <small>
