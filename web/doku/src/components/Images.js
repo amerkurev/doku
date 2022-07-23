@@ -41,7 +41,7 @@ function Images() {
         const extra = {
           ID: x.Id,
           Containers: containers.length === 0 ? '-' : containers.join('\n'),
-          ContainersNum: x.Containers,
+          ContainersNum: containers.length.toString() + containers.join(''), // for alphanumeric sort if length is equal
           RepoTags: repoTags,
           RepoDigests: repoDigests,
         };

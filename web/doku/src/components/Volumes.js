@@ -38,7 +38,7 @@ function Volumes() {
         const containers = getContainers(containerList, x.Name);
         const extra = {
           Containers: containers.length === 0 ? '-' : containers.join('\n'),
-          ContainersNum: containers.length,
+          ContainersNum: containers.length.toString() + containers.join(''), // for alphanumeric sort if length is equal
           RefCount: x.UsageData.RefCount,
           Size: x.UsageData.Size,
         };
