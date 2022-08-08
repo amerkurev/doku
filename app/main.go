@@ -93,10 +93,17 @@ func run(volumes []types.HostVolume) error {
 		return fmt.Errorf("failed to encode as JSON: %w", err)
 	}
 
-	d, err := docker.NewClient(opts.Docker.Host, opts.Docker.CertPath, opts.Docker.Version, opts.Docker.Verify)
+	d, err := docker.NewClient(
+		ctx,
+		opts.Docker.Host,
+		opts.Docker.CertPath,
+		opts.Docker.Version,
+		opts.Docker.Verify,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to initialize docker client: %w", err)
 	}
+	log.Info(fmt.Sprintf("docker engine API (%s)", d.ClientVersion()))
 
 	log.Info("starting docker poller")
 	poller.Run(ctx, d, volumes)
