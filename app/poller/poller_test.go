@@ -52,7 +52,7 @@ func Test_Run(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	d, err := docker.NewClient("http://"+addr, "", version, false)
+	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
 	require.NoError(t, err)
 
 	err = store.Initialize()
@@ -118,7 +118,7 @@ func Test_Run_NoSuchFileOrDir(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	d, err := docker.NewClient("http://"+addr, "", version, false)
+	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
 	require.NoError(t, err)
 
 	err = store.Initialize()
@@ -145,7 +145,7 @@ func Test_poll_Failed(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	d, err := docker.NewClient("http://"+addr, "", "", false)
+	d, err := docker.NewClient(ctx, "http://"+addr, "", "", false)
 	require.NoError(t, err)
 
 	err = store.Initialize()

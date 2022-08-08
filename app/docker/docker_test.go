@@ -23,20 +23,20 @@ func Test_Client(t *testing.T) {
 	mock.Start(t)
 
 	time.Sleep(10 * time.Millisecond)
+	ctx := context.Background()
 
 	// bad host
-	_, err := NewClient(addr, "", version, false)
+	_, err := NewClient(ctx, addr, "", version, false)
 	require.Error(t, err)
 	require.EqualError(t, fmt.Errorf("unable to parse docker host `%s`", addr), err.Error())
 
 	// bad certPath
-	_, err = NewClient("http://"+addr, "/certPath", version, true)
+	_, err = NewClient(ctx, "http://"+addr, "/certPath", version, true)
 	require.Error(t, err)
 	assert.EqualError(t, errors.New("could not read CA certificate \"/certPath/ca.pem\": open /certPath/ca.pem: no such file or directory"), err.Error())
 
 	// OK
-	ctx := context.Background()
-	d, err := NewClient("http://"+addr, "", version, false)
+	d, err := NewClient(ctx, "http://"+addr, "", version, false)
 	require.NoError(t, err)
 
 	_, err = d.Ping(ctx)
