@@ -28,6 +28,10 @@ linters-settings:
       - rangeValCopy
       - singleCaseSwitch
       - ifElseChain
+  revive:
+    rules:
+      - name: package-comments
+        disabled: true
 
 linters:
   enable:
@@ -40,11 +44,8 @@ linters:
     - gocyclo
     - dupl
     - misspell
-    - varcheck
-    - deadcode
     - typecheck
     - ineffassign
-    - varcheck
     - stylecheck
     - gochecknoinits
     - exportloopref
@@ -70,4 +71,4 @@ issues:
   exclude-use-default: false
 
 service:
-  golangci-lint-version: 1.46.x
+  golangci-lint-version: 1.51.x

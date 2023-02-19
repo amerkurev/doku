@@ -13,62 +13,14 @@ import (
 	"github.com/amerkurev/doku/app/store"
 )
 
-var emptyObject = []byte("{}")
-
-func version(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("revision")
-	if !ok {
-		v = emptyObject
+func getDataFromStore(key string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		v, ok := store.Get(key)
+		if !ok {
+			v = []byte("{}")
+		}
+		w.Write(v.([]byte)) // nolint:gosec
 	}
-	w.Write(v.([]byte)) // nolint:gosec
-}
-
-func diskUsage(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("diskUsage")
-	if !ok {
-		v = emptyObject
-	}
-	w.Write(v.([]byte)) // nolint:gosec
-}
-
-func dockerVersion(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerVersion")
-	if !ok {
-		v = emptyObject
-	}
-	w.Write(v.([]byte)) // nolint:gosec
-}
-
-func dockerContainerList(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerContainerList")
-	if !ok {
-		v = emptyObject
-	}
-	w.Write(v.([]byte)) // nolint:gosec
-}
-
-func dockerDiskUsage(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerDiskUsage")
-	if !ok {
-		v = emptyObject
-	}
-	w.Write(v.([]byte)) // nolint:gosec
-}
-
-func dockerLogSize(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerLogSize")
-	if !ok {
-		v = emptyObject
-	}
-	w.Write(v.([]byte)) // nolint:gosec
-}
-
-func dockerBindMounts(w http.ResponseWriter, _ *http.Request) {
-	v, ok := store.Get("dockerBindMounts")
-	if !ok {
-		v = emptyObject
-	}
-	w.Write(v.([]byte)) // nolint:gosec
 }
 
 // CreateRouter creates an HTTP route multiplexer.
@@ -99,21 +51,21 @@ func CreateRouter(s *Server) *chi.Mux {
 		// API for frontend
 		r.Route("/v0", func(r chi.Router) {
 			r.Use(handler.ContentTypeJSON)
-			r.Get("/version", version)
-			r.Get("/disk-usage", diskUsage)
+			r.Get("/version", getDataFromStore("revision"))
+			r.Get("/disk-usage", getDataFromStore("diskUsage"))
 
 			// long polling routes
 			r.Group(func(r chi.Router) {
 				r.Use(handler.LongPolling(s.Timeouts.LongPolling))
-				r.Get("/_/docker/disk-usage", dockerDiskUsage)
+				r.Get("/_/docker/disk-usage", getDataFromStore("dockerDiskUsage"))
 			})
 
 			r.Route("/docker", func(r chi.Router) {
-				r.Get("/version", dockerVersion)
-				r.Get("/containers", dockerContainerList)
-				r.Get("/disk-usage", dockerDiskUsage)
-				r.Get("/log-size", dockerLogSize)
-				r.Get("/bind-mounts", dockerBindMounts)
+				r.Get("/version", getDataFromStore("dockerVersion"))
+				r.Get("/containers", getDataFromStore("dockerContainerList"))
+				r.Get("/disk-usage", getDataFromStore("dockerDiskUsage"))
+				r.Get("/log-size", getDataFromStore("dockerLogSize"))
+				r.Get("/bind-mounts", getDataFromStore("dockerBindMounts"))
 			})
 		})
 

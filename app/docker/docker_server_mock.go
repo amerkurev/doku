@@ -55,8 +55,9 @@ func NewMockServer(addr, version, logPath, mountSource string) ServerMock {
 	})
 
 	s := &http.Server{
-		Addr:    addr,
-		Handler: r,
+		Addr:              addr,
+		Handler:           r,
+		ReadHeaderTimeout: time.Second * 5,
 	}
 
 	return &serverMock{
