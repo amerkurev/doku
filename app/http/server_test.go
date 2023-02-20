@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
@@ -12,22 +11,46 @@ import (
 	"testing"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/amerkurev/doku/app/store"
+	"github.com/amerkurev/doku/app/docker"
+	dockerMock "github.com/amerkurev/doku/app/docker"
+	"github.com/amerkurev/doku/app/types"
 )
 
+var revision = "unknown"
+
 func Test_Server_Run(t *testing.T) {
-	err := os.Setenv("ENVIRONMENT", "dev") // CORS
+	var err error
+	s := "some content"
+
+	// prepare log file
+	fh, err := os.CreateTemp(t.TempDir(), "doku_log_*")
+	require.NoError(t, err)
+	defer fh.Close()
+	n, err := fh.WriteString(s)
+	require.NoError(t, err)
+	require.Equal(t, len(s), n)
+	logFile := fh.Name()
+
+	// prepare mount dir
+	mountDir := t.TempDir()
+	fh, err = os.CreateTemp(mountDir, "doku_mount_*")
+	require.NoError(t, err)
+	defer fh.Close()
+	n, err = fh.WriteString(s)
+	require.NoError(t, err)
+	require.Equal(t, len(s), n)
+
+	err = os.Setenv("ENVIRONMENT", "dev") // CORS
 	require.NoError(t, err)
 
-	log.SetOutput(ioutil.Discard)
-	err = store.Initialize()
-	require.NoError(t, err)
+	rand.Seed(time.Now().UnixNano())
+	port := 1000 + rand.Intn(10000)
+	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
-	port := 1000 + rand.Intn(1000)
+	port = 1000 + rand.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	allowed := []string{
@@ -37,11 +60,10 @@ func Test_Server_Run(t *testing.T) {
 	httpServer := &Server{
 		Address: addr,
 		Timeouts: Timeouts{
-			Read:        5 * time.Second,
-			Write:       60 * time.Second,
-			Idle:        60 * time.Second,
-			Shutdown:    5 * time.Second,
-			LongPolling: 30 * time.Second, // it must be less than writeTimeout!
+			Read:     5 * time.Second,
+			Write:    60 * time.Second,
+			Idle:     60 * time.Second,
+			Shutdown: 5 * time.Second,
 		},
 		BasicAuthEnabled: true,
 		BasicAuthAllowed: allowed,
@@ -49,11 +71,20 @@ func Test_Server_Run(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	ctx = context.WithValue(ctx, "revision", revision)
+	ctx = context.WithValue(ctx, "volumes", []types.HostVolume{{Name: "root", Path: "/"}})
 	defer cancel()
+
+	// Docker mock
+	version := "v1.22"
+	mock := dockerMock.NewMockServer(dockerMockAddr, version, logFile, mountDir)
+	mock.Start(t)
+	d, err := docker.NewClient(ctx, "http://"+dockerMockAddr, "", version, false)
+	require.NoError(t, err)
 
 	done := make(chan struct{})
 	go func() {
-		err := httpServer.Run(ctx)
+		err := httpServer.Run(ctx, d)
 		assert.NoError(t, err)
 		done <- struct{}{}
 	}()
@@ -61,16 +92,16 @@ func Test_Server_Run(t *testing.T) {
 	tbl := []struct {
 		endpoint string
 	}{
-		{"/"},
-		{"/favicon.ico"},
-		{"/manifest.json"},
-		{"/v0/version"},
-		{"/v0/disk-usage"},
-		{"/v0/docker/version"},
-		{"/v0/docker/disk-usage"},
-		{"/v0/docker/log-size"},
-		{"/v0/docker/bind-mounts"},
-		// {"/v0/docker/_/docker/disk-usage"},
+		{"/"},                      // 0
+		{"/favicon.ico"},           // 1
+		{"/manifest.json"},         // 2
+		{"/v0/version"},            // 3
+		{"/v0/disk-usage"},         // 4
+		{"/v0/docker/version"},     // 5
+		{"/v0/docker/containers"},  // 6
+		{"/v0/docker/disk-usage"},  // 7
+		{"/v0/docker/log-size"},    // 8
+		{"/v0/docker/bind-mounts"}, // 9
 	}
 
 	time.Sleep(10 * time.Millisecond)
@@ -92,37 +123,47 @@ func Test_Server_Run(t *testing.T) {
 
 	cancel()
 	<-done
+	mock.Shutdown(t)
 }
 
 func Test_Server_RunFailed(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
-	err := store.Initialize()
-	require.NoError(t, err)
+	rand.Seed(time.Now().UnixNano())
+	port := 1000 + rand.Intn(10000)
+	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
-	port := 1_000_000
+	port = 1_000_000
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	httpServer := &Server{
 		Address: addr,
 		Timeouts: Timeouts{
-			Read:        5 * time.Second,
-			Write:       60 * time.Second,
-			Idle:        60 * time.Second,
-			Shutdown:    5 * time.Second,
-			LongPolling: 30 * time.Second, // it must be less than writeTimeout!
+			Read:     5 * time.Second,
+			Write:    60 * time.Second,
+			Idle:     60 * time.Second,
+			Shutdown: 5 * time.Second,
 		},
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	ctx = context.WithValue(ctx, "revision", revision)
+	ctx = context.WithValue(ctx, "volumes", []types.HostVolume{{Name: "root", Path: "/"}})
 	defer cancel()
+
+	// Docker mock
+	version := "v1.22"
+	mock := dockerMock.NewMockServer(dockerMockAddr, version, "", "")
+	mock.Start(t)
+	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
+	require.NoError(t, err)
 
 	done := make(chan struct{})
 	go func() {
-		err := httpServer.Run(ctx)
+		err := httpServer.Run(ctx, d)
 		assert.Error(t, err)
 		assert.EqualError(t, errors.New("http server failed: listen tcp: address 1000000: invalid port"), err.Error())
 		done <- struct{}{}
 	}()
 
 	<-done
+	mock.Shutdown(t)
 }

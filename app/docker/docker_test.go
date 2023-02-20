@@ -10,14 +10,14 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_Client(t *testing.T) {
 	version := "v1.22"
-	port := 2000 + rand.Intn(1000)
+	rand.Seed(time.Now().UnixNano())
+	port := 1000 + rand.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := NewMockServer(addr, version, "", "")
 	mock.Start(t)
@@ -81,28 +81,5 @@ func getEvents(ctx context.Context, d *Client) (int, error) {
 		case err := <-errs:
 			return eventCount, err
 		}
-	}
-}
-
-func Test_IsSignificantEvent(t *testing.T) {
-	tbl := []struct {
-		eventType string
-		ok        bool
-	}{
-		{events.BuilderEventType, true},
-		{events.ContainerEventType, true},
-		{events.DaemonEventType, false},
-		{events.ImageEventType, true},
-		{events.NetworkEventType, false},
-		{events.PluginEventType, false},
-		{events.VolumeEventType, true},
-		{events.ServiceEventType, true},
-		{events.NodeEventType, false},
-		{events.SecretEventType, false},
-		{events.ConfigEventType, false},
-	}
-
-	for _, tt := range tbl {
-		assert.Equal(t, tt.ok, IsSignificantEvent(tt.eventType))
 	}
 }

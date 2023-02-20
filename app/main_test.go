@@ -47,13 +47,15 @@ func Test_Main(t *testing.T) {
 	require.Equal(t, len(s), n)
 
 	dockerVersion := "v1.22"
-	dockerPort := 6000 + rand.Intn(1000)
+	rand.Seed(time.Now().UnixNano())
+	dockerPort := 1000 + rand.Intn(10000)
 	dockerAddr := fmt.Sprintf("127.0.0.1:%d", dockerPort)
 	mock := docker.NewMockServer(dockerAddr, dockerVersion, logFile, mountDir)
 	mock.Start(t)
 	waitForHTTPServerStart(dockerAddr)
 
-	port := 5000 + rand.Intn(1000)
+	rand.Seed(time.Now().UnixNano())
+	port := 1000 + rand.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	titleHTML := "Doku test"
 	os.Args = []string{

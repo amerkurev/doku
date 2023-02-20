@@ -22,5 +22,5 @@ GET http://127.0.0.1:9090/v0/docker/log-size
 Accept: application/json
 
 ### GET docker mounts
-GET http://127.0.0.1:9090/v0/docker/mounts-bind
+GET http://127.0.0.1:9090/v0/docker/bind-mounts
 Accept: application/json

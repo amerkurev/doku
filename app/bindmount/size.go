@@ -1,4 +1,4 @@
-package poller
+package bindmount
 
 import (
 	"context"
@@ -17,7 +17,8 @@ import (
 	"github.com/amerkurev/doku/app/util"
 )
 
-func bindMountsSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
+func CalcSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
+
 	go func() {
 		for {
 			if containers, err := d.ContainerJSONList(ctx); err != nil {
