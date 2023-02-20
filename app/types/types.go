@@ -1,3 +1,4 @@
+// Package types contains types used in the Doku app.
 package types
 
 // AppVersion contains version of the Doku app.
@@ -31,3 +32,13 @@ type BindMountInfo struct {
 	Prepared  bool
 	Err       string
 }
+
+// CtxKey is the type for the context keys.
+type CtxKey string
+
+const (
+	// CtxKeyRevision is the key for the revision in the context.
+	CtxKeyRevision CtxKey = "revision"
+	// CtxKeyVolumes is the key for the volumes in the context.
+	CtxKeyVolumes CtxKey = "volumes"
+)

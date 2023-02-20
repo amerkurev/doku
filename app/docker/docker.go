@@ -1,3 +1,4 @@
+// Package docker provides Docker client.
 package docker
 
 import (
@@ -6,18 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/events"
 	docker "github.com/docker/docker/client"
 	"github.com/docker/go-connections/tlsconfig"
 )
-
-var significantDockerEvents = [...]string{
-	events.BuilderEventType,
-	events.ContainerEventType,
-	events.ImageEventType,
-	events.VolumeEventType,
-	events.ServiceEventType,
-}
 
 // Client defines Docker client.
 type Client struct {
@@ -92,14 +84,4 @@ func setOpts(c *docker.Client, host, certPath, version string, verify bool) erro
 		}
 	}
 	return nil
-}
-
-// IsSignificantEvent says that event is relative to disk usage.
-func IsSignificantEvent(e string) bool {
-	for _, event := range significantDockerEvents {
-		if e == event {
-			return true
-		}
-	}
-	return false
 }

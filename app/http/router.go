@@ -1,77 +1,63 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"path"
 
+	"github.com/amerkurev/doku/app/docker"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/amerkurev/doku/app/http/handler"
-	"github.com/amerkurev/doku/app/store"
+	"github.com/amerkurev/doku/app/http/middleware"
 )
 
-func getDataFromStore(key string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		v, ok := store.Get(key)
-		if !ok {
-			v = []byte("{}")
-		}
-		w.Write(v.([]byte)) // nolint:gosec
-	}
-}
-
 // CreateRouter creates an HTTP route multiplexer.
-func CreateRouter(s *Server) *chi.Mux {
+func CreateRouter(ctx context.Context, s *Server, d *docker.Client) *chi.Mux {
 	r := chi.NewRouter()
 
 	// a good base middleware stack
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(handler.NewStructuredLogger(log.StandardLogger()))
-	r.Use(middleware.Recoverer)
+	r.Use(chiMiddleware.RequestID)
+	r.Use(chiMiddleware.RealIP)
+	r.Use(middleware.NewStructuredLogger(log.StandardLogger()))
+	r.Use(chiMiddleware.Recoverer)
 
 	if os.Getenv("ENVIRONMENT") == "dev" {
-		r.Use(handler.DevCORS)
+		r.Use(middleware.DevCORS)
 	}
 
 	// Misc
-	r.Get("/favicon.ico", handler.ServeFile(path.Join(s.StaticFolder, "favicon.ico")))
-	r.Get("/manifest.json", handler.ServeFile(path.Join(s.StaticFolder, "manifest.json")))
+	r.Get("/favicon.ico", middleware.ServeFile(path.Join(s.StaticFolder, "favicon.ico")))
+	r.Get("/manifest.json", middleware.ServeFile(path.Join(s.StaticFolder, "manifest.json")))
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
 		if s.BasicAuthEnabled {
 			log.Debugln("basic auth is enabled")
-			r.Use(handler.BasicAuthentication(s.BasicAuthAllowed))
+			r.Use(middleware.BasicAuthentication(s.BasicAuthAllowed))
 		}
 
 		// API for frontend
 		r.Route("/v0", func(r chi.Router) {
-			r.Use(handler.ContentTypeJSON)
-			r.Get("/version", getDataFromStore("revision"))
-			r.Get("/disk-usage", getDataFromStore("diskUsage"))
-
-			// long polling routes
-			r.Group(func(r chi.Router) {
-				r.Use(handler.LongPolling(s.Timeouts.LongPolling))
-				r.Get("/_/docker/disk-usage", getDataFromStore("dockerDiskUsage"))
-			})
+			r.Use(middleware.ContentTypeJSON)
+			r.Get("/version", handler.Version(ctx))
+			r.Get("/disk-usage", handler.DiskUsage(ctx))
 
 			r.Route("/docker", func(r chi.Router) {
-				r.Get("/version", getDataFromStore("dockerVersion"))
-				r.Get("/containers", getDataFromStore("dockerContainerList"))
-				r.Get("/disk-usage", getDataFromStore("dockerDiskUsage"))
-				r.Get("/log-size", getDataFromStore("dockerLogSize"))
-				r.Get("/bind-mounts", getDataFromStore("dockerBindMounts"))
+				r.Get("/version", handler.DockerVersion(ctx, d))
+				r.Get("/containers", handler.DockerContainerList(ctx, d))
+				r.Get("/disk-usage", handler.DockerDiskUsage(ctx, d))
+				r.Get("/log-size", handler.DockerLogSize(ctx, d))
+				r.Get("/bind-mounts", handler.DockerBindMounts())
 			})
 		})
 
 		// Static
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.Compress(5, "text/html", "text/css", "text/javascript", "application/javascript"))
+			r.Use(chiMiddleware.Compress(5, "text/html", "text/css", "text/javascript", "application/javascript"))
 
 			// Everything else falls back on static content
 			// https://github.com/go-chi/chi/issues/403#issuecomment-900144943
@@ -80,7 +66,7 @@ func CreateRouter(s *Server) *chi.Mux {
 
 			// SPA
 			indexHTML := path.Join(s.StaticFolder, "index.html")
-			r.Get("/*", handler.SinglePageApplication(indexHTML, s.UITitle, s.UIHeader))
+			r.Get("/*", middleware.SinglePageApplication(indexHTML, s.UITitle, s.UIHeader))
 		})
 	})
 	return r

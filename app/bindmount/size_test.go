@@ -1,18 +1,15 @@
-package poller
+package bindmount
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strconv"
 	"testing"
 	"time"
 
-	dockerTypes "github.com/docker/docker/api/types"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -45,7 +42,8 @@ func Test_Run(t *testing.T) {
 
 	// options
 	version := "v1.22"
-	port := 3000 + rand.Intn(1000)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 1000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := docker.NewMockServer(addr, version, logFile, mountDir)
 	mock.Start(t)
@@ -55,50 +53,17 @@ func Test_Run(t *testing.T) {
 	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
 	require.NoError(t, err)
 
-	err = store.Initialize()
 	require.NoError(t, err)
 
-	volumes := []types.HostVolume{
-		{Name: "root", Path: "/"},
-	}
+	volumes := []types.HostVolume{{Name: "root", Path: "/"}}
 
-	log.SetOutput(ioutil.Discard)
-	Run(ctx, d, volumes)
+	CalcSize(ctx, d, volumes)
 	time.Sleep(2 * time.Second)
 
 	cancel()
 	mock.Shutdown(t)
 
-	v, ok := store.Get("dockerVersion")
-	assert.True(t, ok)
-	ver := types.AppVersion{}
-	err = json.Unmarshal(v.([]byte), &ver)
-	require.NoError(t, err)
-
-	v, ok = store.Get("dockerContainerList")
-	assert.True(t, ok)
-	c := struct {
-		Containers []*dockerTypes.ContainerJSON
-	}{}
-	err = json.Unmarshal(v.([]byte), &c)
-	require.NoError(t, err)
-
-	v, ok = store.Get("dockerDiskUsage")
-	assert.True(t, ok)
-	du := dockerTypes.DiskUsage{}
-	err = json.Unmarshal(v.([]byte), &du)
-	require.NoError(t, err)
-
-	v, ok = store.Get("dockerLogSize")
-	assert.True(t, ok)
-	logs := struct {
-		Logs      []*types.LogFileInfo
-		TotalSize int64
-	}{}
-	err = json.Unmarshal(v.([]byte), &logs)
-	require.NoError(t, err)
-
-	v, ok = store.Get("dockerBindMounts")
+	v, ok := store.Get("dockerBindMounts")
 	assert.True(t, ok)
 	bindMounts := struct {
 		BindMounts []*types.BindMountInfo
@@ -110,9 +75,11 @@ func Test_Run(t *testing.T) {
 
 func Test_Run_NoSuchFileOrDir(t *testing.T) {
 	// options
-	version := "v1.22"
-	port := 4000 + rand.Intn(1000)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 1000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
+
+	version := "v1.22"
 	mock := docker.NewMockServer(addr, version, "incorrect-path", "incorrect-path")
 	mock.Start(t)
 	time.Sleep(10 * time.Millisecond)
@@ -121,24 +88,21 @@ func Test_Run_NoSuchFileOrDir(t *testing.T) {
 	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
 	require.NoError(t, err)
 
-	err = store.Initialize()
 	require.NoError(t, err)
 
-	volumes := []types.HostVolume{
-		{Name: "root", Path: "/hostroot"},
-	}
+	volumes := []types.HostVolume{{Name: "root", Path: "/"}}
 
-	log.SetOutput(ioutil.Discard)
-	Run(ctx, d, volumes)
+	CalcSize(ctx, d, volumes)
 	time.Sleep(time.Second)
 
 	cancel()
 	mock.Shutdown(t)
 }
 
-func Test_poll_Failed(t *testing.T) {
+func Test_Run_Failed(t *testing.T) {
 	// options
-	port := 7000 + rand.Intn(1000)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 1000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := docker.NewMockServer(addr, "", "", "")
 	mock.Start(t)
@@ -148,14 +112,11 @@ func Test_poll_Failed(t *testing.T) {
 	d, err := docker.NewClient(ctx, "http://"+addr, "", "", false)
 	require.NoError(t, err)
 
-	err = store.Initialize()
 	require.NoError(t, err)
 
-	volumes := []types.HostVolume{
-		{Name: "root", Path: "/hostroot"},
-	}
+	volumes := []types.HostVolume{{Name: "root", Path: "/"}}
 
-	poll(ctx, d, volumes)
+	CalcSize(ctx, d, volumes)
 
 	cancel()
 	mock.Shutdown(t)

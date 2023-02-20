@@ -17,23 +17,11 @@ import {
   getDiskUsage,
   getDockerVersion,
   getDockerDiskUsage,
-  getDockerDiskUsageLongPolling,
   getDockerLogs,
   getDockerBindMounts,
   getDockerContainerList,
   setupTheme,
 } from './AppSlice';
-
-function polling(dispatch) {
-  dispatch(getDiskUsage());
-  dispatch(getDockerContainerList());
-  dispatch(getDockerLogs());
-  dispatch(getDockerBindMounts());
-  dispatch(getDockerDiskUsageLongPolling()) // long polling
-    .unwrap()
-    .then(() => polling(dispatch))
-    .catch(() => setTimeout(() => polling(dispatch), 30000));
-}
 
 function App() {
   const dispatch = useDispatch();
@@ -44,9 +32,12 @@ function App() {
 
   useEffect(() => {
     dispatch(getVersion());
+    dispatch(getDiskUsage());
     dispatch(getDockerVersion());
     dispatch(getDockerDiskUsage());
-    polling(dispatch);
+    dispatch(getDockerContainerList());
+    dispatch(getDockerLogs());
+    dispatch(getDockerBindMounts());
   }, [dispatch]);
 
   return (

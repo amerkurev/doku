@@ -1,3 +1,4 @@
+// Package http provides HTTP server.
 package http
 
 import (
@@ -8,7 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/amerkurev/doku/app/store"
+	"github.com/amerkurev/doku/app/docker"
 )
 
 // Server is a server for http.
@@ -24,16 +25,15 @@ type Server struct {
 
 // Timeouts consolidate timeouts for both server and transport
 type Timeouts struct {
-	Write       time.Duration
-	Read        time.Duration
-	Idle        time.Duration
-	Shutdown    time.Duration
-	LongPolling time.Duration
+	Write    time.Duration
+	Read     time.Duration
+	Idle     time.Duration
+	Shutdown time.Duration
 }
 
 // Run creates and starts an HTTP server.
-func (s *Server) Run(ctx context.Context) error {
-	router := CreateRouter(s)
+func (s *Server) Run(ctx context.Context, d *docker.Client) error {
+	router := CreateRouter(ctx, s, d)
 
 	httpServer := &http.Server{
 		Addr:         s.Address,
@@ -53,10 +53,6 @@ func (s *Server) Run(ctx context.Context) error {
 		defer func() {
 			cancel()
 			done <- struct{}{}
-		}()
-
-		go func() {
-			store.NotifyAll() // unlock all long-polling requests before shut down
 		}()
 
 		err := httpServer.Shutdown(ctx)

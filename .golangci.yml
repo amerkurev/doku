@@ -28,10 +28,6 @@ linters-settings:
       - rangeValCopy
       - singleCaseSwitch
       - ifElseChain
-  revive:
-    rules:
-      - name: package-comments
-        disabled: true
 
 linters:
   enable:

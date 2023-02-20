@@ -64,11 +64,6 @@ export const getDockerDiskUsage = createAsyncThunk('app/getDockerDiskUsage', asy
   return response.data;
 });
 
-export const getDockerDiskUsageLongPolling = createAsyncThunk('app/getDockerDiskUsageLongPolling', async () => {
-  const response = await axios.get(makeURL('/v0/_/docker/disk-usage'));
-  return response.data;
-});
-
 export const getDockerLogs = createAsyncThunk('app/getDockerLogs', async () => {
   const response = await axios.get(makeURL('/v0/docker/log-size'));
   return response.data;
@@ -160,14 +155,6 @@ export const appSlice = createSlice({
     },
     [getDockerDiskUsage.fulfilled]: diskUsageFulfilled,
     [getDockerDiskUsage.rejected]: (state, action) => {
-      state.dockerDiskUsageStatus = 'idle';
-    },
-    // Docker Disk Usage (long polling)
-    [getDockerDiskUsageLongPolling.pending]: (state) => {
-      state.dockerDiskUsageStatus = 'loading';
-    },
-    [getDockerDiskUsageLongPolling.fulfilled]: diskUsageFulfilled,
-    [getDockerDiskUsageLongPolling.rejected]: (state, action) => {
       state.dockerDiskUsageStatus = 'idle';
     },
     // Docker Log Size

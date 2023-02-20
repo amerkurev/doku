@@ -1,8 +1,8 @@
+// Package main provides the entry point for the application.
 package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -14,10 +14,9 @@ import (
 	"github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/amerkurev/doku/app/bindmount"
 	"github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/http"
-	"github.com/amerkurev/doku/app/poller"
-	"github.com/amerkurev/doku/app/store"
 	"github.com/amerkurev/doku/app/types"
 )
 
@@ -72,6 +71,8 @@ func main() {
 
 func run(volumes []types.HostVolume) error {
 	ctx, cancel := context.WithCancel(context.Background())
+	ctx = context.WithValue(ctx, types.CtxKeyRevision, revision)
+	ctx = context.WithValue(ctx, types.CtxKeyVolumes, volumes)
 
 	go func() {
 		// catch signal and invoke graceful termination
@@ -81,17 +82,6 @@ func run(volumes []types.HostVolume) error {
 		log.Debug("interrupt signal")
 		cancel()
 	}()
-
-	err := store.Initialize()
-	if err != nil {
-		return fmt.Errorf("failed to initialize the store: %w", err)
-	}
-	// save revision in the store
-	b, err := json.Marshal(types.AppVersion{Version: revision})
-	store.Set("revision", b)
-	if err != nil {
-		return fmt.Errorf("failed to encode as JSON: %w", err)
-	}
 
 	d, err := docker.NewClient(
 		ctx,
@@ -105,8 +95,8 @@ func run(volumes []types.HostVolume) error {
 	}
 	log.Info(fmt.Sprintf("docker engine API (%s)", d.ClientVersion()))
 
-	log.Info("starting docker poller")
-	poller.Run(ctx, d, volumes)
+	log.Info("calculating size of volumes...")
+	bindmount.CalcSize(ctx, d, volumes)
 
 	basicAuthAllowed, err := makeBasicAuth(opts.AuthBasicHtpasswd)
 	if err != nil {
@@ -117,11 +107,10 @@ func run(volumes []types.HostVolume) error {
 	httpServer := &http.Server{
 		Address: addr,
 		Timeouts: http.Timeouts{
-			Read:        5 * time.Second,
-			Write:       60 * time.Second,
-			Idle:        60 * time.Second,
-			Shutdown:    5 * time.Second,
-			LongPolling: 30 * time.Second, // it must be less than writeTimeout!
+			Read:     5 * time.Second,
+			Write:    60 * time.Second,
+			Idle:     60 * time.Second,
+			Shutdown: 5 * time.Second,
 		},
 		BasicAuthEnabled: len(basicAuthAllowed) > 0,
 		BasicAuthAllowed: basicAuthAllowed,
@@ -131,7 +120,7 @@ func run(volumes []types.HostVolume) error {
 	}
 
 	log.Info(fmt.Sprintf("starting http server at %s", addr))
-	return httpServer.Run(ctx)
+	return httpServer.Run(ctx, d)
 }
 
 func configureLogging(level string, stdout bool) {
