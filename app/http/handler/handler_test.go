@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/amerkurev/doku/app/docker"
-	dockerMock "github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/store"
 	"github.com/amerkurev/doku/app/types"
 )
@@ -42,18 +41,18 @@ func Test_Handler(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, len(s), n)
 
-	rand.Seed(time.Now().UnixNano())
-	port := 1000 + rand.Intn(10000)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 1000 + rnd.Intn(10000)
 	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	ctx = context.WithValue(ctx, "revision", revision)
-	ctx = context.WithValue(ctx, "volumes", []types.HostVolume{{Name: "root", Path: "/"}})
+	ctx = context.WithValue(ctx, types.CtxKeyRevision, revision)
+	ctx = context.WithValue(ctx, types.CtxKeyVolumes, []types.HostVolume{{Name: "root", Path: "/"}})
 	defer cancel()
 
 	// Docker mock
 	version := "v1.22"
-	mock := dockerMock.NewMockServer(dockerMockAddr, version, logFile, mountDir)
+	mock := docker.NewMockServer(dockerMockAddr, version, logFile, mountDir)
 	mock.Start(t)
 	d, err := docker.NewClient(ctx, "http://"+dockerMockAddr, "", version, false)
 	require.NoError(t, err)

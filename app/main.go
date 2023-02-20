@@ -1,3 +1,4 @@
+// Package main provides the entry point for the application.
 package main
 
 import (
@@ -70,8 +71,8 @@ func main() {
 
 func run(volumes []types.HostVolume) error {
 	ctx, cancel := context.WithCancel(context.Background())
-	ctx = context.WithValue(ctx, "revision", revision)
-	ctx = context.WithValue(ctx, "volumes", volumes)
+	ctx = context.WithValue(ctx, types.CtxKeyRevision, revision)
+	ctx = context.WithValue(ctx, types.CtxKeyVolumes, volumes)
 
 	go func() {
 		// catch signal and invoke graceful termination

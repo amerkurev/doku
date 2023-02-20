@@ -1,3 +1,4 @@
+// Package handler provides HTTP handlers for the application.
 package handler
 
 import (
@@ -22,8 +23,9 @@ func internalServerError(w http.ResponseWriter, err error, reason string) {
 	w.WriteHeader(http.StatusInternalServerError)
 }
 
+// Version returns version of the application.
 func Version(ctx context.Context) http.HandlerFunc {
-	revision := ctx.Value("revision").(string)
+	revision := ctx.Value(types.CtxKeyRevision).(string)
 
 	return func(w http.ResponseWriter, _ *http.Request) {
 		b, err := json.Marshal(types.AppVersion{Version: revision})
@@ -36,6 +38,7 @@ func Version(ctx context.Context) http.HandlerFunc {
 	}
 }
 
+// DockerVersion returns version of the docker daemon.
 func DockerVersion(ctx context.Context, d *docker.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		res, err := d.ServerVersion(ctx)
@@ -57,6 +60,7 @@ func DockerVersion(ctx context.Context, d *docker.Client) http.HandlerFunc {
 	}
 }
 
+// DockerContainerList returns list of containers.
 func DockerContainerList(ctx context.Context, d *docker.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		res, err := d.ContainerJSONList(ctx)
@@ -95,6 +99,7 @@ func DockerContainerList(ctx context.Context, d *docker.Client) http.HandlerFunc
 	}
 }
 
+// DockerDiskUsage returns disk usage of the docker daemon.
 func DockerDiskUsage(ctx context.Context, d *docker.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		res, err := d.DiskUsage(ctx)
@@ -127,8 +132,9 @@ func DockerDiskUsage(ctx context.Context, d *docker.Client) http.HandlerFunc {
 	}
 }
 
+// DockerLogSize returns size of the docker container logs.
 func DockerLogSize(ctx context.Context, d *docker.Client) http.HandlerFunc {
-	volumes := ctx.Value("volumes").([]types.HostVolume)
+	volumes := ctx.Value(types.CtxKeyVolumes).([]types.HostVolume)
 	logPathErrors := make(map[string]bool)
 
 	return func(w http.ResponseWriter, _ *http.Request) {
@@ -176,6 +182,7 @@ func DockerLogSize(ctx context.Context, d *docker.Client) http.HandlerFunc {
 	}
 }
 
+// DockerBindMounts returns size of bind mounts.
 func DockerBindMounts() http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		v, ok := store.Get("dockerBindMounts") // cached value
@@ -186,8 +193,9 @@ func DockerBindMounts() http.HandlerFunc {
 	}
 }
 
+// DiskUsage returns disk usage of the host.
 func DiskUsage(ctx context.Context) http.HandlerFunc {
-	volumes := ctx.Value("volumes").([]types.HostVolume)
+	volumes := ctx.Value(types.CtxKeyVolumes).([]types.HostVolume)
 
 	return func(w http.ResponseWriter, _ *http.Request) {
 		var lastErr error

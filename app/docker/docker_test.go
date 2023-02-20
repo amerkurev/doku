@@ -15,10 +15,11 @@ import (
 )
 
 func Test_Client(t *testing.T) {
-	version := "v1.22"
-	rand.Seed(time.Now().UnixNano())
-	port := 1000 + rand.Intn(10000)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 1000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
+
+	version := "v1.22"
 	mock := NewMockServer(addr, version, "", "")
 	mock.Start(t)
 

@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/amerkurev/doku/app/docker"
-	dockerMock "github.com/amerkurev/doku/app/docker"
 	"github.com/amerkurev/doku/app/types"
 )
 
@@ -46,11 +45,11 @@ func Test_Server_Run(t *testing.T) {
 	err = os.Setenv("ENVIRONMENT", "dev") // CORS
 	require.NoError(t, err)
 
-	rand.Seed(time.Now().UnixNano())
-	port := 1000 + rand.Intn(10000)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 1000 + rnd.Intn(10000)
 	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
-	port = 1000 + rand.Intn(10000)
+	port = 1000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	allowed := []string{
@@ -71,13 +70,13 @@ func Test_Server_Run(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	ctx = context.WithValue(ctx, "revision", revision)
-	ctx = context.WithValue(ctx, "volumes", []types.HostVolume{{Name: "root", Path: "/"}})
+	ctx = context.WithValue(ctx, types.CtxKeyRevision, revision)
+	ctx = context.WithValue(ctx, types.CtxKeyVolumes, []types.HostVolume{{Name: "root", Path: "/"}})
 	defer cancel()
 
 	// Docker mock
 	version := "v1.22"
-	mock := dockerMock.NewMockServer(dockerMockAddr, version, logFile, mountDir)
+	mock := docker.NewMockServer(dockerMockAddr, version, logFile, mountDir)
 	mock.Start(t)
 	d, err := docker.NewClient(ctx, "http://"+dockerMockAddr, "", version, false)
 	require.NoError(t, err)
@@ -127,8 +126,8 @@ func Test_Server_Run(t *testing.T) {
 }
 
 func Test_Server_RunFailed(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
-	port := 1000 + rand.Intn(10000)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 1000 + rnd.Intn(10000)
 	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	port = 1_000_000
@@ -145,13 +144,13 @@ func Test_Server_RunFailed(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
-	ctx = context.WithValue(ctx, "revision", revision)
-	ctx = context.WithValue(ctx, "volumes", []types.HostVolume{{Name: "root", Path: "/"}})
+	ctx = context.WithValue(ctx, types.CtxKeyRevision, revision)
+	ctx = context.WithValue(ctx, types.CtxKeyVolumes, []types.HostVolume{{Name: "root", Path: "/"}})
 	defer cancel()
 
 	// Docker mock
 	version := "v1.22"
-	mock := dockerMock.NewMockServer(dockerMockAddr, version, "", "")
+	mock := docker.NewMockServer(dockerMockAddr, version, "", "")
 	mock.Start(t)
 	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
 	require.NoError(t, err)

@@ -1,3 +1,4 @@
+// Package docker provides Docker client.
 package docker
 
 import (

@@ -1,3 +1,4 @@
+// Package bindmount provides functionality to calculate the size of bind mounts.
 package bindmount
 
 import (
@@ -17,6 +18,7 @@ import (
 	"github.com/amerkurev/doku/app/util"
 )
 
+// CalcSize calculates the size of directories that mounted into containers (bind type).
 func CalcSize(ctx context.Context, d *docker.Client, volumes []types.HostVolume) {
 
 	go func() {
