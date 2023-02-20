@@ -16,7 +16,7 @@ import (
 
 func Test_Client(t *testing.T) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	version := "v1.22"

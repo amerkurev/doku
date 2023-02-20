@@ -54,7 +54,7 @@ func Test_Main(t *testing.T) {
 	mock.Start(t)
 	waitForHTTPServerStart(dockerAddr)
 
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	titleHTML := "Doku test"
 	os.Args = []string{

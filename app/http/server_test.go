@@ -46,7 +46,7 @@ func Test_Server_Run(t *testing.T) {
 	require.NoError(t, err)
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	port = 1000 + rnd.Intn(10000)
@@ -127,7 +127,7 @@ func Test_Server_Run(t *testing.T) {
 
 func Test_Server_RunFailed(t *testing.T) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	port = 1_000_000

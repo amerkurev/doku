@@ -43,7 +43,7 @@ func Test_Run(t *testing.T) {
 	// options
 	version := "v1.22"
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := docker.NewMockServer(addr, version, logFile, mountDir)
 	mock.Start(t)
@@ -76,7 +76,7 @@ func Test_Run(t *testing.T) {
 func Test_Run_NoSuchFileOrDir(t *testing.T) {
 	// options
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	version := "v1.22"
@@ -102,7 +102,7 @@ func Test_Run_NoSuchFileOrDir(t *testing.T) {
 func Test_Run_Failed(t *testing.T) {
 	// options
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := docker.NewMockServer(addr, "", "", "")
 	mock.Start(t)

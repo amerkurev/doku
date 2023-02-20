@@ -42,7 +42,7 @@ func Test_Handler(t *testing.T) {
 	require.Equal(t, len(s), n)
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	port := 1000 + rnd.Intn(10000)
+	port := 10000 + rnd.Intn(10000)
 	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -115,4 +115,27 @@ func Test_Handler(t *testing.T) {
 	rr = httptest.NewRecorder()
 	DockerLogSize(ctx, d)(rr, nil)
 	assert.Equal(t, 500, rr.Result().StatusCode)
+}
+
+func Test_FailedToGetLogFile(t *testing.T) {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	port := 10000 + rnd.Intn(10000)
+	dockerMockAddr := fmt.Sprintf("127.0.0.1:%d", port)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	ctx = context.WithValue(ctx, types.CtxKeyRevision, revision)
+	ctx = context.WithValue(ctx, types.CtxKeyVolumes, []types.HostVolume{{Name: "root", Path: "/"}})
+	defer cancel()
+
+	// Docker mock
+	version := "v1.22"
+	mock := docker.NewMockServer(dockerMockAddr, version, "incorrect-path", "incorrect-path")
+	mock.Start(t)
+	d, err := docker.NewClient(ctx, "http://"+dockerMockAddr, "", version, false)
+	require.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+	DockerLogSize(ctx, d)(rr, nil)
+	assert.Equal(t, 200, rr.Result().StatusCode)
+	assert.Greater(t, rr.Body.Len(), 0)
 }
