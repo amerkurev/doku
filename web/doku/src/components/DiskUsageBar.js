@@ -13,6 +13,8 @@ function DiskUsageBar() {
   }
 
   const percent = Math.round(diskUsage.Percent);
+  // "df -H" print sizes in powers of 1000 -- prettyBytes(size) or prettyBytes(size, {binary: false})
+  // "df -h" print sizes in powers of 1024 -- prettyBytes(size, {binary: true})
   const ratio = prettyBytes(diskUsage.Used) + ' / ' + prettyBytes(diskUsage.Total);
   const width = `${percent > 10 ? percent : 10}%`;
 
