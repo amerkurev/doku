@@ -13,9 +13,7 @@ Doku should work for most. It has been tested with dozen of hosts.
 [![Docker pulls](https://img.shields.io/docker/pulls/amerkurev/doku.svg)](https://hub.docker.com/r/amerkurev/doku)&nbsp;
 </div>
 
-<div align="center">
-  <img class="laptop_doku" src="https://github.com/amerkurev/static/blob/e15c6f02845477d94af300f559852313ff869bef/doku/laptop_doku.svg" alt="Laptop with Doku"/>
-</div>
+![laptop_doku](https://user-images.githubusercontent.com/28217522/235870076-a344527c-874d-41a4-bda9-749efd4ff917.svg)
 
 ## Getting Doku
 
