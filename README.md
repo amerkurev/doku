@@ -35,10 +35,10 @@ Doku supports basic auth for all requests. This functionality is disabled by def
 
 In order to enable basic auth, user should set the typical htpasswd file with `--basic-htpasswd=<file location>` or `env BASIC_HTPASSWD=<file location>`. 
 
-Doku expects htpasswd file to be in the following format:
+Doku expects htpasswd file to be crypted with `bcrypt` algorithm in the following format:
 
 ```
-username1:bcrypt(password2)
+username1:bcrypt(password1)
 username2:bcrypt(password2)
 ...
 ```
