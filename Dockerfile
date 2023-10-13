@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine as backend
+FROM golang:1.20-alpine as backend
 
 ARG GIT_BRANCH
 ARG GITHUB_SHA
@@ -21,7 +21,7 @@ RUN \
     cd app && go build -o /build/doku -ldflags "-X main.revision=${version} -s -w"
 
 
-FROM node:16.14.2-alpine as build-frontend
+FROM node:16.20-alpine as build-frontend
 
 ARG NODE_ENV=production
 ARG CI=true
