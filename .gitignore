@@ -27,3 +27,6 @@ coverage.txt
 web/static
 web/doku/build
 web/doku/node_modules
+
+# Local history plugin for Visual Studio
+.history
