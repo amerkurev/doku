@@ -20,12 +20,26 @@ Doku should work for most. It has been tested with dozen of hosts.
 Doku is a very small Docker container (6 MB compressed). Pull the latest release from the index:
 
     docker pull amerkurev/doku:latest
-    
+
 ## Using Doku
 
 The simplest way to use Doku is to run the Docker container. Mount the Docker Unix socket with `-v` to `/var/run/docker.sock`. Also, you need to mount the top-level directory (`/`) on the host machine in `ro` mode. Otherwise, Doku will not be able to calculate the size of the logs and bind mounts.
 
     docker run --name doku -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v /:/hostroot:ro -p 9090:9090 amerkurev/doku
+
+Use following configuration for docker compose:
+
+```yaml
+version: "3"
+services:
+  docu:
+    image: amerkurev/doku:v0.0.16
+    ports:
+      - 9090:9090
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/hostroot:ro
+```
 
 Doku will be available at [http://localhost:9090/](http://localhost:9090/). You can change `-p 9090:9090` to any port. For example, if you want to view Doku over port 8080 then you would do `-p 8080:9090`.
 
@@ -33,7 +47,7 @@ Doku will be available at [http://localhost:9090/](http://localhost:9090/). You 
 
 Doku supports basic auth for all requests. This functionality is disabled by default.
 
-In order to enable basic auth, user should set the typical htpasswd file with `--basic-htpasswd=<file location>` or `env BASIC_HTPASSWD=<file location>`. 
+In order to enable basic auth, user should set the typical htpasswd file with `--basic-htpasswd=<file location>` or `env BASIC_HTPASSWD=<file location>`.
 
 Doku expects htpasswd file to be crypted with `bcrypt` algorithm in the following format:
 
