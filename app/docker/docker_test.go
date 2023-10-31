@@ -22,8 +22,8 @@ func Test_Client(t *testing.T) {
 	version := "v1.22"
 	mock := NewMockServer(addr, version, "", "")
 	mock.Start(t)
+	time.Sleep(time.Second)
 
-	time.Sleep(10 * time.Millisecond)
 	ctx := context.Background()
 
 	// bad host

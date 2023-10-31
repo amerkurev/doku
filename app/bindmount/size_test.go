@@ -47,7 +47,7 @@ func Test_Run(t *testing.T) {
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := docker.NewMockServer(addr, version, logFile, mountDir)
 	mock.Start(t)
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(time.Second)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
@@ -82,7 +82,7 @@ func Test_Run_NoSuchFileOrDir(t *testing.T) {
 	version := "v1.22"
 	mock := docker.NewMockServer(addr, version, "incorrect-path", "incorrect-path")
 	mock.Start(t)
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(time.Second)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
@@ -106,7 +106,7 @@ func Test_Run_Failed(t *testing.T) {
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	mock := docker.NewMockServer(addr, "", "", "")
 	mock.Start(t)
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(time.Second)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	d, err := docker.NewClient(ctx, "http://"+addr, "", "", false)

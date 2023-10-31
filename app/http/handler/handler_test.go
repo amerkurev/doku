@@ -54,6 +54,8 @@ func Test_Handler(t *testing.T) {
 	version := "v1.22"
 	mock := docker.NewMockServer(dockerMockAddr, version, logFile, mountDir)
 	mock.Start(t)
+	time.Sleep(time.Second)
+
 	d, err := docker.NewClient(ctx, "http://"+dockerMockAddr, "", version, false)
 	require.NoError(t, err)
 
@@ -131,6 +133,8 @@ func Test_FailedToGetLogFile(t *testing.T) {
 	version := "v1.22"
 	mock := docker.NewMockServer(dockerMockAddr, version, "incorrect-path", "incorrect-path")
 	mock.Start(t)
+	time.Sleep(time.Second)
+
 	d, err := docker.NewClient(ctx, "http://"+dockerMockAddr, "", version, false)
 	require.NoError(t, err)
 

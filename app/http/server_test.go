@@ -78,6 +78,8 @@ func Test_Server_Run(t *testing.T) {
 	version := "v1.22"
 	mock := docker.NewMockServer(dockerMockAddr, version, logFile, mountDir)
 	mock.Start(t)
+	time.Sleep(time.Second)
+
 	d, err := docker.NewClient(ctx, "http://"+dockerMockAddr, "", version, false)
 	require.NoError(t, err)
 
@@ -152,6 +154,8 @@ func Test_Server_RunFailed(t *testing.T) {
 	version := "v1.22"
 	mock := docker.NewMockServer(dockerMockAddr, version, "", "")
 	mock.Start(t)
+	time.Sleep(time.Second)
+
 	d, err := docker.NewClient(ctx, "http://"+addr, "", version, false)
 	require.NoError(t, err)
 
