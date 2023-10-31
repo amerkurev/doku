@@ -21,7 +21,7 @@ RUN \
     cd app && go build -o /build/doku -ldflags "-X main.revision=${version} -s -w"
 
 
-FROM node:16.14.0-alpine as build-frontend
+FROM node:16.14.2-alpine as build-frontend
 
 ARG NODE_ENV=production
 ARG CI=true
@@ -38,7 +38,7 @@ RUN rm -f /srv/frontend/.eslintrc.json && \
 CMD yarn run test
 
 
-FROM ghcr.io/umputun/baseimage/app:v1.9.1 as base
+FROM ghcr.io/umputun/baseimage/app:v1.11 as base
 
 FROM scratch
 
