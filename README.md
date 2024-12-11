@@ -32,7 +32,7 @@ Use following configuration for docker compose:
 ```yaml
 version: "3"
 services:
-  docu:
+  doku:
     image: amerkurev/doku:v0.0.16
     ports:
       - 9090:9090
