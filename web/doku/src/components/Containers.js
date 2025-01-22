@@ -179,7 +179,7 @@ function getImageNames(diskUsage, ImageID) {
     for (let i = 0; i < diskUsage.Images.length; i++) {
       const x = diskUsage.Images[i];
       if (x.Id === ImageID) {
-        return x.RepoTags.join('\n');
+        return Array.isArray(x.RepoTags) ? x.RepoTags.join('\n') : ImageID;
       }
     }
   }
