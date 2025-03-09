@@ -8,11 +8,6 @@ from dotenv import load_dotenv
 from pydantic import Field, PositiveInt, ValidationError, field_validator
 from pydantic_settings import BaseSettings
 
-from version import revision
-
-
-REVISION = revision  # e.g. 'v1.0.0 (20250301-00:56:09)'
-VERSION = REVISION.split()[0]  # 'v1.0.0'
 
 load_dotenv()  # take environment variables from .env.
 
@@ -75,6 +70,10 @@ class Settings(BaseSettings):
     docker_max_pool_size: PositiveInt = Field(alias='DOCKER_MAX_POOL_SIZE', default=docker.DEFAULT_MAX_POOL_SIZE)
     docker_use_ssh_client: bool = Field(alias='DOCKER_USE_SSH_CLIENT', default=False)
 
+    # version settings
+    git_tag: str = Field(alias='GIT_TAG', default='v0.0.0')
+    git_sha: str = Field(alias='GIT_SHA', default='')
+
     @field_validator('log_level', mode='before')
     def lowercase_log_level(cls, v):
         if isinstance(v, str):
@@ -98,6 +97,9 @@ try:
 except ValidationError as err:
     raise SystemExit(err) from err
 
+
+VERSION = _settings.git_tag
+REVISION = f'{_settings.git_tag}-{_settings.git_sha[:7]}'
 
 # general settings
 HOST = _settings.host
