@@ -16,7 +16,8 @@ COPY --from=builder /install /usr/local
 ARG APP_DIR=/usr/src/app
 ARG SUPERVISOR_CONF=/usr/local/etc/supervisord.conf
 ARG GITHUB_REPO=amerkurev/doku
-ARG REV
+ARG GIT_SHA
+ARG GIT_TAG
 
 # this is used in the code
 LABEL github.repo=$GITHUB_REPO
@@ -31,13 +32,13 @@ LABEL org.opencontainers.image.source="https://github.com/amerkurev/doku"
 ENV IN_DOCKER=1 \
 	# used in supervisord.conf
 	APP_DIR=$APP_DIR \
-	GITHUB_REPO=$GITHUB_REPO
+	GITHUB_REPO=$GITHUB_REPO \
+	GIT_SHA=$GIT_SHA \
+	GIT_TAG=$GIT_TAG
 
 
 COPY app $APP_DIR
 COPY conf/supervisord.conf $SUPERVISOR_CONF
-
-RUN echo "revision = '${REV}'" | tee $APP_DIR/version.py
 
 WORKDIR $APP_DIR
 

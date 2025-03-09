@@ -1,21 +1,27 @@
-BUILD_DATE=$(shell date +%Y%m%d-%H:%M:%S)
-
 ifdef GITHUB_REF
     # CI environment - use provided ref
-    REF=$(shell echo $(GITHUB_REF) | cut -d'/' -f3)
+    GIT_TAG=$(shell echo $(GITHUB_REF) | cut -d'/' -f3)
 else
     # Local environment - calculate from git
-    REF=$(shell git describe --tags 2>/dev/null || git rev-parse --short HEAD)
+	GIT_TAG=$(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD)
 endif
 
-REV=$(REF) ($(BUILD_DATE))
+ifdef GITHUB_SHA
+	# CI environment - use provided sha
+	GIT_SHA=$(GITHUB_SHA)
+else
+	# Local environment - calculate from git
+	GIT_SHA=$(shell git rev-parse --short HEAD)
+endif
+
+REV=$(GIT_TAG)-$(GIT_SHA)
 PWD=$(shell pwd)
 
 info:
 	- @echo "revision $(REV)"
 
 build:
-	- @docker buildx build --load --build-arg REV="${REV}" -t amerkurev/doku:latest --progress=plain .
+	- @docker buildx build --load --build-arg GIT_SHA="${GIT_SHA}" --build-arg GIT_TAG="${GIT_TAG}" -t amerkurev/doku:latest --progress=plain .
 
 lint:
 	- @ruff check app
@@ -25,6 +31,8 @@ fmt: lint
 
 test:
 	- @docker run --rm -t -v $(PWD)/app:/usr/src/app amerkurev/doku ./pytest.sh
+
+cov:
 	- @docker run --rm -t -v $(PWD)/app:/usr/src/app amerkurev/doku coverage html
 
 dev: build
@@ -42,4 +50,4 @@ dev: build
 	  -p 9090:9090 \
 	  amerkurev/doku
 
-.PHONY: info build lint fmt dev
+.PHONY: info build lint fmt test cov dev
