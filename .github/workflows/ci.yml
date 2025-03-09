@@ -29,8 +29,21 @@ jobs:
               run: |
                 make info
                 make build
+                ref="$(echo ${GITHUB_REF} | cut -d'/' -f3)"
+                echo GITHUB_REF - $ref
+              env:
+                USERNAME: ${{ github.actor }}
+                GITHUB_SHA: ${{ github.sha }}
+                GITHUB_REF: ${{ github.ref }}
 
             - name: Test and Lint
               run: |
                 make test
                 make lint
+
+            - name: Coveralls Report
+              run: |
+                pip install coveralls
+                cd app && coveralls --service=github
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
