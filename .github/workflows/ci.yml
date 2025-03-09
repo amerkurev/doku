@@ -67,6 +67,6 @@ jobs:
                 echo ${DOCKER_HUB_TOKEN} | docker login -u ${USERNAME} --password-stdin
                 docker buildx build --push \
                   --build-arg CI=github --build-arg GIT_SHA=${GITHUB_SHA} --build-arg GIT_TAG=${ref} \
-                  --platform linux/amd64,linux/arm/v7,linux/arm64 \
+                  --platform linux/amd64,linux/arm64 \
                   -t ghcr.io/${USERNAME}/doku:${ref} \
                   -t ${USERNAME}/doku:${ref} .
