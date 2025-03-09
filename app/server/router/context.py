@@ -27,6 +27,8 @@ from scan.utils import pretty_size
 
 
 def total_size(items: Sequence | None, field_name='size') -> str:
+    if items is None:
+        return '0'
     total = sum(map(attrgetter(field_name), items))
     return pretty_size(total)
 
