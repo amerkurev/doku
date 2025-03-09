@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<script src="/static/echarts@5.6.0/echarts.min.js"></script>
+{% endblock %}
+
+{% block content %}
+{% include "docker_version.html" %}
+{% include "disk_usage_bar.html" %}
+{% include "charts.html" %}
+{% include "summary.html" %}
+
+{% endblock %}

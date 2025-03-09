@@ -1,49 +1,47 @@
-B=$(shell git rev-parse --abbrev-ref HEAD)
-BRANCH=$(subst /,-,$(B))
-GITREV=$(shell git describe --abbrev=7 --always --tags)
-REV=$(GITREV)-$(BRANCH)-$(shell date +%Y%m%d-%H:%M:%S)
-BIN=doku
-
-UNAME_S:=$(shell uname -s)
-GOOS:=
-ifeq ($(UNAME_S),Darwin)
-	GOOS=darwin
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+GIT_SHA=$(shell git rev-parse --short HEAD)
+GIT_TAG=$(shell git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+BUILD_DATE=$(shell date +%Y%m%d-%H:%M:%S)
+# If we're exactly on a tag, just show tag, otherwise show detailed version with commits
+GIT_DESCRIBE=$(shell git describe --tags 2>/dev/null)
+ifeq ($(GIT_TAG),$(GIT_DESCRIBE))
+    # We're exactly on a tag
+    REV=$(GIT_TAG) ($(BUILD_DATE))
 else
-	GOOS=linux
+    # We're off a tag
+    REV=$(shell git describe --tags) ($(BUILD_DATE))
 endif
-
-build: info
-	- @go mod tidy
-	- cd app && GOOS=$(GOOS) GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.revision=$(REV) -s -w" -o ../dist/$(BIN)
-
-test:
-	- go test -v -timeout=60s -race -mod=vendor -covermode=atomic -coverprofile=coverage.txt ./...
-
-run: build
-	- @./dist/$(BIN)
+PWD=$(shell pwd)
 
 info:
-	- @echo "os $(GOOS)"
 	- @echo "revision $(REV)"
 
+build:
+	- @docker buildx build --build-arg REV="${REV}" -t amerkurev/doku:latest --progress=plain .
 
-## React App ##
-build-web:
-	- cd web/doku && NODE_ENV=production yarn build
-	- @rm -rf web/static
-	- @cp -r web/doku/build/static web/static
-	- @cp web/doku/build/favicon.ico web/static
-	- @cp web/doku/build/index.html web/static
-	- @cp web/doku/build/manifest.json web/static
+lint:
+	- @ruff check app
 
-clean:
-	- @rm -rf web/static
+fmt: lint
+	- @ruff format app
 
-## Docker ##
-docker:
-	docker build -t amerkurev/$(BIN):master --progress=plain .
+test:
+	- @docker run --rm -t -v $(PWD)/app:/usr/src/app amerkurev/doku ./pytest.sh
+	- @docker run --rm -t -v $(PWD)/app:/usr/src/app amerkurev/doku coverage html
 
-docker-run: docker
-	docker run --rm -p 9090:9090 --name $(BIN) amerkurev/$(BIN):master
+dev: build
+	- @docker run \
+	  -it \
+	  --rm \
+	  --name doku \
+  	  --env-file=.env \
+	  -v $(PWD)/app:/usr/src/app \
+	  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+	  -v /:/hostroot:ro \
+      -v $(PWD)/.htpasswd:/.htpasswd \
+	  -v $(PWD)/.ssl/key.pem:/.ssl/key.pem \
+	  -v $(PWD)/.ssl/cert.pem:/.ssl/cert.pem \
+	  -p 9090:9090 \
+	  amerkurev/doku
 
-.PHONY: info build build-web clean test docker dist
+.PHONY: info build lint fmt dev

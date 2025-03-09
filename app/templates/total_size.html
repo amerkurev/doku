@@ -1,0 +1,29 @@
+<div class="uk-container">
+  <div class="uk-margin-small-top lato-font">
+    <div uk-grid>
+      <div class="uk-width-auto@m">
+        <h6 class="uk-text-center uk-text-uppercase uk-margin-remove-vertical lato-font">Total size</h6>
+        <h1 class="uk-heading-small uk-margin-remove-vertical lato-font">
+          {% if items is not none and items is sequence %}
+          {{ total }}
+          {% else %}
+          ??
+          {% endif %}
+        </h1>
+      </div>
+      <div class="uk-width-expand@m"></div>
+      <div class="uk-width-1-5@m uk-flex uk-flex-bottom">
+        <div class="uk-width-1-1">
+          <p class="uk-text-secondary uk-text-bold uk-text-center uk-margin-remove-bottom lato-font">
+            {{ name|title }}
+            {% if items is not none and items is sequence %}
+            ({{ items|length }})
+            {% else %}
+            not found
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

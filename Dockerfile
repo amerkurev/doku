@@ -1,58 +1,44 @@
-FROM golang:1.18-alpine as backend
+FROM python:3.13-slim AS base
 
-ARG GIT_BRANCH
-ARG GITHUB_SHA
-ARG CI
+FROM base AS builder
 
-ENV GOFLAGS="-mod=vendor"
-ENV CGO_ENABLED=0
-ENV GOOS=linux
-
-ADD . /build
-WORKDIR /build
-
-RUN apk add --no-cache --update git tzdata ca-certificates
-
-RUN \
-    if [ -z "$CI" ] ; then \
-    echo "runs outside of CI" && version=$(git rev-parse --abbrev-ref HEAD)-$(git log -1 --format=%h)-$(date +%Y%m%dT%H:%M:%S); \
-    else version=${GIT_BRANCH}-${GITHUB_SHA:0:7}-$(date +%Y%m%dT%H:%M:%S); fi && \
-    echo "version=$version" && \
-    cd app && go build -o /build/doku -ldflags "-X main.revision=${version} -s -w"
+RUN apt update && apt install -y python3-dev && mkdir /install
+WORKDIR /install
+COPY requirements.txt ./
+RUN pip install --no-cache-dir --prefix=/install -r ./requirements.txt
 
 
-FROM node:16.14.2-alpine as build-frontend
+FROM base AS final
 
-ARG NODE_ENV=production
-ARG CI=true
-
-ADD web/doku /srv/frontend
-WORKDIR /srv/frontend
-
-RUN rm -f /srv/frontend/.eslintrc.json && \
-    apk update && \
-    apk add zip make gcc g++ python3 && \
-    yarn install --immutable --network-timeout 100000 && \
-    yarn semantic-ui-css-patch && \
-    yarn build
-CMD yarn run test
+COPY --from=builder /install /usr/local
 
 
-FROM ghcr.io/umputun/baseimage/app:v1.11 as base
+ARG APP_DIR=/usr/src/app
+ARG SUPERVISOR_CONF=/usr/local/etc/supervisord.conf
+ARG GITHUB_REPO=amerkurev/doku
+ARG REV
 
-FROM scratch
+# this is used in the code
+LABEL github.repo=$GITHUB_REPO
+LABEL org.opencontainers.image.title="Doku"
+LABEL org.opencontainers.image.description="Doku - Docker disk usage dashboard"
+LABEL org.opencontainers.image.url="https://docker-disk.space"
+LABEL org.opencontainers.image.documentation="https://github.com/amerkurev/doku?tab=readme-ov-file#doku"
+LABEL org.opencontainers.image.vendor="amerkurev"
+LABEL org.opencontainers.image.licenses="MIT License"
+LABEL org.opencontainers.image.source="https://github.com/amerkurev/doku"
 
-ENV DOKU_IN_DOCKER=1
+ENV IN_DOCKER=1 \
+	# used in supervisord.conf
+	APP_DIR=$APP_DIR \
+	GITHUB_REPO=$GITHUB_REPO
 
-COPY --from=backend /build/doku /srv/doku
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=base /etc/passwd /etc/passwd
-COPY --from=base /etc/group /etc/group
-COPY --from=build-frontend /srv/frontend/build/static /srv/web/static
-COPY --from=build-frontend /srv/frontend/build/favicon.ico /srv/web/static
-COPY --from=build-frontend /srv/frontend/build/index.html /srv/web/static
-COPY --from=build-frontend /srv/frontend/build/manifest.json /srv/web/static
 
-WORKDIR /srv
-ENTRYPOINT ["/srv/doku"]
+COPY app $APP_DIR
+COPY conf/supervisord.conf $SUPERVISOR_CONF
+
+RUN echo "revision = '${REV}'" | tee $APP_DIR/version.py
+
+WORKDIR $APP_DIR
+
+CMD ["supervisord", "-c", "/usr/local/etc/supervisord.conf"]

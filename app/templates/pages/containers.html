@@ -1,0 +1,56 @@
+{% extends "table.html" %}
+
+{% block table %}
+<div class="uk-container">
+  <div class="uk-margin-small-top">
+    <table id="datatable" class="uk-table uk-table-small uk-table-hover lato-font">
+      <thead class="uk-text-secondary">
+          <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Image</th>
+              <th>
+                <span uk-tooltip="title: The size of files that have been created or modified in the container; pos: top">
+                  Size&nbsp;RW
+                </span>
+              </th>
+              <th>
+                <span uk-tooltip="title: The size of the container's root filesystem; pos: top">
+                  Virtual&nbsp;Size
+                </span>
+              </th>
+              <th class="uk-text-center">State</th>
+              <th>Created</th>
+          </tr>
+        </thead>
+        <tbody class="uk-text-secondary">
+          {% for item in items %}
+            <tr>
+              <td class="uk-text-nowrap mono-font">{{ item.short_id }}</td>
+              <td class="uk-text-nowrap">
+                {{ item.clean_names|join('<br>')|safe }}
+              </td>
+              <td class="uk-text-nowrap">{{ item.image }}</td>
+              <td class="width-1">{{ item.size_rw }}</td>
+              <td class="width-1">{{ item.size_root_fs }}</td>
+              <td class="uk-text-nowrap uk-text-center">{{ item.state }}</td>
+              <td class="uk-text-nowrap uk-text-muted">
+                <span uk-tooltip="title: {{ item.created }}; pos: top">
+                  {{ item.created_delta }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+<script type="text/javascript">
+  initializeDataTable({
+    sizeCol: [3, 4],
+    si: si,
+    nonSortableColumns: [6],  // Created
+    nonSearchableColumns: [5, 6]  // State, Created
+  });
+</script>
+{% endblock %}

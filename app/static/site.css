@@ -1,0 +1,155 @@
+/* General custom styles */
+:focus-visible {
+  outline: unset;
+}
+
+[class*='uk-light'] {
+  background: #222 !important;
+}
+
+.uk-height-xlarge {
+  height: 600px
+}
+.uk-height-max-xlarge {
+  max-height: 600px
+}
+
+/* Font declaration */
+@font-face {
+  font-family: 'Lato';
+  src: url('/static/assets/fonts/Lato-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.lato-font {
+  font-family: Lato,Helvetica Neue,Arial,Helvetica,sans-serif;
+}
+.mono-font {
+  font-family: 'Courier New',Courier,monospace;
+}
+
+/* Container custom styles */
+.uk-container {
+  max-width: 1100px;
+}
+
+/* Navabe custom styles */
+.uk-navbar-container.bg-moby-blue {
+  background-color: #1d63ed;
+}
+[class*='uk-light'] .uk-navbar-container.bg-moby-blue {
+  background: #1a1a1a;
+}
+
+.uk-navbar-container.bg-moby-blue .uk-navbar-nav > li > a {
+  color: #fff;
+}
+
+.uk-navbar-item,
+.uk-navbar-nav > li > a,
+.uk-navbar-toggle {
+  min-height: 60px;
+  font-size: 12px;
+}
+
+.uk-navbar-nav>li.uk-active>a {
+  text-decoration: underline;
+}
+
+/* Progress bar custom styles */
+.uk-progress.disk-usage {
+  background-color: rgba(229, 242, 252, 1);
+}
+.uk-progress.disk-usage::-webkit-progress-value {
+  background-color:rgba(29, 99, 237, .4);
+}
+.uk-progress.disk-usage::-moz-progress-bar {
+  background-color:rgba(29, 99, 237, .4);
+}
+
+/* Table custom styles */
+.uk-table {
+  border-collapse: collapse;
+  border: 1px solid rgba(34, 36, 38, .15);
+}
+[class*='uk-light'] .uk-table {
+  border-color: rgba(255, 255, 255, .15);
+}
+
+.uk-table th {
+  color: inherit;
+  text-transform: none;
+  background-color: rgba(0, 0, 0, 0.05);
+  background:-webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(230, 230, 230, 0.05)), color-stop(100%, rgba(0, 0, 0, 0.05)));
+  background:-webkit-linear-gradient(top, rgba(230, 230, 230, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%);
+  background:-moz-linear-gradient(top, rgba(230, 230, 230, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%);
+  background:-ms-linear-gradient(top, rgba(230, 230, 230, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%);
+  background:-o-linear-gradient(top, rgba(230, 230, 230, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%);
+  background:linear-gradient(to bottom, rgba(230, 230, 230, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%)
+}
+
+.uk-table tr {
+  font-size: .875rem;
+  border-bottom: 1px solid rgba(34, 36, 38, .15);
+}
+[class*='uk-light'] .uk-table tr {
+  border-color: rgba(255, 255, 255, .15);
+  background-color: rgb(33, 37, 41);
+}
+
+.uk-table th,
+.uk-table td {
+  border-right: 1px solid rgba(34, 36, 38, .15);
+}
+[class*='uk-light'] .uk-table th,
+[class*='uk-light'] .uk-table td {
+  border-color: rgba(255, 255, 255, .15);
+}
+
+.uk-table th:last-child,
+.uk-table td:last-child {
+  border-right: none;
+}
+
+.uk-table-hover tbody tr:hover,
+.uk-table-hover>tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* DataTable custom styles */
+table.dataTable thead>tr>th.dt-orderable-asc:hover,
+table.dataTable thead>tr>th.dt-orderable-desc:hover,
+table.dataTable thead>tr>td.dt-orderable-asc:hover,
+table.dataTable thead>tr>td.dt-orderable-desc:hover {
+  outline: none;
+}
+
+div.dt-container.dt-empty-footer tbody > tr:last-child > * {
+  border-bottom: unset;
+}
+
+div.dt-container .dt-search input {
+  margin-left: 0;
+  border: 1px solid rgba(34, 36, 38, .15);
+  border-radius: 0;
+  padding-left: 10px;
+}
+[class*='uk-light'] div.dt-container .dt-search input {
+  border-color: rgba(255, 255, 255, .15);
+}
+
+/* Footer */
+[class*='uk-light'] .footer {
+  background: #1a1a1a !important;
+}
+
+.footer.uk-section-xsmall {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+td.width-1 {
+  width: 1%;
+  white-space: nowrap;
+}

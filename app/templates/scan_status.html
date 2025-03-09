@@ -1,0 +1,15 @@
+<td class="uk-text-center">
+  {% if item.scan_in_progress %}
+  <span class="uk-text-warning" uk-tooltip="title: Scan In Progress; pos: top">
+    <i class="bi-hourglass" style="font-size: .85rem;"></i>
+  </span>
+  {% elif item.err %}
+  <span class="uk-text-danger" uk-tooltip="title: Scan Failed; pos: top">
+    <i class="bi-slash-circle" style="font-size: .85rem;"></i>
+  </span>
+  {% else %}
+  <span class="uk-text-success" uk-tooltip="title: Scan Completed; pos: top">
+    <i class="bi-check-circle" style="font-size: .85rem;"></i>
+  </span>
+  {% endif %}
+</td>

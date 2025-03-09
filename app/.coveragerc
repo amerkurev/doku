@@ -1,0 +1,12 @@
+[run]
+relative_files = True
+source = .
+omit =
+    */migrations/*
+    */test_*.py
+    */conftest.py
+
+[report]
+exclude_lines =
+  pragma: no cover
+  def __repr__

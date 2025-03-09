@@ -1,0 +1,54 @@
+{% extends "table.html" %}
+
+{% block table %}
+<div class="uk-container">
+  <div class="uk-margin-small-top">
+    <table id="datatable" class="uk-table uk-table-small uk-table-hover lato-font">
+      <thead class="uk-text-secondary">
+          <tr>
+              <th>ID</th>
+              <th>Diff</th>
+              <th class="uk-text-center">In&nbsp;Use</th>
+              <th>Size</th>
+              <th class="uk-text-center">Scan</th>
+              <th>Last&nbsp;Scan</th>
+              <th>Created</th>
+          </tr>
+        </thead>
+        <tbody class="uk-text-secondary">
+          {% for item in items %}
+            <tr>
+              <td class="uk-text-nowrap mono-font">
+                {{ item.short_id }}
+              </td>
+              <td>
+                {{ item.diff_root }}
+              </td>
+              <td class="uk-text-nowrap uk-text-center">{% if item.in_use %}yes{% else %}no{% endif %}</td>
+              <td>{{ item.size }}</td>
+              {% include 'scan_status.html' %}
+              <td class="uk-text-nowrap uk-text-muted">
+                <span uk-tooltip="title: {{ item.last_scan }}; pos: top">
+                  {{ item.last_scan_delta }}
+                </span>
+              </td>
+              <td class="uk-text-nowrap uk-text-muted">
+                <span uk-tooltip="title: {{ item.created }}; pos: top">
+                  {{ item.created_delta }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+<script type="text/javascript">
+  initializeDataTable({
+    sizeCol: 3,
+    si: si,
+    nonSortableColumns: [1, 5, 6],  // Diff, Last Scan, Created
+    nonSearchableColumns: [2, 4, 5, 6]  // In Use, Scan, Last Scan, Created
+  });
+</script>
+{% endblock %}

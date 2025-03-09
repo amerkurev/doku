@@ -1,0 +1,11 @@
+<div class="uk-margin-small-bottom uk-text-center">
+  {% if last_scan_at %}
+  <small>
+    Last scan at: {{ last_scan_at[0] }} ({{ last_scan_at[1] }})
+  </small>
+  {% else %}
+  <small>
+    Scanning was not performed
+  </small>
+  {% endif %}
+</div>

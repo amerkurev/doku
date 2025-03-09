@@ -1,7 +1,0 @@
-build
-node_modules
-public
-yarn.lock
-yarn-error.log
-package.json
-package-lock.json

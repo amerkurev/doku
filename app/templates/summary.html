@@ -1,0 +1,56 @@
+<div class="uk-container uk-position-relative" style="margin-top: -200px;">
+  <div class="uk-margin-medium-top">
+    <div uk-grid>
+      <div class="uk-width-1-2@m">
+        {% if image %}
+        <div class="uk-width-1-1 uk-text-center">
+          Total Size
+          <h1 class="uk-heading-small uk-margin-remove-vertical lato-font">
+            {{ total.pretty_total_size }}
+          </h1>
+          <div class="uk-margin-small-top lato-font">
+            <div uk-grid class="uk-grid-divider uk-grid-medium">
+              <div class="uk-width-1-2@m uk-text-right uk-text-emphasis">
+                <p>{{ image.pretty_total_size }}</p>
+                <p>{{ container.pretty_total_size }}</p>
+                <p>{{ volume.pretty_total_size }}</p>
+                <p>{{ logfiles.pretty_total_size }}</p>
+                <p>{{ build_cache.pretty_total_size }}</p>
+              </div>
+              <div class="uk-width-1-2@m uk-text-left">
+                <p>Images</p>
+                <p>Containers</p>
+                <p>Volumes</p>
+                <p>Logs</p>
+                <p>Build Cache</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <div class="uk-width-1-2@m">
+        {% if overlay2 %}
+        <div class="uk-width-1-1 uk-text-center">
+          Total Size
+          <h1 class="uk-heading-small uk-margin-remove-vertical lato-font">
+            {{ overlay2.pretty_total_size }}
+          </h1>
+          <div class="uk-margin-small-top lato-font">
+            <div uk-grid class="uk-grid-divider uk-grid-medium">
+              <div class="uk-width-1-2@m uk-text-right uk-text-emphasis">
+                <p>{{ overlay2_in_use.pretty_total_size }}</p>
+                <p>{{ overlay2_not_in_use.pretty_total_size }}</p>
+              </div>
+              <div class="uk-width-1-2@m uk-text-left">
+                <p>Bonded with images</p>
+                <p>Not bonded with images</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

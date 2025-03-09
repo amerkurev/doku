@@ -1,0 +1,23 @@
+<div class="uk-container uk-text-small">
+  <div class="uk-margin-medium-top">
+    <div uk-grid>
+      <div class="uk-width-auto@m">
+        <div class="uk-text-secondary">
+          Docker version <strong>{{ version.version }}</strong> ({{ version.os }})
+        </div>
+      </div>
+      <div class="uk-width-expand@m">
+        <div class="uk-text-secondary uk-text-center">
+          Disk&nbsp;Usage&nbsp;({{ disk_usage.percent }}&nbsp;%)
+          &nbsp;&nbsp;
+          {{ disk_usage.pretty_used }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ disk_usage.pretty_total }}
+        </div>
+      </div>
+      <div class="uk-width-auto@m uk-flex uk-flex-bottom">
+        <div class="uk-text-secondary uk-text-right">
+          API version <strong>{{ version.api_version }}</strong> (min. {{ version.min_api_version }})
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

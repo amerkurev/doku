@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include "last_scan_time.html" %}
+{% include "total_size.html" %}
+
+{% if items is not none and items is sequence %}
+{% block table %}{% endblock %}
+{% else %}
+<!-- TODO: error message -->
+{% endif %}
+
+{% endblock %}

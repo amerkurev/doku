@@ -1,0 +1,44 @@
+{% extends "table.html" %}
+
+{% block table %}
+<div class="uk-container">
+  <div class="uk-margin-small-top">
+    <table id="datatable" class="uk-table uk-table-small uk-table-hover lato-font">
+      <thead class="uk-text-secondary">
+          <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Containers</th>
+              <th class="uk-text-center">Driver</th>
+              <th>Mountpoint</th>
+          </tr>
+        </thead>
+        <tbody class="uk-text-secondary">
+          {% for item in items %}
+            <tr>
+                <td class="uk-text-nowrap">{{ item.name }}</td>
+                <td class="width-1">{{ item.size }}</td>
+                <td>
+                  <ul class="uk-text-nowrap uk-padding-small uk-padding-remove-vertical">
+                  {% for name in item.containers %}
+                    <li>{{ name }}</li>
+                  {% endfor %}
+                  </ul>
+                </td>
+                <td class="uk-text-nowrap uk-text-center uk-text-muted">{{ item.driver }}</td>
+                <td class="uk-text-muted">{{ item.mountpoint }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+<script type="text/javascript">
+  initializeDataTable({
+    sizeCol: 1,
+    si: si,
+    nonSortableColumns: [2],  // Containers
+    nonSearchableColumns: [3]  // Driver
+  });
+</script>
+{% endblock %}

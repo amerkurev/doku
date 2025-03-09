@@ -1,0 +1,38 @@
+{% extends "table.html" %}
+
+{% block table %}
+<div class="uk-container">
+  <div class="uk-margin-small-top">
+    <table id="datatable" class="uk-table uk-table-small uk-table-hover lato-font">
+      <thead class="uk-text-secondary">
+          <tr>
+              <th>Container&nbsp;ID</th>
+              <th>Container&nbsp;Name</th>
+              <th>Image</th>
+              <th>Size</th>
+              <th>Log&nbsp;File</th>
+          </tr>
+        </thead>
+        <tbody class="uk-text-secondary">
+          {% for item in items %}
+            <tr>
+                <td class="uk-text-nowrap mono-font">{{ item.id }}</td>
+                <td class="uk-text-nowrap">{{ item.name }}</td>
+                <td class="uk-text-nowrap">{{ item.image }}</td>
+                <td class="width-1">{{ item.size }}</td>
+                <td class="uk-text-muted">{{ item.short_path }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+<script type="text/javascript">
+  initializeDataTable({
+    sizeCol: 3,
+    si: si,
+    nonSortableColumns: [4],  // Log File Path
+    nonSearchableColumns: [4]  // Log File Path
+  });
+</script>
+{% endblock %}

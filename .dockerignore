@@ -1,3 +1,14 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose.yml
+Dockerfile
+.docker
+.dockerignore
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -50,9 +61,8 @@ cover/
 *.pot
 
 # Sqlite database files:
-db/
-*.sqlite3
-*.sqlite3-journal
+db.sqlite3
+db.sqlite3-journal
 
 # Sphinx documentation
 docs/_build/
@@ -161,6 +171,3 @@ cython_debug/
 
 # Ruff cache files
 .ruff_cache/
-
-# Development environment
-run-dev.sh

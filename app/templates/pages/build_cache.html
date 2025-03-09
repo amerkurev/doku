@@ -1,0 +1,54 @@
+{% extends "table.html" %}
+
+{% block table %}
+<div class="uk-container">
+  <div class="uk-margin-small-top">
+    <table id="datatable" class="uk-table uk-table-small uk-table-hover lato-font">
+      <thead class="uk-text-secondary">
+          <tr>
+              <th>Build&nbsp;Cache</th>
+              <th>Size</th>
+              <th class="uk-text-center">Usage</th>
+              <th class="uk-text-center">Type</th>
+              <th class="uk-text-center">Shared</th>
+              <th>Last&nbsp;Used</th>
+              <th>ID</th>
+          </tr>
+        </thead>
+        <tbody class="uk-text-secondary">
+          {% for item in items %}
+            <tr>
+              <td>
+                <span uk-tooltip="title: {{ item.description }}; pos: top">
+                  {{ item.short_desc }}
+                </span>
+              </td>
+              <td class="width-1">{{ item.size }}</td>
+              <td class="uk-text-nowrap uk-text-center">{{ item.usage_count }}</td>
+              <td class="uk-text-center">{{ item.type }}</td>
+              <td class="uk-text-nowrap uk-text-center">{% if item.shared %}yes{% else %}no{% endif %}</td>
+              <td class="uk-text-nowrap uk-text-muted">
+                <span uk-tooltip="title: {{ item.last_used }}; pos: top">
+                  {{ item.last_used_delta }}
+                </span>
+              </td>
+              <td class="uk-text-muted">
+                <span uk-tooltip="title: {{ item.id }}; pos: top">
+                  <i class="bi-info-circle" style="font-size: .85rem;"></i>
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+<script type="text/javascript">
+  initializeDataTable({
+    sizeCol: 1,
+    si: si,
+    nonSortableColumns: [5, 6],  // Last Used, ID
+    nonSearchableColumns: [2, 3, 4, 5, 6]  // Usage Count, Type, Shared, Last Used, ID
+  });
+</script>
+{% endblock %}
