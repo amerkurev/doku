@@ -4,6 +4,7 @@ on:
     push:
       branches:
         - master
+        - 39-create-a-new-ciyml
       tags:
         - '*'
       paths-ignore:
