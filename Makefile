@@ -1,16 +1,14 @@
-GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
-GIT_SHA=$(shell git rev-parse --short HEAD)
-GIT_TAG=$(shell git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
 BUILD_DATE=$(shell date +%Y%m%d-%H:%M:%S)
-# If we're exactly on a tag, just show tag, otherwise show detailed version with commits
-GIT_DESCRIBE=$(shell git describe --tags 2>/dev/null)
-ifeq ($(GIT_TAG),$(GIT_DESCRIBE))
-    # We're exactly on a tag
-    REV=$(GIT_TAG) ($(BUILD_DATE))
+
+ifdef GITHUB_REF
+    # CI environment - use provided ref
+    REF=$(shell echo $(GITHUB_REF) | cut -d'/' -f3)
 else
-    # We're off a tag
-    REV=$(shell git describe --tags) ($(BUILD_DATE))
+    # Local environment - calculate from git
+    REF=$(shell git describe --tags 2>/dev/null || git rev-parse --short HEAD)
 endif
+
+REV=$(REF) ($(BUILD_DATE))
 PWD=$(shell pwd)
 
 info:
