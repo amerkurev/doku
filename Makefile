@@ -17,7 +17,7 @@ info:
 	- @echo "revision $(REV)"
 
 build:
-	- @docker buildx build --build-arg REV="${REV}" -t amerkurev/doku:latest --progress=plain .
+	- @docker buildx build --load --build-arg REV="${REV}" -t amerkurev/doku:latest --progress=plain .
 
 lint:
 	- @ruff check app

@@ -25,11 +25,12 @@ jobs:
               id: buildx
               uses: docker/setup-buildx-action@v3
 
-            - name: Test and submit coverage report
+            - name: Build Docker image
               run: |
                 make info
                 make build
+
+            - name: Test and Lint
+              run: |
                 make test
                 make lint
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
