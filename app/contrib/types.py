@@ -34,6 +34,12 @@ class DockerImage(BaseModel):
     def created_delta(self) -> str:
         return naturaltime(self.created)
 
+    @property
+    def safe_repo_tags(self) -> list[str]:
+        if not self.repo_tags:  # empty list or None
+            return ['<none>:<none>']
+        return self.repo_tags
+
 
 class DockerImageList(RootModel):
     root: list[DockerImage]

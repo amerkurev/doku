@@ -19,13 +19,13 @@
             <tr>
               <td class="uk-text-nowrap mono-font">{{ item.short_id }}</td>
               <td class="uk-text-nowrap">
-                {% if item.repo_tags %}
-                  {{ item.repo_tags|join('<br>')|safe }}
-                {% else %}
-                  <span class="uk-text-muted">
-                    &lt;none&gt;:&lt;none&gt;
-                  </span>
-                {% endif %}
+                {% for repo_tag in item.safe_repo_tags %}
+                  {% if repo_tag == '<none>:<none>' %}
+                    <span class="uk-text-muted">{{ repo_tag }}</span><br>
+                  {% else %}
+                  {{ repo_tag }}<br>
+                  {% endif %}
+                {% endfor %}
               </td>
               <td class="width-1">{{ item.size }}</td>
               <td class="width-1">{{ item.shared_size }}</td>

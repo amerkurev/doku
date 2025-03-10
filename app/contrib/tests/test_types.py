@@ -53,11 +53,38 @@ def test_docker_image():
     assert x.created == datetime(2023, 1, 1, 12, 0, tzinfo=timezone.utc)
     assert x.parent_id == 'sha256:987654321fedcba'
     assert x.repo_tags == ['image:latest', 'image:v1']
+    assert x.safe_repo_tags == x.repo_tags
     assert x.shared_size == 1000
     assert x.size == 5000
     assert x.short_id == x.id[7:19]
     assert isinstance(x.created_delta, str)
     assert x.containers == []
+
+    # repo_tags = None
+    x = DockerImage.model_validate({
+        'Id': 'sha256:123456789abcdef',
+        'Created': '2023-01-01T12:00:00Z',
+        'ParentId': 'sha256:987654321fedcba',
+        'RepoTags': None,
+        'SharedSize': 1000,
+        'Size': 5000,
+    })
+
+    assert x.repo_tags is None
+    assert x.safe_repo_tags == ['<none>:<none>']
+
+    # repo_tags = []
+    x = DockerImage.model_validate({
+        'Id': 'sha256:123456789abcdef',
+        'Created': '2023-01-01T12:00:00Z',
+        'ParentId': 'sha256:987654321fedcba',
+        'RepoTags': [],
+        'SharedSize': 1000,
+        'Size': 5000,
+    })
+
+    assert x.repo_tags == []
+    assert x.safe_repo_tags == ['<none>:<none>']
 
 
 def test_docker_image_list():

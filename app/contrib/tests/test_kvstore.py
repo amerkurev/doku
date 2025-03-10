@@ -13,7 +13,7 @@ def test_model():
     return DockerImage(
         Id='test_id',
         Created=datetime.datetime.now(),
-        RepoTags=['test_repo:tag'],
+        RepoTags=['test_repo:tag', 'test_repo:latest'],
         SharedSize=0,
         Size=100,
         containers=['test_container'],
