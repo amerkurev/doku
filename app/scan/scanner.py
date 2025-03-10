@@ -241,7 +241,7 @@ class BindMountsScanner(BaseScanner):
             total = 0
             num = 0
             start = time.perf_counter()
-            self.logger.debug('Scanning bind mounts...')
+            self.logger.info('Scanning bind mounts...')
 
             kv.clear()  # clear previous calculations
 
@@ -421,7 +421,7 @@ class Overlay2Scanner(BaseScanner):
             total = 0
             num = 0
             start = time.perf_counter()
-            self.logger.debug('Scanning overlay2 storage driver...')
+            self.logger.info('Scanning overlay2 storage driver...')
 
             kv.clear()  # clear previous calculations
 

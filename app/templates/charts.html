@@ -2,10 +2,10 @@
   <div class="uk-margin-medium-top">
     <div uk-grid>
       <div class="uk-width-1-2@m">
+        {% if image %}
         <div class="uk-width-1-1 uk-text-center">
           Docker Disk Usage
         </div>
-        {% if image %}
         <div id="du-chart" class="uk-width-1-1 uk-height-large"></div>
         <div id="du-chart-image"
              data-value="{{ image.total_size or 0 }}"
@@ -28,16 +28,16 @@
              data-num="{{ build_cache.num }}"
              data-name="Build Cache"></div>
         {% else %}
-        <div class="uk-width-1-1 uk-text-center uk-margin-large-top">
-          Docker Disk Usage has not been calculated yet.
+        <div class="uk-width-1-1 uk-text-center">
+          Docker Disk Usage has not been calculated yet...
         </div>
         {% endif %}
       </div>
       <div class="uk-width-1-2@m">
+        {% if overlay2.num %}
         <div class="uk-width-1-1 uk-text-center">
           Overlay2 Usage
         </div>
-        {% if overlay2 %}
         <div id="overlay2-chart" class="uk-width-1-1 uk-height-large"></div>
         <div id="overlay2-chart-in-use"
              data-value="{{ overlay2_in_use.total_size or 0 }}"
@@ -48,8 +48,8 @@
              data-num="{{ overlay2_not_in_use.num }}"
              data-name="Not In Use"></div>
         {% else %}
-        <div class="uk-width-1-1 uk-text-center uk-margin-large-top">
-          Overlay2 has not been calculated yet.
+        <div class="uk-width-1-1 uk-text-center">
+          Overlay2 has not been calculated yet...
         </div>
         {% endif %}
       </div>
