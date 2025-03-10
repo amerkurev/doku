@@ -115,6 +115,7 @@ def test_docker_container():
     assert x.id == '123456789abcdef'
     assert x.names == ['/container_name']
     assert x.image == 'nginx:latest'
+    assert x.short_image == x.image
     assert x.image_id == 'sha256:abcdef123456'
     assert x.created == datetime(2023, 1, 1, 12, 0, tzinfo=timezone.utc)
     assert x.size_rw == 50000
@@ -134,6 +135,9 @@ def test_docker_container():
         'State': 'running',
     })
     assert x.clean_names == []
+
+    x.image = 'sha256:f31294ac0a9255aa810e2cd9639485260ff9b3c19ef3263a56a091fad37e23b5'
+    assert x.short_image == 'f31294ac0a92'
 
 
 def test_docker_container_list():
@@ -170,6 +174,7 @@ def test_docker_volume():
     })
 
     assert x.name == 'volume1'
+    assert x.short_name == x.name
     assert x.driver == 'local'
     assert x.created_at == datetime(2023, 1, 1, 12, 0, tzinfo=timezone.utc)
     assert x.mountpoint == '/var/lib/docker/volumes/volume1'
@@ -177,6 +182,9 @@ def test_docker_volume():
     assert x.size == 1000
     assert x.ref_count == 2
     assert x.containers == []
+
+    x.name = '26fb9bbf928c9a4dae3198438fb02f7b286894069dadf2827f8d3f98bbb2aa64'
+    assert x.short_name == x.name[:39] + '...'
 
 
 def test_docker_volume_list():

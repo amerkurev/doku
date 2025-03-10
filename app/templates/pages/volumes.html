@@ -16,7 +16,7 @@
         <tbody class="uk-text-secondary">
           {% for item in items %}
             <tr>
-                <td class="uk-text-nowrap">{{ item.name }}</td>
+                <td class="uk-text-nowrap">{{ item.short_name }}</td>
                 <td class="width-1">{{ item.size }}</td>
                 <td>
                   <ul class="uk-text-nowrap uk-padding-small uk-padding-remove-vertical">
@@ -26,7 +26,7 @@
                   </ul>
                 </td>
                 <td class="uk-text-nowrap uk-text-center uk-text-muted">{{ item.driver }}</td>
-                <td class="uk-text-muted">{{ item.mountpoint }}</td>
+                <td class="uk-text-muted uk-text-break">{{ item.mountpoint }}</td>
             </tr>
           {% endfor %}
         </tbody>

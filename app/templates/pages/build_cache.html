@@ -19,9 +19,13 @@
           {% for item in items %}
             <tr>
               <td>
-                <span uk-tooltip="title: {{ item.description }}; pos: top">
+                {% if item.short_desc == item.description %}
                   {{ item.short_desc }}
-                </span>
+                {% else %}
+                  <span uk-tooltip="title: {{ item.description }}; pos: top">
+                    {{ item.short_desc }}
+                  </span>
+                {% endif %}
               </td>
               <td class="width-1">{{ item.size }}</td>
               <td class="uk-text-nowrap uk-text-center">{{ item.usage_count }}</td>

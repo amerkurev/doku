@@ -6,6 +6,12 @@ from pydantic import BaseModel, RootModel, Field
 from scan.utils import pretty_size
 
 
+def truncate(name: str, limit: int) -> str:
+    if len(name) <= limit:
+        return name
+    return name[:limit] + '...'
+
+
 class DockerVersion(BaseModel):
     platform_name: str = Field(alias=('Platform', 'Name'), default='')
     version: str = Field(alias='Version')
@@ -66,6 +72,12 @@ class DockerContainer(BaseModel):
         return self.id[:12]
 
     @property
+    def short_image(self) -> str:
+        if self.image.startswith('sha256:'):
+            return self.image[7:19]
+        return self.image
+
+    @property
     def clean_names(self) -> list[str]:
         if not self.names:
             return []
@@ -94,6 +106,10 @@ class DockerVolume(BaseModel):
     scope: str = Field(alias='Scope', default='local')
     usage_data: dict | None = Field(alias='UsageData', default_factory=dict)
     containers: list[str] | None = Field(default_factory=list)
+
+    @property
+    def short_name(self) -> str:
+        return truncate(self.name, 39)
 
     @property
     def size(self) -> int:
@@ -135,11 +151,7 @@ class DockerBuildCache(BaseModel):
 
     @property
     def short_desc(self) -> str:
-        limit = 180
-        s = self.description[:limit]
-        if len(self.description) > limit:
-            s += '...'
-        return s
+        return truncate(self.description, 180)
 
 
 class DockerBuildCacheList(RootModel):
@@ -223,11 +235,7 @@ class DockerOverlay2Layer(BaseModel):
 
     @property
     def short_id(self) -> str:
-        limit = 22
-        s = self.id[:limit]
-        if len(self.id) > limit:
-            s += '...'
-        return s
+        return truncate(self.id, 22)
 
     @property
     def created_delta(self) -> str:
