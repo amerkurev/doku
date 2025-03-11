@@ -21,6 +21,18 @@ Doku monitors disk space used by:
 - Overlay2 storage (typically the largest consumer of disk space)
 - Container logs
 
+## Quick Start
+
+For those eager to get started, here's the fastest way to run Doku:
+
+```bash
+docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v /:/hostroot:ro -p 9090:9090 amerkurev/doku
+```
+
+Then open http://localhost:9090/ in your browser. That's it!
+
+This command runs Doku with default settings and read-only access to your Docker socket and filesystem. See the sections below for more detailed setup options.
+
 ![laptop_doku](https://user-images.githubusercontent.com/28217522/235870076-a344527c-874d-41a4-bda9-749efd4ff917.svg)
 
 ## Getting Doku
