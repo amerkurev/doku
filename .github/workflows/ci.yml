@@ -4,7 +4,6 @@ on:
     push:
       branches:
         - master
-        - 39-create-a-new-ciyml
       tags:
         - '*'
       paths-ignore:
@@ -68,5 +67,5 @@ jobs:
                 docker buildx build --push \
                   --build-arg CI=github --build-arg GIT_SHA=${GITHUB_SHA} --build-arg GIT_TAG=${ref} \
                   --platform linux/amd64,linux/arm64 \
-                  -t ghcr.io/${USERNAME}/doku:${ref} \
-                  -t ${USERNAME}/doku:${ref} .
+                  -t ghcr.io/${USERNAME}/doku:${ref} -t ghcr.io/${USERNAME}/doku:latest \
+                  -t ${USERNAME}/doku:${ref} -t ${USERNAME}/doku:latest .
