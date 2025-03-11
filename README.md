@@ -10,17 +10,6 @@ Doku is a lightweight web application that helps you monitor Docker disk usage t
 [![License](https://img.shields.io/badge/license-mit-blue.svg)](https://github.com/amerkurev/doku/blob/master/LICENSE)
 </div>
 
-## Features
-
-Doku monitors disk space used by:
-
-- Images
-- Containers
-- Volumes
-- Builder cache
-- Overlay2 storage (typically the largest consumer of disk space)
-- Container logs
-
 ## Quick Start
 
 For those eager to get started, here's the fastest way to run Doku:
@@ -33,7 +22,19 @@ Then open http://localhost:9090/ in your browser. That's it!
 
 This command runs Doku with default settings and read-only access to your Docker socket and filesystem. See the sections below for more detailed setup options.
 
-![laptop_doku](https://user-images.githubusercontent.com/28217522/235870076-a344527c-874d-41a4-bda9-749efd4ff917.svg)
+![doku_screenshot](doku.svg)
+
+## Features
+
+Doku monitors disk space used by:
+
+- Images
+- Containers
+- Volumes
+- Builder cache
+- Overlay2 storage (typically the largest consumer of disk space)
+- Container logs
+- Bind mounts
 
 ## Getting Doku
 
