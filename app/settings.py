@@ -48,21 +48,45 @@ class Settings(BaseSettings):
     ssl_ciphers: str = Field(alias='SSL_CIPHERS', default='TLSv1')
 
     # scan settings
-    scan_interval: PositiveInt = Field(alias='SCAN_INTERVAL', default=60, description='Scan interval in seconds (docker system df).')
-    scan_logfile_interval: PositiveInt = Field(alias='SCAN_LOGFILE_INTERVAL', default=60, description='Scan interval in seconds (logfiles).')
-    scan_bindmounts_interval: PositiveInt = Field(alias='SCAN_BINDMOUNTS_INTERVAL', default=60 * 60, description='Scan interval in seconds (bindmounts).')
-    scan_overlay2_interval: PositiveInt = Field(alias='SCAN_OVERLAY2_INTERVAL', default=60 * 60 * 24, description='Scan interval in seconds (overlay2).')
-    scan_intensity: ScanIntensity = Field(alias='SCAN_INTENSITY', default=ScanIntensity.NORMAL, description='Scan intensity. Aggressive: no sleep, but CPU throttling. Normal: 1ms sleep. Light: 10ms sleep.')
-    scan_use_du: bool = Field(alias='SCAN_USE_DU', default=True, description="Use the `du` command to calculate disk usage. It's not recommended to disable it, as it is faster than programmatic methods.")
+    scan_interval: PositiveInt = Field(
+        alias='SCAN_INTERVAL', default=60, description='Scan interval in seconds (docker system df).'
+    )
+    scan_logfile_interval: PositiveInt = Field(
+        alias='SCAN_LOGFILE_INTERVAL', default=60, description='Scan interval in seconds (logfiles).'
+    )
+    scan_bindmounts_interval: PositiveInt = Field(
+        alias='SCAN_BINDMOUNTS_INTERVAL', default=60 * 60, description='Scan interval in seconds (bindmounts).'
+    )
+    scan_overlay2_interval: PositiveInt = Field(
+        alias='SCAN_OVERLAY2_INTERVAL', default=60 * 60 * 24, description='Scan interval in seconds (overlay2).'
+    )
+    scan_intensity: ScanIntensity = Field(
+        alias='SCAN_INTENSITY',
+        default=ScanIntensity.NORMAL,
+        description='Scan intensity. Aggressive: no sleep, but CPU throttling. Normal: 1ms sleep. Light: 10ms sleep.',
+    )
+    scan_use_du: bool = Field(
+        alias='SCAN_USE_DU',
+        default=True,
+        description="Use the `du` command to calculate disk usage. It's not recommended to disable it, as it is faster than programmatic methods.",
+    )
 
     # uvicorn settings
-    workers: PositiveInt = Field(alias='UVICORN_WORKERS', default=1, description='Number of worker processes for web server.')
+    workers: PositiveInt = Field(
+        alias='UVICORN_WORKERS', default=1, description='Number of worker processes for web server.'
+    )
     debug: bool = Field(alias='DEBUG', default=False, description='Enable debug mode.')
 
     # docker daemon settings
-    docker_host: str = Field(alias='DOCKER_HOST', default='unix:///var/run/docker.sock', description='Docker daemon host.')
-    docker_tls_verify: bool = Field(alias='DOCKER_TLS_VERIFY', default=False, description='Verify the Docker daemon TLS certificate.')
-    docker_cert_path: str | None = Field(alias='DOCKER_CERT_PATH', default=None, description='Path to Docker daemon TLS certificate.')
+    docker_host: str = Field(
+        alias='DOCKER_HOST', default='unix:///var/run/docker.sock', description='Docker daemon host.'
+    )
+    docker_tls_verify: bool = Field(
+        alias='DOCKER_TLS_VERIFY', default=False, description='Verify the Docker daemon TLS certificate.'
+    )
+    docker_cert_path: str | None = Field(
+        alias='DOCKER_CERT_PATH', default=None, description='Path to Docker daemon TLS certificate.'
+    )
     docker_version: str = Field(alias='DOCKER_VERSION', default='auto', description='Docker daemon API version.')
     docker_timeout: PositiveInt = Field(alias='DOCKER_TIMEOUT', default=docker.DEFAULT_TIMEOUT_SECONDS)
     docker_max_pool_size: PositiveInt = Field(alias='DOCKER_MAX_POOL_SIZE', default=docker.DEFAULT_MAX_POOL_SIZE)
