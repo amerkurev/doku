@@ -185,7 +185,7 @@ def test_overlay2(mock_kvstore, log_start_time):
         DockerOverlay2Layer(
             id='jq1br13jcumomv9j6u8rce531485cee0f83624769a2d',
             created='2023-01-01T12:00:00Z',
-            diff_root='/var/lib/docker/overlay2/diff/jq1br13jcumomv9j6u8rce531485cee0f83624769a2d',
+            diff_root='/usr, /etc, /opt, /var, /entrypoint.sh, /sys, /sbin, /mnt, /bitnami, /run, /lib64, /boot, /proc, /dev, /media, /lib, /srv, /tmp, /home, /bin, /root, /run.sh',
             err=False,
             size=5000,
             scan_in_progress=False,

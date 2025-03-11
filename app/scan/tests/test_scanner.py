@@ -383,7 +383,7 @@ def test_overlay2_scanner(mock_docker_client, mock_is_stop, docker_mount, mock_d
         overlay2_2 = DockerOverlay2Layer(
             id='/var/lib/docker/overlay2/img456',
             created='2023-01-01T12:00:00Z',
-            diff_root='/mnt,\xa0\xa0/root',
+            diff_root='/mnt, /root',
             err=True,
             size=0,
             scan_in_progress=False,

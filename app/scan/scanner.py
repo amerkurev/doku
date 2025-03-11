@@ -447,7 +447,7 @@ class Overlay2Scanner(BaseScanner):
 
                 if len(subdirs) > 1:
                     # the root has many subdirectories, list them
-                    diff_root = ',\u00a0\u00a0'.join('/' + x.name for x in subdirs)
+                    diff_root = ', '.join('/' + x.name for x in subdirs)
 
                 while len(subdirs) == 1:
                     # traverse the subdirectories while there is only one subdirectory on each level
