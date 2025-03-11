@@ -28,10 +28,10 @@ class ScanIntensity(str, Enum):
 
 class Settings(BaseSettings):
     # general settings
-    host: str = Field(alias='HOST', default='0.0.0.0')
-    port: PositiveInt = Field(alias='PORT', default=9090)
+    host: str = Field(alias='HOST', default='0.0.0.0', description='Host to listen on.')
+    port: PositiveInt = Field(alias='PORT', default=9090, description='Port to listen on.')
     in_docker: bool = Field(alias='IN_DOCKER', default=False)
-    log_level: LogLevel = Field(alias='LOG_LEVEL', default=LogLevel.INFO)
+    log_level: LogLevel = Field(alias='LOG_LEVEL', default=LogLevel.INFO, description='Log level.')
     github_repo: str = Field(alias='GITHUB_REPO', default='amerkurev/doku')
     my_hostname: str = Field(alias='HOSTNAME', default='')  # it is set by the container automatically
     si: bool = Field(
@@ -48,24 +48,46 @@ class Settings(BaseSettings):
     ssl_ciphers: str = Field(alias='SSL_CIPHERS', default='TLSv1')
 
     # scan settings
-    scan_interval: PositiveInt = Field(alias='SCAN_INTERVAL', default=60)  # in seconds
-    scan_logfile_interval: PositiveInt = Field(alias='SCAN_LOGFILE_INTERVAL', default=60)  # in seconds
-    scan_bindmounts_interval: PositiveInt = Field(alias='SCAN_BINDMOUNTS_INTERVAL', default=60 * 60)  # in seconds
-    scan_overlay2_interval: PositiveInt = Field(alias='SCAN_OVERLAY2_INTERVAL', default=60 * 60 * 24)  # in seconds
-    scan_intensity: ScanIntensity = Field(alias='SCAN_INTENSITY', default=ScanIntensity.NORMAL)
-    scan_use_du: bool = Field(alias='SCAN_USE_DU', default=True)
-    scan_use_ncdu: bool = Field(alias='SCAN_USE_NCDU', default=True)
-    scan_ncdu_interval: PositiveInt = Field(alias='SCAN_NCDU_INTERVAL', default=60 * 60)  # in seconds
+    scan_interval: PositiveInt = Field(
+        alias='SCAN_INTERVAL', default=60, description='Scan interval in seconds (docker system df).'
+    )
+    scan_logfile_interval: PositiveInt = Field(
+        alias='SCAN_LOGFILE_INTERVAL', default=60, description='Scan interval in seconds (logfiles).'
+    )
+    scan_bindmounts_interval: PositiveInt = Field(
+        alias='SCAN_BINDMOUNTS_INTERVAL', default=60 * 60, description='Scan interval in seconds (bindmounts).'
+    )
+    scan_overlay2_interval: PositiveInt = Field(
+        alias='SCAN_OVERLAY2_INTERVAL', default=60 * 60 * 24, description='Scan interval in seconds (overlay2).'
+    )
+    scan_intensity: ScanIntensity = Field(
+        alias='SCAN_INTENSITY',
+        default=ScanIntensity.NORMAL,
+        description='Scan intensity. Aggressive: no sleep, but CPU throttling. Normal: 1ms sleep. Light: 10ms sleep.',
+    )
+    scan_use_du: bool = Field(
+        alias='SCAN_USE_DU',
+        default=True,
+        description="Use the `du` command to calculate disk usage. It's not recommended to disable it, as it is faster than programmatic methods.",
+    )
 
     # uvicorn settings
-    workers: PositiveInt = Field(alias='UVICORN_WORKERS', default=1)
-    debug: bool = Field(alias='DEBUG', default=False)
+    workers: PositiveInt = Field(
+        alias='UVICORN_WORKERS', default=1, description='Number of worker processes for web server.'
+    )
+    debug: bool = Field(alias='DEBUG', default=False, description='Enable debug mode.')
 
     # docker daemon settings
-    docker_host: str = Field(alias='DOCKER_HOST', default='unix:///var/run/docker.sock')
-    docker_tls_verify: bool = Field(alias='DOCKER_TLS_VERIFY', default=False)
-    docker_cert_path: str | None = Field(alias='DOCKER_CERT_PATH', default=None)
-    docker_version: str = Field(alias='DOCKER_VERSION', default='auto')
+    docker_host: str = Field(
+        alias='DOCKER_HOST', default='unix:///var/run/docker.sock', description='Docker daemon host.'
+    )
+    docker_tls_verify: bool = Field(
+        alias='DOCKER_TLS_VERIFY', default=False, description='Verify the Docker daemon TLS certificate.'
+    )
+    docker_cert_path: str | None = Field(
+        alias='DOCKER_CERT_PATH', default=None, description='Path to Docker daemon TLS certificate.'
+    )
+    docker_version: str = Field(alias='DOCKER_VERSION', default='auto', description='Docker daemon API version.')
     docker_timeout: PositiveInt = Field(alias='DOCKER_TIMEOUT', default=docker.DEFAULT_TIMEOUT_SECONDS)
     docker_max_pool_size: PositiveInt = Field(alias='DOCKER_MAX_POOL_SIZE', default=docker.DEFAULT_MAX_POOL_SIZE)
     docker_use_ssh_client: bool = Field(alias='DOCKER_USE_SSH_CLIENT', default=False)
