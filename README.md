@@ -111,8 +111,9 @@ Here's an example `.env` file with some commonly adjusted settings:
 ```ini
 PORT=9090 
 LOG_LEVEL=info 
-SI=true 
-SCAN_INTERVAL=120 
+SI=true
+DOCKER_TIMEOUT=200 
+SCAN_INTERVAL=200 
 SCAN_INTENSITY=light 
 DEBUG=false
 ```
