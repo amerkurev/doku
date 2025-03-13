@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
+# https://www.mkdocs.org/user-guide/configuration/
+site_name: Doku - Docker disk usage dashboard
+site_url: https://docker-disk.space
+site_description: Doku is a lightweight web application that helps you monitor Docker disk usage through a clean, intuitive interface.
+site_author: https://github.com/amerkurev
+
+repo_url: https://github.com/amerkurev/doku
+repo_name: doku
+
+edit_uri: edit/master/
+
+theme:
+  name: material
+  # https://icon-sets.iconify.design/?query=docker
+  logo: img/logo.svg
+  favicon: img/favicon.svg
+  icon:
+    repo: fontawesome/brands/docker
+  features:
+    - toc.integrate
+    - content.code.copy
+    - content.code.annotate
+#    - navigation.instant
+#    - navigation.instant.progress
+#    - navigation.tabs
+    - search.suggest
+    - search.highlight
+    - search.share
+    - navigation.footer
+    - content.action.edit
+#    - content.action.view
+    - content.tabs.link
+    - content.tooltips
+    - navigation.top
+    # - navigation.expand
+    # - navigation.tracking
+  # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#system-preference
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+# noinspection YAMLSchemaValidation
+markdown_extensions:
+  - smarty
+  - sane_lists
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.betterem
+  - pymdownx.details
+  - pymdownx.snippets
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+
+# noinspection YAMLSchemaValidation
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/extra.css
