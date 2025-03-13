@@ -22,7 +22,7 @@ Then open http://localhost:9090/ in your browser. That's it!
 
 This command runs Doku with default settings and read-only access to your Docker socket and filesystem. See the sections below for more detailed setup options.
 
-![doku_screenshot](doku.svg)
+![doku_screenshot](docs/img/doku.svg)
 
 ## Features
 
