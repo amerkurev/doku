@@ -101,7 +101,7 @@ Doku can be configured using environment variables. You can set these either dir
 | DOCKER_CERT_PATH | Directory containing Docker TLS certificates | null |
 | DOCKER_VERSION | Docker API version to use | auto |
 | DOCKER_TIMEOUT | Timeout in seconds for Docker API requests | 60 |
-<!-- | DOCKER_MAX_POOL_SIZE | Maximum number of connections in the Docker API connection pool | 10 | -->
+| DOCKER_MAX_POOL_SIZE | Maximum number of connections in the Docker API connection pool | 10 |
 | DOCKER_USE_SSH_CLIENT | Use SSH for Docker daemon connection instead of HTTP/HTTPS | false |
 
 ### Example .env file
