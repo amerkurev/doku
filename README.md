@@ -89,7 +89,7 @@ Doku can be configured using environment variables. You can set these either dir
 | SI | Use SI units (base 1000) instead of binary units (base 1024) | true |
 | BASIC_HTPASSWD | Path to the htpasswd file for basic authentication | /.htpasswd |
 | SCAN_INTERVAL | How often to collect basic Docker usage data (in seconds) | 60 |
-| SCAN_LOGFILE_INTERVAL | How frequently to check container log sizes (in seconds) | 60 |
+| SCAN_LOGFILE_INTERVAL | How frequently to check container log sizes (in seconds) | 300 |
 | SCAN_BINDMOUNTS_INTERVAL | Time between bind mount scanning operations (in seconds) | 3600 |
 | SCAN_OVERLAY2_INTERVAL | How often to analyze Overlay2 storage (in seconds) | 86400 |
 | SCAN_INTENSITY | Performance impact level: "aggressive" (highest CPU usage), "normal" (balanced), or "light" (lowest impact) | normal |
@@ -100,6 +100,9 @@ Doku can be configured using environment variables. You can set these either dir
 | DOCKER_TLS_VERIFY | Enable TLS verification for Docker daemon connection | false |
 | DOCKER_CERT_PATH | Directory containing Docker TLS certificates | null |
 | DOCKER_VERSION | Docker API version to use | auto |
+| DOCKER_TIMEOUT | Timeout in seconds for Docker API requests | 60 |
+<!-- | DOCKER_MAX_POOL_SIZE | Maximum number of connections in the Docker API connection pool | 10 | -->
+| DOCKER_USE_SSH_CLIENT | Use SSH for Docker daemon connection instead of HTTP/HTTPS | false |
 
 ### Example .env file
 

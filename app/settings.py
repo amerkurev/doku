@@ -52,7 +52,7 @@ class Settings(BaseSettings):
         alias='SCAN_INTERVAL', default=60, description='Scan interval in seconds (docker system df).'
     )
     scan_logfile_interval: PositiveInt = Field(
-        alias='SCAN_LOGFILE_INTERVAL', default=60, description='Scan interval in seconds (logfiles).'
+        alias='SCAN_LOGFILE_INTERVAL', default=60 * 5, description='Scan interval in seconds (logfiles).'
     )
     scan_bindmounts_interval: PositiveInt = Field(
         alias='SCAN_BINDMOUNTS_INTERVAL', default=60 * 60, description='Scan interval in seconds (bindmounts).'
