@@ -88,6 +88,7 @@ Doku can be configured using environment variables. You can set these either dir
 | LOG_LEVEL | Logging detail level (debug, info, warning, error, critical) | info |
 | SI | Use SI units (base 1000) instead of binary units (base 1024) | true |
 | BASIC_HTPASSWD | Path to the htpasswd file for basic authentication | /.htpasswd |
+| ROOT_PATH | URL prefix when served behind a proxy (e.g., "/doku") | "" |
 | SCAN_INTERVAL | How often to collect basic Docker usage data (in seconds) | 60 |
 | SCAN_LOGFILE_INTERVAL | How frequently to check container log sizes (in seconds) | 300 |
 | SCAN_BINDMOUNTS_INTERVAL | Time between bind mount scanning operations (in seconds) | 3600 |
