@@ -95,7 +95,7 @@ Doku can be configured using environment variables. You can set these either dir
 | SCAN_INTENSITY | Performance impact level: "aggressive" (highest CPU usage), "normal" (balanced), or "light" (lowest impact) | normal |
 | SCAN_USE_DU | Use the faster system `du` command for disk calculations instead of slower built-in methods | true |
 | UVICORN_WORKERS | Number of web server worker processes | 1 |
-| DEBUG | Enable detailed debug output | false |
+| DEBUG | Enable debug mode | false |
 | DOCKER_HOST | Connection string for the Docker daemon | unix:///var/run/docker.sock |
 | DOCKER_TLS_VERIFY | Enable TLS verification for Docker daemon connection | false |
 | DOCKER_CERT_PATH | Directory containing Docker TLS certificates | null |

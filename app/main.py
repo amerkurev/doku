@@ -1,4 +1,5 @@
 import ssl
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI, status
@@ -7,6 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 import settings
+from contrib.logger import setup_logger
 from server.router import site
 from server.state import lifespan
 
@@ -22,7 +24,12 @@ async def index(_: Request):
 
 
 def main():
-    print(f'Revision: {settings.REVISION}', flush=True)
+    logger = setup_logger()
+    logger.info(f'Revision: {settings.REVISION}')
+
+    if settings.LOG_LEVEL == logging.DEBUG:
+        logger.debug(settings.to_string())
+
     kwargs = {
         'host': settings.HOST,
         'port': settings.PORT,
