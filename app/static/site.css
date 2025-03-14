@@ -17,7 +17,7 @@
 /* Font declaration */
 @font-face {
   font-family: 'Lato';
-  src: url('/static/assets/fonts/Lato-Regular.ttf') format('truetype');
+  src: url('assets/fonts/Lato-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

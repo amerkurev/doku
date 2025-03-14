@@ -8,18 +8,18 @@
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-      <link rel="icon" href="/static/assets/images/docker-mark-blue.svg" sizes="any" type="image/svg+xml">
-      <link rel="stylesheet" href="/static/uikit@3.23.0/uikit.min.css" />
-      <link rel="stylesheet" href="/static/datatables@2.2.2/datatables.min.css" />
-      <link rel="stylesheet" href="/static/bootstrap-icons@1.11.3/bootstrap-icons.min.css">
-      <link rel="stylesheet" href="/static/site.css" />
-      <script src="/static/jquery@3.7.1/jquery.min.js"></script>
-      <script src="/static/uikit@3.23.0/uikit.min.js"></script>
-      <script src="/static/uikit@3.23.0/uikit-icons.min.js"></script>
-      <script src="/static/datatables@2.2.2/datatables.min.js"></script>
+      <link rel="icon" href="{{ url_for('static', path='assets/images/docker-mark-blue.svg') }}" sizes="any" type="image/svg+xml">
+      <link rel="stylesheet" href="{{ url_for('static', path='uikit@3.23.0/uikit.min.css') }}" />
+      <link rel="stylesheet" href="{{ url_for('static', path='datatables@2.2.2/datatables.min.css') }}" />
+      <link rel="stylesheet" href="{{ url_for('static', path='bootstrap-icons@1.11.3/bootstrap-icons.min.css') }}" />
+      <link rel="stylesheet" href="{{ url_for('static', path='site.css') }}" />
+      <script src="{{ url_for('static', path='jquery@3.7.1/jquery.min.js') }}"></script>
+      <script src="{{ url_for('static', path='uikit@3.23.0/uikit.min.js') }}"></script>
+      <script src="{{ url_for('static', path='uikit@3.23.0/uikit-icons.min.js') }}"></script>
+      <script src="{{ url_for('static', path='datatables@2.2.2/datatables.min.js') }}"></script>
       {% block extra_head %}
       {% endblock %}
-      <script src="/static/site.js"></script>
+      <script src="{{ url_for('static', path='site.js') }}"></script>
       {% endblock %}
     </head>
     <body data-si="{% if si %}true{% else %}false{% endif %}">

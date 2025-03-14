@@ -15,7 +15,7 @@ function setActiveMenuItem() {
   // Find and activate current menu item
   document.querySelectorAll('.uk-navbar-nav li a').forEach(link => {
       const href = link.getAttribute('href').replace(/\/$/, '');
-      if (href === currentPath) {
+      if (href.endsWith(currentPath)) {
           link.parentElement.classList.add('uk-active');
       }
   });
@@ -78,16 +78,24 @@ document.addEventListener('DOMContentLoaded', function() {
       html.classList.add('uk-light', 'dark');
       localStorage.setItem('theme', 'dark');
       themeSwitcher.querySelector('#theme-switcher>i').setAttribute('class', 'bi-sun');
-      changeChartTextColor(duChart, darkTextColor);
-      changeChartTextColor(overlay2Chart, darkTextColor);
+      if (duChart !== null) {
+        changeChartTextColor(duChart, darkTextColor);
+      }
+      if (overlay2Chart !== null) {
+        changeChartTextColor(overlay2Chart, darkTextColor);
+      }
   }
 
   function disableDarkMode() {
       html.classList.remove('uk-light', 'dark');
       localStorage.setItem('theme', 'light');
       themeSwitcher.querySelector('#theme-switcher>i').setAttribute('class', 'bi-moon');
-      changeChartTextColor(duChart, lightTextColor);
-      changeChartTextColor(overlay2Chart, lightTextColor);
+      if (duChart !== null) {
+        changeChartTextColor(duChart, lightTextColor);
+      }
+      if (overlay2Chart !== null) {
+        changeChartTextColor(overlay2Chart, lightTextColor);
+      }
   }
 });
 

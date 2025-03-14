@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block extra_head %}
-<script src="/static/echarts@5.6.0/echarts.min.js"></script>
+<script src="{{ url_for('static', path='echarts@5.6.0/echarts.min.js') }}"></script>
 {% endblock %}
 
 {% block content %}

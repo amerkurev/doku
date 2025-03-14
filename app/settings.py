@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     basic_htpasswd: str = Field(
         alias='BASIC_HTPASSWD', default='/.htpasswd', description='Path to the htpasswd file for basic authentication'
     )
+    root_path: str = Field(
+        alias='ROOT_PATH', default='', description='URL prefix when served behind a proxy (e.g., "/doku")'
+    )
 
     # ssl settings
     ssl_keyfile: str = Field(alias='SSL_KEYFILE', default='/.ssl/key.pem')
@@ -153,6 +156,7 @@ MY_HOSTNAME = _settings.my_hostname
 SI = _settings.si
 BASIC_HTPASSWD = _settings.basic_htpasswd
 AUTH_ENABLED = Path(BASIC_HTPASSWD).exists()
+ROOT_PATH = _settings.root_path
 
 # ssl settings
 SSL_KEYFILE = _settings.ssl_keyfile
@@ -231,6 +235,7 @@ def to_string() -> str:
             'my_hostname',
             'si',
             'basic_htpasswd',
+            'root_path',
         ],
         'SSL settings': ['ssl_keyfile', 'ssl_keyfile_password', 'ssl_certfile', 'ssl_ciphers'],
         'Scan settings': [

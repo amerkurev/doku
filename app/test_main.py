@@ -71,6 +71,7 @@ def test_settings_to_string():
             'host': '0.0.0.0',
             'port': 9090,
             'log_level': 'info',
+            'root_path': '/doku',
             'ssl_keyfile': '/.ssl/key.pem',
             'ssl_keyfile_password': 'secret',
             'ssl_certfile': '/.ssl/cert.pem',
@@ -102,6 +103,7 @@ def test_settings_to_string():
         assert 'host: 0.0.0.0' in result
         assert 'port: 9090' in result
         assert 'log_level: info' in result
+        assert 'root_path: /doku' in result
 
         # Verify password is masked
         assert 'ssl_keyfile_password: ********' in result

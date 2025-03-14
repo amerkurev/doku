@@ -13,14 +13,15 @@ from server.router import site
 from server.state import lifespan
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, root_path=settings.ROOT_PATH)
 app.mount('/static', StaticFiles(directory=settings.STATIC_DIR), name='static')
 app.include_router(site.router)
 
 
 @app.get('/', response_class=HTMLResponse, include_in_schema=False)
-async def index(_: Request):
-    return RedirectResponse(url='/site', status_code=status.HTTP_303_SEE_OTHER)
+async def index(request: Request):
+    url = request.url_for('dashboard')
+    return RedirectResponse(url=url, status_code=status.HTTP_303_SEE_OTHER)
 
 
 def main():
