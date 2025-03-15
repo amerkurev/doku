@@ -1,4 +1,5 @@
 import time
+import fnmatch
 from collections.abc import Callable
 from pathlib import Path
 
@@ -229,6 +230,13 @@ class BindMountsScanner(BaseScanner):
     def table_name(self):
         return settings.TABLE_BINDMOUNTS
 
+    def should_ignore_path(self, path: str) -> bool:
+        """Check if the path matches any ignore pattern."""
+        for pattern in settings.BINDMOUNT_IGNORE_PATTERNS:
+            if fnmatch.fnmatch(path, pattern):
+                return True
+        return False
+
     def scan(self):
         if not self.doku_mounts:
             return
@@ -279,6 +287,11 @@ class BindMountsScanner(BaseScanner):
 
                     # skip mounts to docker socket and secrets
                     if mnt.dst == '/var/run/docker.sock' or mnt.dst.startswith('/run/secrets/'):
+                        continue
+
+                    # Skip paths matching ignore patterns
+                    if self.should_ignore_path(mnt.src):
+                        self.logger.debug(f'Skipping bind mount {mnt.src} as it matches an ignore pattern')
                         continue
 
                     if mnt.src in already_scanned:

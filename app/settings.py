@@ -64,10 +64,21 @@ class Settings(BaseSettings):
         default=60 * 60,
         description='Time between bind mount scanning operations (in seconds)',
     )
+    bindmount_ignore_patterns: str = Field(
+        alias='BINDMOUNT_IGNORE_PATTERNS',
+        default='',
+        examples=['/home/*;/tmp/*;*/.git/*'],
+        description='Paths matching these patterns will be excluded from bind mount scanning (semicolon-separated)',
+    )
     scan_overlay2_interval: PositiveInt = Field(
         alias='SCAN_OVERLAY2_INTERVAL',
         default=60 * 60 * 24,
         description='How often to analyze Overlay2 storage (in seconds)',
+    )
+    disable_overlay2_scan: bool = Field(
+        alias='DISABLE_OVERLAY2_SCAN',
+        default=False,
+        description='Disable Overlay2 storage scanning',
     )
     scan_intensity: ScanIntensity = Field(
         alias='SCAN_INTENSITY',
@@ -136,6 +147,20 @@ class Settings(BaseSettings):
         }
         return level_map[self.log_level]
 
+    @cached_property
+    def bindmount_ignore_patterns_list(self) -> list[str]:
+        patterns = self.bindmount_ignore_patterns
+
+        # Remove surrounding quotes from the entire string if present
+        if (patterns.startswith('"') and patterns.endswith('"')) or (
+            patterns.startswith("'") and patterns.endswith("'")
+        ):
+            patterns = patterns[1:-1]
+
+        # Split and filter empty values
+        result = list(filter(None, map(str.strip, patterns.split(';'))))
+        return result
+
 
 try:
     _settings = Settings()
@@ -168,7 +193,9 @@ SSL_CIPHERS = _settings.ssl_ciphers
 SCAN_INTERVAL = _settings.scan_interval
 SCAN_LOGFILE_INTERVAL = _settings.scan_logfile_interval
 SCAN_BINDMOUNTS_INTERVAL = _settings.scan_bindmounts_interval
+BINDMOUNT_IGNORE_PATTERNS = _settings.bindmount_ignore_patterns_list
 SCAN_OVERLAY2_INTERVAL = _settings.scan_overlay2_interval
+DISABLE_OVERLAY2_SCAN = _settings.disable_overlay2_scan
 SCAN_INTENSITY = _settings.scan_intensity
 SCAN_SLEEP_DURATION = {
     ScanIntensity.AGGRESSIVE: 0,  # no sleep, but CPU throttling
@@ -242,7 +269,9 @@ def to_string() -> str:
             'scan_interval',
             'scan_logfile_interval',
             'scan_bindmounts_interval',
+            'bindmount_ignore_patterns',
             'scan_overlay2_interval',
+            'disable_overlay2_scan',
             'scan_intensity',
             'scan_use_du',
         ],
