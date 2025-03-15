@@ -25,9 +25,12 @@ def main():
     schedule.every(settings.SCAN_BINDMOUNTS_INTERVAL).seconds.do(scanner.scan)
 
     ### Docker Overlay2 Scanner ###
-    scanner = Overlay2Scanner(is_stop=signal_.is_stop)
-    scanner.scan()  # run once immediately
-    schedule.every(settings.SCAN_OVERLAY2_INTERVAL).seconds.do(scanner.scan)
+    if settings.DISABLE_OVERLAY2_SCAN:
+        logger.warning('Overlay2 scanner disabled.')
+    else:
+        scanner = Overlay2Scanner(is_stop=signal_.is_stop)
+        scanner.scan()  # run once immediately
+        schedule.every(settings.SCAN_OVERLAY2_INTERVAL).seconds.do(scanner.scan)
 
     # main loop
     while not signal_.is_stop():

@@ -92,7 +92,9 @@ Doku can be configured using environment variables. You can set these either dir
 | SCAN_INTERVAL | How often to collect basic Docker usage data (in seconds) | 60 |
 | SCAN_LOGFILE_INTERVAL | How frequently to check container log sizes (in seconds) | 300 |
 | SCAN_BINDMOUNTS_INTERVAL | Time between bind mount scanning operations (in seconds) | 3600 |
+| BINDMOUNT_IGNORE_PATTERNS | Paths matching these patterns will be excluded from bind mount scanning (semicolon-separated) (e.g., `/home/*;/tmp/*;*/.git/*`) | "" |
 | SCAN_OVERLAY2_INTERVAL | How often to analyze Overlay2 storage (in seconds) | 86400 |
+| DISABLE_OVERLAY2_SCAN | Disable Overlay2 storage scanning | false |
 | SCAN_INTENSITY | Performance impact level: "aggressive" (highest CPU usage), "normal" (balanced), or "light" (lowest impact) | normal |
 | SCAN_USE_DU | Use the faster system `du` command for disk calculations instead of slower built-in methods | true |
 | UVICORN_WORKERS | Number of web server worker processes | 1 |

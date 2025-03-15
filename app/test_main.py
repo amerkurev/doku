@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from settings import to_string as settings_to_string
+from settings import Settings, to_string as settings_to_string
 from main import main
 
 
@@ -76,6 +76,8 @@ def test_settings_to_string():
             'ssl_keyfile_password': 'secret',
             'ssl_certfile': '/.ssl/cert.pem',
             'scan_interval': 60,
+            'bindmount_ignore_patterns': '/home/*;/tmp/*;*/.git/*',
+            'disable_overlay2_scan': False,
             'workers': 4,
             'docker_host': 'unix:///var/run/docker.sock',
             'git_tag': 'v1.2.3',
@@ -105,6 +107,11 @@ def test_settings_to_string():
         assert 'log_level: info' in result
         assert 'root_path: /doku' in result
 
+        # Scan settings
+        assert 'scan_interval: 60' in result
+        assert 'bindmount_ignore_patterns: /home/*;/tmp/*;*/.git/*' in result
+        assert 'disable_overlay2_scan: False' in result
+
         # Verify password is masked
         assert 'ssl_keyfile_password: ********' in result
         assert 'ssl_keyfile_password: secret' not in result
@@ -119,3 +126,47 @@ def test_settings_to_string():
         # Verify version info
         assert 'git_tag: v1.2.3' in result
         assert 'git_sha: abcdef1234567890' in result
+
+
+def patterns_assert(patterns: list[str]):
+    assert len(patterns) == 3
+    assert '/home/*' in patterns
+    assert '/tmp/*' in patterns
+    assert '*/.git/*' in patterns
+
+
+def test_bindmount_ignore_patterns_list():
+    with patch('os.environ', {'BINDMOUNT_IGNORE_PATTERNS': '/home/*;/tmp/*;*/.git/*'}):
+        s = Settings()
+        patterns_assert(s.bindmount_ignore_patterns_list)
+
+    # Test with entire string in double quotes
+    with patch('os.environ', {'BINDMOUNT_IGNORE_PATTERNS': '"/home/*;/tmp/*;*/.git/*"'}):
+        s = Settings()
+        patterns_assert(s.bindmount_ignore_patterns_list)
+
+    # Test with entire string in single quotes
+    with patch('os.environ', {'BINDMOUNT_IGNORE_PATTERNS': "';/home/*;/tmp/*;*/.git/*;'"}):
+        s = Settings()
+        patterns_assert(s.bindmount_ignore_patterns_list)
+
+    # Test with a single pattern
+    with patch('os.environ', {'BINDMOUNT_IGNORE_PATTERNS': '/var/log/*;'}):
+        s = Settings()
+        patterns = s.bindmount_ignore_patterns_list
+        assert len(patterns) == 1
+        assert '/var/log/*' in patterns
+
+    # Test with empty string
+    with patch('os.environ', {'BINDMOUNT_IGNORE_PATTERNS': ';;'}):
+        s = Settings()
+        patterns = s.bindmount_ignore_patterns_list
+        assert len(patterns) == 0
+
+    # Test with whitespace
+    with patch('os.environ', {'BINDMOUNT_IGNORE_PATTERNS': '  /path1/*;  /path2/*  '}):
+        s = Settings()
+        patterns = s.bindmount_ignore_patterns_list
+        assert len(patterns) == 2
+        assert '/path1/*' in patterns
+        assert '/path2/*' in patterns
