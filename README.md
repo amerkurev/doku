@@ -66,9 +66,9 @@ docker run -d --name doku \
     --env-file=.env \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/hostroot:ro \
-    -v $(PWD)/.htpasswd:/.htpasswd \
-    -v $(PWD)/.ssl/key.pem:/.ssl/key.pem \
-    -v $(PWD)/.ssl/cert.pem:/.ssl/cert.pem \
+    -v ${PWD}/.htpasswd:/.htpasswd \
+    -v ${PWD}/.ssl/key.pem:/.ssl/key.pem \
+    -v ${PWD}/.ssl/cert.pem:/.ssl/cert.pem \
     -p 9090:9090 \
     amerkurev/doku
 ```
@@ -148,7 +148,7 @@ htpasswd -bB .htpasswd another_user anotherpassword
 docker run -d --name doku \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/hostroot:ro \
-    -v $(PWD)/.htpasswd:/.htpasswd \
+    -v ${PWD}/.htpasswd:/.htpasswd \
     -p 9090:9090 \
     amerkurev/doku
 ```
@@ -158,7 +158,7 @@ docker run -d --name doku \
 docker run -d --name doku \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/hostroot:ro \
-    -v $(PWD)/custom/path/.htpasswd:/auth/.htpasswd \
+    -v ${PWD}/custom/path/.htpasswd:/auth/.htpasswd \
     -e BASIC_HTPASSWD=/auth/.htpasswd \
     -p 9090:9090 \
     amerkurev/doku
