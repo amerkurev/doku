@@ -168,7 +168,9 @@ class LogfilesScanner(BaseScanner):
 
                 id_ = cont.short_id
                 name = cont.name
-                image = cont.image.tags[0] if cont.image.tags else ''
+                image_id = cont.image.short_id
+                image = cont.image.tags[0] if cont.image.tags else image_id.removeprefix('sha256:')
+
                 log_path = cont.attrs['LogPath']
 
                 # map host path to doku container path (used only for size calculation)
