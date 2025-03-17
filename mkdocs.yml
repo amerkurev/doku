@@ -17,7 +17,7 @@ theme:
   logo: img/logo.svg
   favicon: img/favicon.svg
   icon:
-    repo: fontawesome/brands/docker
+    repo: fontawesome/brands/github
   features:
     - toc.integrate
     - content.code.copy
