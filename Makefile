@@ -20,6 +20,10 @@ PWD=$(shell pwd)
 info:
 	- @echo "revision $(REV)"
 
+pip-sync:
+	- @pip-compile requirements.in
+	- @pip-sync requirements.txt
+
 build:
 	- @docker buildx build --load --build-arg GIT_SHA="${GIT_SHA}" --build-arg GIT_TAG="${GIT_TAG}" -t amerkurev/doku:latest --progress=plain .
 
