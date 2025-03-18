@@ -42,6 +42,8 @@ def main():
         'ssl_cert_reqs': ssl.CERT_NONE,
         'ssl_ca_certs': None,  # TODO: add settings.SSL_CA_CERTS
         'ssl_ciphers': settings.SSL_CIPHERS,
+        'proxy_headers': True,
+        'forwarded_allow_ips': '*',
     }
 
     # enable SSL if key and cert files are provided
