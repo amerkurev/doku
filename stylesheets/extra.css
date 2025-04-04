@@ -1,0 +1,9 @@
+article {
+  max-width: 800px !important;
+}
+
+:root  > * {
+  --md-primary-fg-color:        #1d63ed;
+  --md-primary-fg-color--light: #e5f2fc;
+  --md-primary-fg-color--dark:  #00084d;
+}
