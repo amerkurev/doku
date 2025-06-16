@@ -1,51 +1,72 @@
 <nav class="uk-navbar-container bg-moby-blue">
   <div class="uk-container">
-      <div uk-navbar>
 
-        <!-- Navbar left side -->
-        <div class="uk-navbar-left">
-            <a class="uk-navbar-item uk-logo" href="{{ url_for('index') }}" aria-label="Back to Home">
-                <img src="{{ url_for('static', path='assets/images/docker-mark-white.svg') }}" width="25" height="25" alt="Docker Logo" />
-            </a>
-            <ul class="uk-navbar-nav">
-                <li>
-                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('images') }}">Images</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('containers') }}">Containers</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('volumes') }}">Volumes</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('bind_mounts') }}">Bind Mounts</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('logs') }}">Logs</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('build_cache') }}">Build Cache</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('overlay2') }}">Overlay2</a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Navbar right side -->
-        <div class="uk-navbar-right">
-          <ul class="uk-navbar-nav">
-              <li>
-                  <a href="#" id="theme-switcher">
-                    <i class="bi-moon" style="font-size: 1.2rem;"></i>
-                  </a>
-              </li>
-          </ul>
-        </div>
-
+    <!-- Desktop View -->
+    <div uk-navbar class="uk-navbar uk-visible@m">
+      <!-- Navbar left side -->
+      <div class="uk-navbar-left">
+        <a class="uk-navbar-item uk-logo" href="{{ url_for('index') }}" aria-label="Back to Home">
+          <img src="{{ url_for('static', path='assets/images/docker-mark-white.svg') }}" width="25" height="25" alt="Docker Logo" />
+        </a>
+        <ul class="uk-navbar-nav">
+          <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li><a href="{{ url_for('images') }}">Images</a></li>
+          <li><a href="{{ url_for('containers') }}">Containers</a></li>
+          <li><a href="{{ url_for('volumes') }}">Volumes</a></li>
+          <li><a href="{{ url_for('bind_mounts') }}">Bind Mounts</a></li>
+          <li><a href="{{ url_for('logs') }}">Logs</a></li>
+          <li><a href="{{ url_for('build_cache') }}">Build Cache</a></li>
+          <li><a href="{{ url_for('overlay2') }}">Overlay2</a></li>
+        </ul>
       </div>
+      <!-- Navbar right side -->
+      <div class="uk-navbar-right">
+        <ul class="uk-navbar-nav">
+          <li>
+            <a href="#" id="theme-switcher">
+              <i class="bi-moon" style="font-size: 1.2rem;"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Mobile View -->
+    <div uk-navbar class="uk-navbar uk-hidden@m">
+      <div class="uk-navbar-left">
+        <a class="uk-navbar-item uk-logo" href="{{ url_for('index') }}" aria-label="Back to Home">
+          <img src="{{ url_for('static', path='assets/images/docker-mark-white.svg') }}" width="25" height="25" alt="Docker Logo" />
+        </a>
+      </div>
+      <div class="uk-navbar-right">
+        <a class="uk-navbar-toggle " href="#mobile-menu" uk-toggle>
+          <span uk-navbar-toggle-icon style="color: white;"></span>
+        </a>
+      </div>
+    </div>
+
   </div>
 </nav>
+
+<!-- Offcanvas Mobile Menu -->
+<div id="mobile-menu" class="uk-hidden@m" uk-offcanvas="mode: slide; overlay: true; flip: true" style="padding-right: 0px;">
+  <div class="uk-offcanvas-bar bg-moby-blue" style="display: flex; flex-direction: column; flex: 1;">
+    <button class="uk-offcanvas-close" type="button" uk-close style="margin: 16px;"></button>
+    <ul class="uk-nav uk-nav-default uk-width-1-1 uk-margin-top uk-padding" style="display: flex; flex-direction: column; flex: 1;">
+      <li class="uk-margin-small"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li class="uk-margin-small"><a href="{{ url_for('images') }}">Images</a></li>
+      <li class="uk-margin-small"><a href="{{ url_for('containers') }}">Containers</a></li>
+      <li class="uk-margin-small"><a href="{{ url_for('volumes') }}">Volumes</a></li>
+      <li class="uk-margin-small"><a href="{{ url_for('bind_mounts') }}">Bind Mounts</a></li>
+      <li class="uk-margin-small"><a href="{{ url_for('logs') }}">Logs</a></li>
+      <li class="uk-margin-small"><a href="{{ url_for('build_cache') }}">Build Cache</a></li>
+      <li class="uk-margin-small"><a href="{{ url_for('overlay2') }}">Overlay2</a></li>
+      <li style="flex: 1;"></li>
+      <li class="uk-margin-small">
+        <a href="#" id="theme-switcher">
+          <i class="bi-moon" style="font-size: 1.2rem;"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
