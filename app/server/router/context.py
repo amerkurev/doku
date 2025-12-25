@@ -58,8 +58,7 @@ def images() -> dict:
             if settings.IMAGE_KEY in kv:
                 items = kvstore.get(settings.IMAGE_KEY, kv, DockerImageList).root
 
-            if settings.LAYERS_SIZE_KEY in kv:
-                total = kv[settings.LAYERS_SIZE_KEY]
+            total = kv.get(settings.LAYERS_SIZE_KEY, 0)
 
     context = {
         'name': 'images',
