@@ -49,6 +49,7 @@ def last_df_scan_time() -> tuple[datetime, str] | None:
 
 def images() -> dict:
     items = None
+    total = 0
 
     if settings.DB_DF.exists():
         db = SqliteDatabase(settings.DB_DF)
@@ -57,10 +58,13 @@ def images() -> dict:
             if settings.IMAGE_KEY in kv:
                 items = kvstore.get(settings.IMAGE_KEY, kv, DockerImageList).root
 
+            if settings.LAYERS_SIZE_KEY in kv:
+                total = kv[settings.LAYERS_SIZE_KEY]
+
     context = {
         'name': 'images',
         'items': items,
-        'total': total_size(items, field_name='shared_size'),
+        'total': pretty_size(total),
         'si': settings.SI,
         'last_scan_at': last_df_scan_time(),
     }
@@ -209,13 +213,14 @@ def summary(db: SqliteDatabase) -> dict[str, Summary]:
         if key in kv:
             items = kvstore.get(key, kv, value).root
             if key == settings.IMAGE_KEY:
-                field_name = 'shared_size'
+                total_size = kv.get(settings.LAYERS_SIZE_KEY, 0)
             elif key == settings.CONTAINER_KEY:
                 field_name = 'size_rw'
+                total_size = sum(map(attrgetter(field_name), items))
             else:
                 field_name = 'size'
+                total_size = sum(map(attrgetter(field_name), items))
 
-            total_size = sum(map(attrgetter(field_name), items))
             r[key] = Summary(
                 num=len(items),
                 total_size=total_size,
