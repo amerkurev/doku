@@ -56,6 +56,14 @@ class SystemDFScanner(BaseScanner):
     It's the equivalent of running `docker system df`.
     """
 
+    _DEFAULTS = {
+        'LayersSize': 0,
+        'Images': [],
+        'Containers': [],
+        'Volumes': [],
+        'BuildCache': [],
+    }
+
     @property
     def database_name(self):
         return settings.DB_DF
@@ -74,6 +82,11 @@ class SystemDFScanner(BaseScanner):
             self.logger.debug('Scanning Docker disk usage (df)...')
 
             data = self.client.df()
+
+            # Docker may omit sections entirely; normalize to defaults
+            for key, default in self._DEFAULTS.items():
+                data[key] = data.get(key) or default
+
             df = DockerSystemDF.model_validate(data)
 
             # create image id -> image object mapping
