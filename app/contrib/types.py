@@ -165,6 +165,7 @@ class DockerBuildCacheList(RootModel):
 
 
 class DockerSystemDF(BaseModel):
+    layers_size: int = Field(alias='LayersSize', default=0)
     images: DockerImageList = Field(alias='Images', default_factory=list)
     containers: DockerContainerList = Field(alias='Containers', default_factory=list)
     volumes: DockerVolumeList = Field(alias='Volumes', default_factory=list)

@@ -371,6 +371,7 @@ def test_disk_usage():
 
 def test_docker_system_df():
     data = {
+        'LayersSize': 4000,
         'Images': [
             {'Id': 'sha256:img1', 'Created': '2023-01-01T12:00:00Z', 'Size': 1500},
             {'Id': 'sha256:img2', 'Created': '2023-01-02T12:00:00Z', 'Size': 2500},
@@ -409,6 +410,8 @@ def test_docker_system_df():
     }
 
     x = DockerSystemDF.model_validate(data)
+
+    assert x.layers_size == 4000
 
     assert len(x.images.root) == 2
     assert x.images[0].id == 'sha256:img1'

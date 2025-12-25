@@ -100,6 +100,7 @@ class SystemDFScanner(BaseScanner):
                 for name in volume_mounts:
                     volume_map[name].containers.append(cont.name)
 
+            kv[settings.LAYERS_SIZE_KEY] = df.layers_size
             kvstore.set(settings.IMAGE_KEY, df.images, kv)
             kvstore.set(settings.CONTAINER_KEY, df.containers, kv)
             kvstore.set(settings.VOLUME_KEY, df.volumes, kv)
